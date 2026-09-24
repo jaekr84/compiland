@@ -310,6 +310,16 @@
           <span class="boton verde chico">Jugar ▶</span>
         </div>
       </a>
+      <a class="juego" href="misterios.html" id="linkMisterios" style="--c:radial-gradient(circle at 50% 10%, #4a3510, #12151d 70%)">
+        <div class="portada" aria-hidden="true">
+          <div class="teclas"><span style="--k:#ffc53d">¼</span><span style="--k:#ff8a3d">½</span><span style="--k:#ff4d8d">¾</span></div>
+        </div>
+        <div class="cuerpo">
+          <h3>Desapariciones Misteriosas</h3>
+          <p>Algo se come el barrio de a pedacitos. Resolvé 9 casos con fracciones y atrapá a El Mordisco.</p>
+          <span class="boton verde chico">Investigar ▶</span>
+        </div>
+      </a>
       <div class="juego pronto">
         <div class="portada" aria-hidden="true">// PRÓXIMAMENTE</div>
         <div class="cuerpo">
@@ -468,7 +478,7 @@ async function mostrarJuegos(invitado) {
 }
 
 // ---------- ranking general ----------
-const JUEGOS = { tecla: 'Tecla a Tecla', tablas: 'Factor X' };
+const JUEGOS = { tecla: 'Tecla a Tecla', tablas: 'Factor X', misterios: 'Desapariciones Misteriosas' };
 let periodo = 'semana';
 async function rankingGeneral(p) {
   const r = await (await fetch(API + '/general?p=' + p)).json();
@@ -517,7 +527,7 @@ document.querySelectorAll('.periodo button').forEach(b => b.addEventListener('cl
   mostrarRanking();
 }));
 
-if (location.search) { $('linkTecla').href += location.search; $('linkTablas').href += location.search; }   // mantiene ?api= al ir al juego
+if (location.search) ['linkTecla', 'linkTablas', 'linkMisterios'].forEach(id => { $(id).href += location.search; });   // mantiene ?api= al ir al juego
 const sesion = leer();
 if (sesion && sesion.token) {
   mostrarJuegos();

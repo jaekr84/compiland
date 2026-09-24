@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="motor.css">
 <style>
   /* misma estética que el resto del sitio: oscuro, grilla sutil, acentos neón */
   :root{
@@ -171,72 +172,6 @@
     font-size:13px; font-weight:500; color:var(--muted)}
   .ghost:hover{color:var(--ink); border-color:var(--faint)}
 
-  /* ---------- partida ---------- */
-  .juego{margin-top:26px}
-  .j-cab{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px}
-  .j-cab .tipo{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--c)}
-  .j-cab h2{font-family:var(--display); font-weight:700; font-size:clamp(24px,4vw,32px); letter-spacing:-.04em; margin:0; line-height:1.05}
-  .hud{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
-  .hud div{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:7px 14px; min-width:80px}
-  .hud b{display:block; font-family:var(--mono); font-size:20px; line-height:1.15; font-variant-numeric:tabular-nums}
-  .hud span{font-family:var(--mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
-  .hud .combo.on{border-color:color-mix(in srgb, var(--c) 55%, var(--line))}
-  .hud .combo.on b{color:var(--c); text-shadow:0 0 12px color-mix(in srgb, var(--c) 60%, transparent)}
-  .tiempo{height:8px; background:var(--surface-2); border:1px solid var(--line); border-radius:99px; overflow:hidden; margin-bottom:14px}
-  .tiempo i{display:block; height:100%; background:var(--c); transform-origin:left; box-shadow:0 0 12px var(--c)}
-  .tiempo.apuro i{background:var(--rojo); box-shadow:0 0 12px var(--rojo)}
-  .escenario, .resultado{
-    position:relative; min-height:430px; background:var(--surface); border:1px solid var(--line); border-radius:20px;
-    box-shadow:var(--shadow-card); padding:28px 20px; overflow:hidden;
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px;
-  }
-  .escenario.sacude{animation:sacude .3s}
-  @keyframes sacude{20%{transform:translateX(-6px)} 60%{transform:translateX(6px)}}
-  .cuenta{font-family:var(--mono); font-weight:700; font-size:120px; line-height:1; color:var(--c);
-    text-shadow:0 0 40px color-mix(in srgb, var(--c) 50%, transparent); animation:aparece .6s}
-  @keyframes aparece{from{opacity:0; transform:scale(1.6)} to{opacity:1; transform:none}}
-  .pregunta{font-family:var(--mono); font-weight:700; font-size:clamp(48px,11vw,96px); line-height:1;
-    display:flex; gap:.28em; align-items:center; font-variant-numeric:tabular-nums}
-  .pregunta .igual{color:var(--faint)}
-  .pregunta .hueco{min-width:1.4em; text-align:center; color:var(--c); border-bottom:4px solid color-mix(in srgb, var(--c) 45%, transparent)}
-  .pregunta .hueco.bien{color:var(--lima); border-color:var(--lima)}
-  .pregunta .hueco.mal{color:var(--rojo); border-color:var(--rojo)}
-  .opciones{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; width:min(520px,100%)}
-  .opcion{
-    position:relative; border:1px solid var(--line); background:var(--surface-2); border-radius:16px; padding:18px 12px;
-    font-family:var(--mono); font-weight:700; font-size:clamp(28px,6vw,40px); line-height:1;
-    box-shadow:0 5px 0 #05060a; transition:transform .06s, box-shadow .06s, border-color .12s, background .12s;
-  }
-  .opcion:hover{border-color:color-mix(in srgb, var(--c) 60%, var(--line))}
-  .opcion:active{transform:translateY(3px); box-shadow:0 2px 0 #05060a}
-  .opcion kbd{position:absolute; top:8px; left:10px; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--faint);
-    border:1px solid var(--line); border-radius:5px; padding:0 5px}
-  .opcion.bien, .opcion.era{border-color:var(--lima); color:var(--lima); background:color-mix(in srgb, var(--lima) 12%, var(--surface-2))}
-  .opcion.bien{box-shadow:0 5px 0 #05060a, 0 0 26px color-mix(in srgb, var(--lima) 35%, transparent)}
-  .opcion.mal{border-color:var(--rojo); color:var(--rojo); background:color-mix(in srgb, var(--rojo) 12%, var(--surface-2))}
-  .flota{position:absolute; font-family:var(--mono); font-weight:700; font-size:26px; color:var(--lima); pointer-events:none;
-    text-shadow:0 0 14px color-mix(in srgb, var(--lima) 60%, transparent); animation:flota .75s forwards}
-  @keyframes flota{from{opacity:1; transform:translate(-50%,0)} to{opacity:0; transform:translate(-50%,-56px)}}
-
-  /* entrada de números (teclado en pantalla) */
-  #entradaCaja{width:100%; display:flex; justify-content:center}
-  .entrada{display:flex; flex-direction:column; align-items:center; gap:10px; width:min(460px,100%)}
-  .visor{min-width:160px; height:58px; border-radius:14px; border:1px solid var(--line); background:var(--surface-2);
-    display:grid; place-items:center; font-family:var(--mono); font-weight:700; font-size:34px; color:var(--c);
-    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 25%, transparent)}
-  .visor span:empty::after{content:"_"; color:var(--faint); animation:parpadeo 1s steps(2) infinite}
-  @keyframes parpadeo{50%{opacity:0}}
-  .visor.ok{animation:visorOk .35s} .visor.mal{animation:visorMal .35s}
-  @keyframes visorOk{from{border-color:var(--lima); box-shadow:0 0 24px color-mix(in srgb, var(--lima) 45%, transparent)}}
-  @keyframes visorMal{from{border-color:var(--rojo); box-shadow:0 0 24px color-mix(in srgb, var(--rojo) 45%, transparent)}}
-  .numpad{display:grid; grid-template-columns:repeat(5,1fr) 1.2fr; gap:6px; width:100%}
-  .numpad button{border:1px solid var(--line); background:var(--surface-2); border-radius:10px; padding:10px 0;
-    font-family:var(--mono); font-weight:700; font-size:19px; box-shadow:0 3px 0 #05060a}
-  .numpad button:active{transform:translateY(2px); box-shadow:0 1px 0 #05060a; border-color:var(--c)}
-  .numpad .borrar{grid-column:6; grid-row:1 / 3; color:var(--muted)}
-  .consigna{margin:0; font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
-  .pregunta.chica{font-size:clamp(36px,8vw,64px)}
-
   /* ×2 Dobles */
   /* mesa más clara que el fondo, y cartas claras con sombra: se tienen que poder seguir con la vista */
   .mesa{position:relative; width:min(480px,100%); height:clamp(110px,26vw,150px); --vel:400ms; margin:14px 0}
@@ -349,25 +284,6 @@
   .vida span{position:relative; display:block; text-align:center; font-family:var(--mono); font-size:11px; line-height:16px; font-weight:700}
   .critico{font-family:var(--display); font-weight:700; color:var(--oro)}
 
-  .resultado{text-align:center; gap:16px}
-  .r-estrellas{font-size:clamp(44px,9vw,64px); letter-spacing:10px; line-height:1; color:var(--line)}
-  .r-estrellas b{display:inline-block; color:var(--oro); font-weight:400; text-shadow:0 0 22px color-mix(in srgb, var(--oro) 60%, transparent);
-    animation:estrella .45s backwards}
-  .r-estrellas b:nth-child(2){animation-delay:.25s} .r-estrellas b:nth-child(3){animation-delay:.5s}
-  @keyframes estrella{from{opacity:0; transform:scale(2.2) rotate(-25deg)}}
-  .resultado h3{font-family:var(--display); font-weight:700; font-size:clamp(28px,5vw,40px); letter-spacing:-.04em; margin:0; line-height:1}
-  .resultado > p{margin:0; color:var(--muted); max-width:44ch}
-  .r-datos{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; width:min(560px,100%)}
-  .r-datos div{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:10px 8px}
-  .r-datos b{display:block; font-family:var(--mono); font-size:22px; line-height:1.15; font-variant-numeric:tabular-nums}
-  .r-datos span{font-family:var(--mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
-  .r-insignias{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
-  .insignia{font-size:13.5px; font-weight:600; border-radius:999px; padding:5px 14px; color:var(--oro);
-    background:color-mix(in srgb, var(--oro) 10%, transparent); border:1px solid color-mix(in srgb, var(--oro) 40%, transparent)}
-  .insignia.lima{color:var(--lima); background:color-mix(in srgb, var(--lima) 9%, transparent); border-color:color-mix(in srgb, var(--lima) 40%, transparent)}
-  .r-botones{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; margin-top:4px}
-  .r-servidor{font-family:var(--mono); font-size:11.5px; color:var(--faint); margin:0}
-
   footer{margin-top:48px; text-align:center; color:var(--faint); font-family:var(--mono); font-size:11.5px; letter-spacing:.04em}
 
   @media (max-width:860px){
@@ -380,17 +296,12 @@
     .marca small{display:none}
     .metas{grid-template-columns:1fr}
     .det-cab .ghost{margin-left:0}
-    .hud{margin-left:0; width:100%}
-    .hud div{flex:1; min-width:0; padding:6px 10px}
-    .escenario, .resultado{min-height:380px; padding:22px 14px}
-    .r-datos{grid-template-columns:repeat(2,minmax(0,1fr))}
     .cables{grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px}
     .tablero{gap:4px}
     .casilla{border-radius:7px}
   }
   @media (prefers-reduced-motion: reduce){
     .tabla:hover, .boton:hover{transform:none}
-    .escenario.sacude, .cuenta, .r-estrellas b, .flota{animation:none}
   }
 </style>
 </head>
@@ -452,47 +363,14 @@
   </section>
 
   <!-- ===== partida ===== -->
-  <section class="juego" id="juego" hidden>
-    <div class="j-cab">
-      <button class="ghost" id="jSalir" title="Salir (Esc)">✕ Salir</button>
-      <div><div class="tipo" id="jTipo"></div><h2 id="jTitulo"></h2></div>
-      <button class="ghost" id="sonidoBtn" aria-pressed="true" title="Sonido">🔊</button>
-      <div class="hud">
-        <div><b id="hTiempo">30</b><span id="hTiempoLbl">Tiempo</span></div>
-        <div><b id="hAciertos">0</b><span>Aciertos</span></div>
-        <div class="combo" id="hCombo"><b id="hMulti">×1</b><span>Combo</span></div>
-        <div><b id="hPuntos">0</b><span>Puntos</span></div>
-      </div>
-    </div>
-    <div class="tiempo" id="tiempo"><i id="tiempoBarra"></i></div>
-    <div class="escenario" id="escenario"></div>
-    <div class="resultado" id="resultado" hidden>
-      <div class="r-estrellas" id="rEstrellas"></div>
-      <h3 id="rTitulo"></h3>
-      <p id="rSub"></p>
-      <div class="r-datos">
-        <div><b id="rAciertos"></b><span>Aciertos</span></div>
-        <div><b id="rPrecision"></b><span>Precisión</span></div>
-        <div><b id="rRacha"></b><span>Mejor racha</span></div>
-        <div><b id="rPuntos"></b><span>Puntos</span></div>
-      </div>
-      <div class="r-insignias" id="rInsignias"></div>
-      <div class="r-botones">
-        <button class="boton" id="rOtra">Otra vez ↻</button>
-        <button class="ghost" id="rSiguiente" hidden></button>
-        <button class="ghost" id="rVolver">Volver a la tabla</button>
-      </div>
-      <p class="r-servidor" id="rServidor"></p>
-    </div>
-  </section>
+  <!-- ===== partida (la arma motor.js) ===== -->
+  <section class="juego" id="juego" hidden></section>
 
   <footer>FACTOR X · LOS PUNTOS SUMAN AL RANKING GENERAL</footer>
 </div>
 
+<script src="motor.js"></script>
 <script>
-const $ = id => document.getElementById(id);
-const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const corazones = n => '♥'.repeat(Math.max(0, n)) || '—';
 
 // ---------- los 9 minijuegos (y el desafío final) ----------
 // listo: true cuando el minijuego ya está programado
@@ -581,7 +459,6 @@ const FINAL = JUEGOS[10] = { nombre: 'Desafío final', tipo: 'Todas mezcladas ·
 const METAS = ['Terminá el minijuego', 'Acertá el 80 % o más', 'Acertá todo y rápido'];
 
 // ---------- sesión y progreso ----------
-const sesion = (() => { try { return JSON.parse(localStorage.getItem('aprender.sesion')); } catch (e) { return null; } })();
 const CLAVE = 'factorx.' + (sesion && sesion.apodo ? sesion.apodo.toLowerCase() : 'invitado');
 // progreso = { 1: { estrellas: 0-3, mejor: puntos }, ... }
 let progreso = {};
@@ -675,255 +552,25 @@ $('ocultarBtn').addEventListener('click', () => {
 $('dVolver').addEventListener('click', () => { location.hash = ''; });
 $('jugarBtn').addEventListener('click', () => { location.hash = 'jugar-' + tablaActual; });
 
-// ---------- servidor (el mismo que usa todo el sitio) ----------
-// ?api=http://localhost:8787 usa el servidor local. Sólo se acepta la propia computadora.
-const API = (() => {
-  const q = new URLSearchParams(location.search).get('api');
-  return q && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(q) ? q
-    : 'https://br-fancy-cherry-auqw065l-clase.compute.c-10.us-east-1.aws.neon.tech';
-})();
-function enviarResultado(puntos, ms) {
-  if (!sesion || !sesion.token) return Promise.resolve('invitado');
-  if (!puntos) return Promise.resolve('cero');
-  return fetch(API + '/resultado', { method: 'POST', headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({ token: sesion.token, r: { app: 'tablas', m: 'p', p: Math.min(5000, puntos), ms: Math.round(ms), lg: 'es' } }) })
-    .then(r => r.json()).then(r => r.ok ? 'ok' : r.error === 'sesion' ? 'sesion' : 'error')
-    .catch(() => 'error');
-}
 const guardarProgreso = () => { try { localStorage.setItem(CLAVE, JSON.stringify(progreso)); } catch (e) {} };
 
-// ---------- sonido ----------
-let sonido = true, audio;
-try { sonido = localStorage.getItem('factorx.sonido') !== '0'; } catch (e) {}
-function pintarSonido() {
-  $('sonidoBtn').textContent = sonido ? '🔊' : '🔇';
-  $('sonidoBtn').setAttribute('aria-pressed', String(sonido));
-}
-$('sonidoBtn').addEventListener('click', () => {
-  sonido = !sonido; pintarSonido();
-  try { localStorage.setItem('factorx.sonido', sonido ? '1' : '0'); } catch (e) {}
-});
-pintarSonido();
-function bip(frec, dur = .09, tipo = 'sine', vol = .07) {
-  if (!sonido) return;
-  try {
-    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-    const t = audio.currentTime, o = audio.createOscillator(), g = audio.createGain();
-    o.type = tipo; o.frequency.value = frec;
-    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-    o.connect(g).connect(audio.destination); o.start(t); o.stop(t + dur);
-  } catch (e) {}
-}
-
-// ---------- motor común de los minijuegos ----------
-// Cada minijuego recibe `motor` y lo usa para el reloj, los puntos, los errores, la entrada de números, etc.
-// partida.gen cambia en cada partida: así un cuadro o una espera de la partida anterior no sigue corriendo.
-const partida = { activa: false, gen: 0, timers: [], onTecla: null, onElegir: null };
-function limpiar() {
-  partida.activa = false; partida.gen++; partida.onTecla = null; partida.onElegir = null;
-  partida.timers.forEach(clearTimeout); partida.timers = [];
-}
-const azar = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
-const mezclar = a => { for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(Math.random() * (i + 1)); [a[i], a[k]] = [a[k], a[i]]; } return a; };
-const multi = () => Math.min(4, 1 + Math.floor(partida.racha / 5));
-function hud() {
-  $('hAciertos').textContent = partida.aciertos;
-  $('hPuntos').textContent = partida.puntos;
-  $('hMulti').textContent = '×' + multi();
-  $('hCombo').classList.toggle('on', multi() > 1);
-}
-const motor = {
-  get escenario() { return $('escenario'); },
-  espera(fn, ms) { partida.timers.push(setTimeout(fn, ms)); },
-  cuadro(fn) {
-    const g = partida.gen;
-    requestAnimationFrame(t => { if (partida.activa && partida.gen === g) fn(t); });
+// ---------- motor común (motor.js) ----------
+Motor.iniciar({
+  app: 'tablas', clave: 'factorx', niveles: JUEGOS, ultimo: 10,
+  prog: n => ({ premio: prog(n).estrellas, mejor: prog(n).mejor }),
+  guardar: (n, premio, mejor) => { progreso[n] = { estrellas: premio, mejor }; guardarProgreso(); },
+  abierto: abierta,
+  nombre: n => n === 10 ? 'Desafío final' : 'Tabla del ' + n,
+  rutaNivel: n => 'tabla-' + n,
+  premio: { icono: '★', uno: 'estrella', varios: 'estrellas', nuevo: '⭐ Nueva estrella' },
+  titulos: ['Seguí practicando', '¡Bien!', '¡Muy bien!', '¡Perfecto!'],
+  textos: {
+    dominado: n => n === 10 ? '¡Desafío superado!' : '¡Tabla del ' + n + ' dominada!',
+    desbloqueado: n => n === 10 ? 'Desafío final desbloqueado' : 'Tabla del ' + n + ' desbloqueada',
   },
-  // cuenta regresiva de `dur` ms con la barra de arriba; t.sumar(-3000) quita tiempo
-  temporizador(dur, { alAcabar = () => motor.fin(), cadaCuadro } = {}) {
-    const t = { fin: performance.now() + dur, resta: () => t.fin - performance.now(), sumar(ms) { t.fin += ms; }, parar() { t.parado = true; } };
-    const tick = () => {
-      if (t.parado) return;
-      const r = t.resta();
-      motor.reloj(r / dur, Math.ceil(r / 1000));
-      if (cadaCuadro) cadaCuadro(r);
-      if (r <= 0) return alAcabar();
-      motor.cuadro(tick);
-    };
-    tick();
-    return t;
-  },
-  // para los juegos sin reloj: la primera casilla del HUD muestra otra cosa (vidas, ronda…)
-  marcador(valor, etiqueta) {
-    $('tiempo').hidden = true;
-    $('hTiempo').textContent = valor;
-    if (etiqueta) $('hTiempoLbl').textContent = etiqueta;
-  },
-  bono(pts) { partida.puntos += pts; hud(); },
-  // barra de tiempo: frac de 1 a 0, y los segundos que quedan
-  reloj(frac, seg) {
-    $('tiempoBarra').style.transform = 'scaleX(' + Math.max(0, frac) + ')';
-    $('tiempo').classList.toggle('apuro', seg <= 5);
-    $('hTiempo').textContent = Math.max(0, seg);
-  },
-  acierto(base = 10) {
-    partida.aciertos++; partida.racha++;
-    partida.mejorRacha = Math.max(partida.mejorRacha, partida.racha);
-    const pts = base * multi();
-    partida.puntos += pts; hud();
-    bip(620 + Math.min(partida.racha, 12) * 45);
-    return pts;
-  },
-  // suave: sin sacudir la pantalla (por ejemplo, dar vuelta dos cartas que no son pareja)
-  error(suave) {
-    partida.errores++; partida.racha = 0; hud();
-    bip(150, .2, 'square', suave ? .025 : .045);
-    if (suave) return;
-    const e = $('escenario'); e.classList.remove('sacude'); void e.offsetWidth; e.classList.add('sacude');
-  },
-  // ¿lo que escribió es la respuesta c? 'ok', 'mal' (ya no puede ser) o null (todavía falta escribir)
-  comprobar(v, c) {
-    c = String(c);
-    return v === c ? 'ok' : c.startsWith(v) ? null : 'mal';
-  },
-  // entrada de números: teclado en pantalla + teclado de la compu.
-  // alCambiar(valor) devuelve 'ok' o 'mal' para vaciar la entrada (con un destello), o nada para seguir escribiendo.
-  entrada(caja, alCambiar) {
-    caja.innerHTML = '<div class="entrada"><div class="visor" aria-live="polite"><span></span></div><div class="numpad">' +
-      [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(d => '<button data-d="' + d + '">' + d + '</button>').join('') +
-      '<button data-d="⌫" class="borrar" aria-label="Borrar">⌫</button></div></div>';
-    const visor = caja.querySelector('.visor'), txt = visor.querySelector('span');
-    let v = '';
-    const tipear = d => {
-      if (!partida.activa) return;
-      if (d === '⌫') v = v.slice(0, -1);
-      else if (v.length < 3) v += d;
-      txt.textContent = v;
-      const r = v ? alCambiar(v) : null;
-      if (r === 'ok' || r === 'mal') {
-        v = '';
-        visor.classList.remove('ok', 'mal'); void visor.offsetWidth; visor.classList.add(r);
-        motor.espera(() => { if (!v) txt.textContent = ''; }, 160);
-      }
-    };
-    caja.querySelector('.numpad').addEventListener('click', e => { const b = e.target.closest('button'); if (b) tipear(b.dataset.d); });
-    partida.onTecla = e => {
-      if (/^[0-9]$/.test(e.key)) { e.preventDefault(); tipear(e.key); }
-      else if (e.key === 'Backspace') { e.preventDefault(); tipear('⌫'); }
-    };
-    return { vaciar() { v = ''; txt.textContent = ''; } };
-  },
-  // "+20" que sube desde un elemento
-  flota(texto, el) {
-    const r = el.getBoundingClientRect(), base = $('escenario').getBoundingClientRect();
-    const f = document.createElement('span');
-    f.className = 'flota'; f.textContent = texto;
-    f.style.left = (r.left - base.left + r.width / 2) + 'px'; f.style.top = (r.top - base.top - 10) + 'px';
-    $('escenario').appendChild(f);
-    setTimeout(() => f.remove(), 800);
-  },
-  // 4 respuestas para n × k: la correcta y 3 parecidas (las de al lado en la tabla, ±1, ±2…)
-  opciones(n, k) {
-    const c = n * k, set = new Set();
-    mezclar([n * (k + 1), n * (k - 1), c + 1, c - 1, c + 2, c - 2, c + 10, (n + 1) * k, (n - 1) * k])
-      .forEach(v => { if (v > 0 && v !== c && set.size < 3) set.add(v); });
-    while (set.size < 3) { const v = 1 + Math.floor(Math.random() * (c + 10)); if (v !== c) set.add(v); }
-    return mezclar([c, ...set]);
-  },
-  fin() { terminar(); },
-};
-
-function jugar(n) {
-  limpiar();
-  const j = JUEGOS[n];
-  $('juego').style.setProperty('--c', j.color);
-  $('jTipo').textContent = n === 10 ? j.tipo : 'Tabla del ' + n + ' · ' + j.tipo;
-  $('jTitulo').textContent = j.nombre;
-  Object.assign(partida, { n, puntos: 0, aciertos: 0, errores: 0, racha: 0, mejorRacha: 0, mensaje: '',
-    gano: false, perdidas: 0, tableros: 0, sobra: 0 });
-  $('resultado').hidden = true; $('escenario').hidden = false; $('tiempo').hidden = false;
-  $('hTiempoLbl').textContent = 'Tiempo';
-  $('escenario').className = 'escenario';
-  hud(); motor.reloj(1, j.segundos || 30);
-  if (j.marcador) motor.marcador(...j.marcador);
-  let k = 3;
-  const paso = () => {
-    if (k === 0) {
-      partida.activa = true; partida.t0 = performance.now();
-      $('escenario').innerHTML = ''; $('escenario').classList.add('j' + n);
-      MINIJUEGOS[n](motor); return;
-    }
-    $('escenario').innerHTML = '<div class="cuenta" aria-live="polite">' + k + '</div>';
-    bip(k === 1 ? 660 : 440, .12); k--;
-    motor.espera(paso, 650);
-  };
-  paso();
-}
-
-const TITULOS = ['Seguí practicando', '¡Bien!', '¡Muy bien!', '¡Perfecto!'];
-function terminar() {
-  if (!partida.activa) return;
-  const ms = performance.now() - partida.t0;
-  limpiar();
-  const n = partida.n, j = JUEGOS[n], antes = prog(n);
-  const total = partida.aciertos + partida.errores;
-  partida.precision = total ? Math.round(partida.aciertos * 100 / total) : 0;
-  partida.ms = ms;
-  const est = j.estrellas(partida);
-  const siguienteAntes = n < 10 && abierta(n + 1);
-  const record = partida.puntos > antes.mejor;
-  progreso[n] = { estrellas: Math.max(antes.estrellas, est), mejor: Math.max(antes.mejor, partida.puntos) };
-  guardarProgreso();
-  const desbloqueo = n < 10 && !siguienteAntes && abierta(n + 1);
-  const nombreSig = n + 1 === 10 ? 'Desafío final' : 'Tabla del ' + (n + 1);
-
-  $('escenario').hidden = true; $('tiempo').hidden = true; $('resultado').hidden = false;
-  $('rEstrellas').innerHTML = '<b>★</b>'.repeat(est) + '★'.repeat(3 - est);
-  $('rEstrellas').setAttribute('aria-label', est + ' de 3 estrellas');
-  $('rTitulo').textContent = TITULOS[est];
-  const metas = j.metas || METAS;
-  $('rSub').textContent = (partida.mensaje ? partida.mensaje + ' ' : '') +
-    (est < 3 ? 'Para ' + (est + 1) + (est ? ' estrellas' : ' estrella') + ': ' + metas[est].toLowerCase() + '.'
-             : n === 10 ? '¡Desafío superado!' : '¡Tabla del ' + n + ' dominada!');
-  $('rAciertos').textContent = partida.aciertos;
-  $('rPrecision').textContent = partida.precision + '%';
-  $('rRacha').textContent = partida.mejorRacha;
-  $('rPuntos').textContent = partida.puntos;
-  $('rInsignias').innerHTML =
-    (record && partida.puntos ? '<span class="insignia">🏆 Nuevo récord</span>' : '') +
-    (est > antes.estrellas && antes.estrellas ? '<span class="insignia">⭐ Nueva estrella</span>' : '') +
-    (desbloqueo ? '<span class="insignia lima">🔓 ' + nombreSig + (n + 1 === 10 ? ' desbloqueado' : ' desbloqueada') + '</span>' : '');
-  const sig = n < 10 && abierta(n + 1);
-  $('rSiguiente').hidden = !sig;
-  $('rSiguiente').textContent = nombreSig + ' →';
-  bip(est ? 880 : 300, .25, 'triangle', .06);
-
-  $('rServidor').textContent = '';
-  enviarResultado(partida.puntos, ms).then(e => {
-    $('rServidor').textContent = {
-      ok: '✓ Puntos sumados al ranking general',
-      invitado: 'Jugás como invitado: entrá con tu apodo para sumar al ranking',
-      sesion: 'Tu sesión venció: volvé a entrar para sumar al ranking',
-      error: 'No se pudieron guardar los puntos en el ranking (¿hay internet?)',
-    }[e] || '';
-  });
-}
-$('rOtra').addEventListener('click', () => jugar(partida.n));
-$('rVolver').addEventListener('click', () => { location.hash = 'tabla-' + partida.n; });
-$('rSiguiente').addEventListener('click', () => { location.hash = 'tabla-' + (partida.n + 1); });
-$('jSalir').addEventListener('click', () => { location.hash = 'tabla-' + partida.n; });
-$('escenario').addEventListener('click', e => {
-  const b = e.target.closest('.opcion');
-  if (b && partida.onElegir) partida.onElegir(b);
-});
-document.addEventListener('keydown', e => {
-  if ($('juego').hidden) return;
-  if (e.key === 'Escape') { location.hash = 'tabla-' + partida.n; return; }
-  if (partida.onTecla) partida.onTecla(e);
 });
 
 // ---------- los minijuegos ----------
-const MINIJUEGOS = {};
 
 // ×1 · Espejo: 30 segundos, 4 opciones por cuenta
 MINIJUEGOS[1] = m => {
@@ -1433,10 +1080,10 @@ function ruta() {
   if (m && (!abierta(+m[2]) || (m[1] === 'jugar' && !JUEGOS[+m[2]].listo))) {
     history.replaceState(null, '', location.pathname + location.search); m = null;
   }
-  limpiar();
+  Motor.limpiar();
   const vista = m ? (m[1] === 'jugar' ? 'juego' : 'detalle') : 'inicio';
   ['inicio', 'detalle', 'juego'].forEach(id => { $(id).hidden = id !== vista; });
-  if (vista === 'juego') jugar(+m[2]);
+  if (vista === 'juego') Motor.jugar(+m[2]);
   else if (vista === 'detalle') pintarDetalle(+m[2]);
   else pintarInicio();
   window.scrollTo(0, 0);

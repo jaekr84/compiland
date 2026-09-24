@@ -1,0 +1,98 @@
+/* motor.css — estilos de la partida y la pantalla final, compartidos por los juegos con niveles
+ (Factor X, Desapariciones Misteriosas). Usa las variables de color de cada página (--c es el color del nivel). */
+/* ---------- partida ---------- */
+.juego{margin-top:26px}
+.j-cab{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px}
+.j-cab .tipo{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--c)}
+.j-cab h2{font-family:var(--display); font-weight:700; font-size:clamp(24px,4vw,32px); letter-spacing:-.04em; margin:0; line-height:1.05}
+.hud{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+.hud div{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:7px 14px; min-width:80px}
+.hud b{display:block; font-family:var(--mono); font-size:20px; line-height:1.15; font-variant-numeric:tabular-nums}
+.hud span{font-family:var(--mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+.hud .combo.on{border-color:color-mix(in srgb, var(--c) 55%, var(--line))}
+.hud .combo.on b{color:var(--c); text-shadow:0 0 12px color-mix(in srgb, var(--c) 60%, transparent)}
+.tiempo{height:8px; background:var(--surface-2); border:1px solid var(--line); border-radius:99px; overflow:hidden; margin-bottom:14px}
+.tiempo i{display:block; height:100%; background:var(--c); transform-origin:left; box-shadow:0 0 12px var(--c)}
+.tiempo.apuro i{background:var(--rojo); box-shadow:0 0 12px var(--rojo)}
+.escenario, .resultado{
+  position:relative; min-height:430px; background:var(--surface); border:1px solid var(--line); border-radius:20px;
+  box-shadow:var(--shadow-card); padding:28px 20px; overflow:hidden;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px;
+}
+.escenario.sacude{animation:sacude .3s}
+@keyframes sacude{20%{transform:translateX(-6px)} 60%{transform:translateX(6px)}}
+.cuenta{font-family:var(--mono); font-weight:700; font-size:120px; line-height:1; color:var(--c);
+  text-shadow:0 0 40px color-mix(in srgb, var(--c) 50%, transparent); animation:aparece .6s}
+@keyframes aparece{from{opacity:0; transform:scale(1.6)} to{opacity:1; transform:none}}
+.pregunta{font-family:var(--mono); font-weight:700; font-size:clamp(48px,11vw,96px); line-height:1;
+  display:flex; gap:.28em; align-items:center; font-variant-numeric:tabular-nums}
+.pregunta .igual{color:var(--faint)}
+.pregunta .hueco{min-width:1.4em; text-align:center; color:var(--c); border-bottom:4px solid color-mix(in srgb, var(--c) 45%, transparent)}
+.pregunta .hueco.bien{color:var(--lima); border-color:var(--lima)}
+.pregunta .hueco.mal{color:var(--rojo); border-color:var(--rojo)}
+.opciones{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; width:min(520px,100%)}
+.opcion{
+  position:relative; border:1px solid var(--line); background:var(--surface-2); border-radius:16px; padding:18px 12px;
+  font-family:var(--mono); font-weight:700; font-size:clamp(28px,6vw,40px); line-height:1;
+  box-shadow:0 5px 0 #05060a; transition:transform .06s, box-shadow .06s, border-color .12s, background .12s;
+}
+.opcion:hover{border-color:color-mix(in srgb, var(--c) 60%, var(--line))}
+.opcion:active{transform:translateY(3px); box-shadow:0 2px 0 #05060a}
+.opcion kbd{position:absolute; top:8px; left:10px; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--faint);
+  border:1px solid var(--line); border-radius:5px; padding:0 5px}
+.opcion.bien, .opcion.era{border-color:var(--lima); color:var(--lima); background:color-mix(in srgb, var(--lima) 12%, var(--surface-2))}
+.opcion.bien{box-shadow:0 5px 0 #05060a, 0 0 26px color-mix(in srgb, var(--lima) 35%, transparent)}
+.opcion.mal{border-color:var(--rojo); color:var(--rojo); background:color-mix(in srgb, var(--rojo) 12%, var(--surface-2))}
+.flota{position:absolute; font-family:var(--mono); font-weight:700; font-size:26px; color:var(--lima); pointer-events:none;
+  text-shadow:0 0 14px color-mix(in srgb, var(--lima) 60%, transparent); animation:flota .75s forwards}
+@keyframes flota{from{opacity:1; transform:translate(-50%,0)} to{opacity:0; transform:translate(-50%,-56px)}}
+
+/* entrada de números (teclado en pantalla) */
+#entradaCaja{width:100%; display:flex; justify-content:center}
+.entrada{display:flex; flex-direction:column; align-items:center; gap:10px; width:min(460px,100%)}
+.visor{min-width:160px; height:58px; border-radius:14px; border:1px solid var(--line); background:var(--surface-2);
+  display:grid; place-items:center; font-family:var(--mono); font-weight:700; font-size:34px; color:var(--c);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 25%, transparent)}
+.visor span:empty::after{content:"_"; color:var(--faint); animation:parpadeo 1s steps(2) infinite}
+@keyframes parpadeo{50%{opacity:0}}
+.visor.ok{animation:visorOk .35s} .visor.mal{animation:visorMal .35s}
+@keyframes visorOk{from{border-color:var(--lima); box-shadow:0 0 24px color-mix(in srgb, var(--lima) 45%, transparent)}}
+@keyframes visorMal{from{border-color:var(--rojo); box-shadow:0 0 24px color-mix(in srgb, var(--rojo) 45%, transparent)}}
+.numpad{display:grid; grid-template-columns:repeat(5,1fr) 1.2fr; gap:6px; width:100%}
+.numpad button{border:1px solid var(--line); background:var(--surface-2); border-radius:10px; padding:10px 0;
+  font-family:var(--mono); font-weight:700; font-size:19px; box-shadow:0 3px 0 #05060a}
+.numpad button:active{transform:translateY(2px); box-shadow:0 1px 0 #05060a; border-color:var(--c)}
+.numpad .borrar{grid-column:6; grid-row:1 / 3; color:var(--muted)}
+.consigna{margin:0; font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.pregunta.chica{font-size:clamp(36px,8vw,64px)}
+
+.resultado{text-align:center; gap:16px}
+.r-estrellas{font-size:clamp(44px,9vw,64px); letter-spacing:10px; line-height:1; color:var(--line)}
+.r-estrellas b{display:inline-block; color:var(--oro); font-weight:400; text-shadow:0 0 22px color-mix(in srgb, var(--oro) 60%, transparent);
+  animation:estrella .45s backwards}
+.r-estrellas b:nth-child(2){animation-delay:.25s} .r-estrellas b:nth-child(3){animation-delay:.5s}
+@keyframes estrella{from{opacity:0; transform:scale(2.2) rotate(-25deg)}}
+.resultado h3{font-family:var(--display); font-weight:700; font-size:clamp(28px,5vw,40px); letter-spacing:-.04em; margin:0; line-height:1}
+.resultado > p{margin:0; color:var(--muted); max-width:44ch}
+.r-datos{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; width:min(560px,100%)}
+.r-datos div{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:10px 8px}
+.r-datos b{display:block; font-family:var(--mono); font-size:22px; line-height:1.15; font-variant-numeric:tabular-nums}
+.r-datos span{font-family:var(--mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+.r-insignias{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+.insignia{font-size:13.5px; font-weight:600; border-radius:999px; padding:5px 14px; color:var(--oro);
+  background:color-mix(in srgb, var(--oro) 10%, transparent); border:1px solid color-mix(in srgb, var(--oro) 40%, transparent)}
+.insignia.lima{color:var(--lima); background:color-mix(in srgb, var(--lima) 9%, transparent); border-color:color-mix(in srgb, var(--lima) 40%, transparent)}
+.r-botones{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; margin-top:4px}
+.r-servidor{font-family:var(--mono); font-size:11.5px; color:var(--faint); margin:0}
+
+.r-estrellas svg{width:1em; height:1em; vertical-align:-.1em}
+
+@media (max-width:560px){
+  .hud{margin-left:0; width:100%}
+  .hud div{flex:1; min-width:0; padding:6px 10px}
+  .escenario, .resultado{min-height:380px; padding:22px 14px}
+  .r-datos{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion: reduce){
+  .escenario.sacude, .cuenta, .r-estrellas b, .flota{animation:none}
+}

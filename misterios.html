@@ -1,0 +1,1792 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desapariciones Misteriosas</title>
+<meta name="description" content="Fracciones con una historia de detectives: resolvé los 9 casos y atrapá a El Mordisco.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='42' cy='42' r='26' fill='none' stroke='%23ffc53d' stroke-width='9'/><path d='M61 61 L86 86' stroke='%23ffc53d' stroke-width='11' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="motor.css">
+<style>
+  /* misma estética que el resto del sitio, con un toque policial: ámbar de linterna y tipografía de máquina de escribir */
+  :root{
+    --bg:#0a0c11; --surface:#12151d; --surface-2:#0e1118; --line:#232a37;
+    --ink:#eef1f7; --muted:#98a2b6; --faint:#5f6a80;
+    --lima:#b8ff3c; --violeta:#8b5cff; --rosa:#ff4d8d; --cian:#2ee6c5; --rojo:#ff4d6d; --oro:#ffc53d;
+    --papel:#efe6d2; --papel-ink:#2a2218;
+    --shadow-card:0 0 0 1px rgba(255,255,255,.02), 0 18px 50px rgba(0,0,0,.5);
+    --display:'Space Grotesk', system-ui, sans-serif;
+    --body:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    --maquina:'Special Elite', 'Courier New', monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0; min-height:100%}
+  body{
+    font-family:var(--body); font-size:16px; line-height:1.5; color:var(--ink);
+    background:var(--bg); min-height:100vh; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit; color:inherit; cursor:pointer}
+  :focus-visible{outline:2px solid var(--oro); outline-offset:3px}
+
+  /* fondo: grilla y un cono de linterna */
+  .fondo{position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden}
+  .fondo .grilla{position:absolute; inset:0;
+    background:
+      linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px) 0 0/44px 44px,
+      linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px) 0 0/44px 44px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
+            mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%)}
+  .fondo .linterna{position:absolute; top:-260px; right:-120px; width:720px; height:720px; border-radius:50%;
+    background:radial-gradient(circle, color-mix(in srgb, var(--oro) 20%, transparent), transparent 65%); filter:blur(30px)}
+  .fondo .l2{position:absolute; width:420px; height:420px; bottom:-220px; left:-160px; border-radius:50%;
+    background:var(--violeta); opacity:.14; filter:blur(90px)}
+
+  .wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:22px 16px 48px}
+
+  /* ---------- cabecera ---------- */
+  header{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .volver{display:grid; place-items:center; width:36px; height:36px; border-radius:10px; flex:none;
+    border:1px solid var(--line); background:var(--surface); color:var(--muted); text-decoration:none; font-weight:600}
+  .volver:hover{color:var(--ink); border-color:var(--faint)}
+  .marca{display:flex; align-items:baseline; gap:10px; margin-right:auto; min-width:0}
+  .marca h1{font-family:var(--display); font-weight:700; font-size:clamp(19px,3.6vw,24px); letter-spacing:-.035em; margin:0; line-height:1.05}
+  .marca h1 em{font-style:normal; color:var(--oro)}
+  .marca small{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+  .chip{display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 12px; border-radius:10px;
+    border:1px solid var(--line); background:var(--surface); font-size:14px; font-weight:600; max-width:200px}
+  .chip .cara{width:22px; height:22px; border-radius:50%; background:var(--oro); color:#0a0c11; display:grid; place-items:center;
+    font-size:11px; font-weight:700; flex:none}
+  .chip .nom{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .chip.invitado{color:var(--faint); font-weight:500}
+  .chip.invitado .cara{background:var(--line); color:var(--muted)}
+
+  /* ---------- la historia ---------- */
+  .historia{display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:24px; align-items:center; margin:30px 0 26px}
+  .etiqueta{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--rojo); border:1px solid color-mix(in srgb, var(--rojo) 40%, transparent);
+    background:color-mix(in srgb, var(--rojo) 8%, transparent); border-radius:999px; padding:5px 12px; margin-bottom:16px}
+  .etiqueta::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--rojo); box-shadow:0 0 10px var(--rojo);
+    animation:alarma 1.2s ease-in-out infinite}
+  @keyframes alarma{50%{opacity:.25}}
+  .historia h2{font-family:var(--display); font-weight:700; font-size:clamp(34px,5.8vw,58px); line-height:.98; letter-spacing:-.045em; margin:0 0 14px}
+  .historia h2 .brillo{background:linear-gradient(90deg, var(--oro), #ff8a3d 60%, var(--rosa));
+    -webkit-background-clip:text; background-clip:text; color:transparent}
+  .historia p{margin:0 0 10px; color:var(--muted); max-width:52ch}
+  .historia p b{color:var(--ink); font-weight:600}
+  .resumen{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px}
+  .dato{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 16px; min-width:118px}
+  .dato b{display:block; font-family:var(--mono); font-size:24px; line-height:1.1; font-variant-numeric:tabular-nums}
+  .dato b small{font-size:14px; color:var(--faint); font-weight:500}
+  .dato span{font-family:var(--mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+  .dato.oro b{color:var(--oro)}
+
+  /* el cartel de "Se busca" */
+  .buscado{background:var(--papel); color:var(--papel-ink); border-radius:6px; padding:16px 16px 14px; text-align:center;
+    transform:rotate(2.5deg); box-shadow:0 22px 40px rgba(0,0,0,.55); position:relative}
+  .buscado::before{content:""; position:absolute; top:-9px; left:50%; width:16px; height:16px; margin-left:-8px; border-radius:50%;
+    background:var(--rojo); box-shadow:0 3px 6px rgba(0,0,0,.5)}
+  .buscado h3{font-family:var(--maquina); font-weight:400; font-size:28px; letter-spacing:.06em; margin:0; line-height:1}
+  .buscado .foto{margin:10px 0; background:#1a1c22; border-radius:4px; aspect-ratio:1.1; display:grid; place-items:center; overflow:hidden}
+  .buscado .foto svg{width:88%; height:auto}
+  .buscado b{display:block; font-family:var(--maquina); font-weight:400; font-size:22px; letter-spacing:.04em}
+  .buscado small{display:block; font-family:var(--maquina); font-size:12.5px; opacity:.75; margin-top:2px}
+
+  /* ---------- casos ---------- */
+  .titulo-sec{display:flex; align-items:baseline; gap:12px; margin:34px 0 14px}
+  .titulo-sec h2{font-family:var(--display); font-weight:700; font-size:24px; letter-spacing:-.03em; margin:0}
+  .titulo-sec span{font-family:var(--mono); font-size:12px; color:var(--faint)}
+  .casos{display:grid; gap:14px; grid-template-columns:repeat(3, minmax(0,1fr))}
+  .caso{
+    --c:var(--oro);
+    position:relative; text-align:left; border:1px solid var(--line); border-radius:6px 16px 16px 16px; overflow:hidden;
+    background:linear-gradient(170deg, color-mix(in srgb, var(--c) 10%, var(--surface)) 0%, var(--surface) 60%);
+    padding:0; display:flex; flex-direction:column; transition:transform .18s, border-color .18s, box-shadow .18s;
+  }
+  .caso:hover{transform:translateY(-3px); border-color:color-mix(in srgb, var(--c) 55%, var(--line));
+    box-shadow:var(--shadow-card), 0 0 36px color-mix(in srgb, var(--c) 14%, transparent)}
+  .caso .dibujo{height:150px; display:grid; place-items:center; position:relative;
+    background:radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--c) 16%, #161a24), #0d1016 72%);
+    border-bottom:1px dashed color-mix(in srgb, var(--c) 30%, var(--line))}
+  .caso .dibujo svg{height:118px; width:auto; max-width:90%}
+  .caso .num{position:absolute; top:10px; left:12px; font-family:var(--maquina); font-size:14px; color:var(--c); letter-spacing:.05em}
+  .caso .cuerpo{padding:14px 16px 14px; display:flex; flex-direction:column; gap:6px; flex:1}
+  .caso .tema{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--c)}
+  .caso h3{font-family:var(--display); font-weight:700; font-size:21px; letter-spacing:-.03em; margin:0; line-height:1.1}
+  .caso p{margin:0; color:var(--muted); font-size:13.5px; line-height:1.4}
+  .caso .pie{display:flex; align-items:center; gap:10px; margin-top:auto; padding-top:10px; border-top:1px solid var(--line)}
+  .lupas{display:inline-flex; gap:3px; color:#2c3342; line-height:0}
+  .lupas b{display:inline-flex; gap:3px; color:var(--oro); filter:drop-shadow(0 0 5px color-mix(in srgb, var(--oro) 55%, transparent))}
+  .lupas svg{width:17px; height:17px}
+  .caso .estado{margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--faint)}
+  .sello{position:absolute; top:14px; right:10px; font-family:var(--maquina); font-size:14px; letter-spacing:.06em; color:var(--lima);
+    border:2px solid var(--lima); border-radius:5px; padding:1px 8px; transform:rotate(8deg); opacity:.9;
+    text-shadow:0 0 10px color-mix(in srgb, var(--lima) 50%, transparent)}
+  .caso.final{grid-column:1 / -1; flex-direction:row}
+  .caso.final .dibujo{width:240px; height:auto; min-height:170px; border-bottom:0; border-right:1px dashed color-mix(in srgb, var(--c) 30%, var(--line)); flex:none}
+  /* casos bloqueados: expediente clasificado */
+  .caso.bloqueado{cursor:not-allowed; background:var(--surface-2); border-style:dashed}
+  .caso.bloqueado:hover{transform:none; box-shadow:none; border-color:var(--line)}
+  .caso.bloqueado .dibujo{background:#0c0e13}
+  .caso.bloqueado .dibujo svg{opacity:.12; filter:grayscale(1)}
+  .caso.bloqueado .dibujo::after{content:"CLASIFICADO"; position:absolute; font-family:var(--maquina); font-size:22px; letter-spacing:.12em;
+    color:var(--rojo); border:3px solid var(--rojo); padding:2px 12px; transform:rotate(-8deg); opacity:.75}
+  .caso.bloqueado h3, .caso.bloqueado .tema, .caso.bloqueado .num{color:var(--faint)}
+  .tachado{display:inline-block; background:#2a303d; color:transparent; border-radius:3px; user-select:none}
+
+  /* ---------- pistas ---------- */
+  .pistas{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px}
+  .pista{background:var(--papel); color:var(--papel-ink); border-radius:4px; padding:11px 13px; font-family:var(--maquina); font-size:14px;
+    line-height:1.35; box-shadow:0 10px 20px rgba(0,0,0,.4); position:relative}
+  .pista:nth-child(3n+1){transform:rotate(-1.2deg)} .pista:nth-child(3n+2){transform:rotate(.8deg)} .pista:nth-child(3n){transform:rotate(-.4deg)}
+  .pista i{font-style:normal; display:block; font-size:11.5px; opacity:.6; margin-bottom:3px}
+  .pista.oculta{background:var(--surface); color:var(--faint); border:1px dashed var(--line); box-shadow:none; transform:none}
+
+  /* ---------- expediente de un caso ---------- */
+  .detalle{margin-top:24px}
+  .det-cab{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:20px}
+  .det-cab .num{font-family:var(--maquina); font-size:16px; color:var(--c); letter-spacing:.05em}
+  .det-cab h2{font-family:var(--display); font-weight:700; font-size:clamp(30px,5vw,46px); letter-spacing:-.04em; margin:0; line-height:1}
+  .det-cab .ghost{margin-left:auto}
+  .det{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:16px; align-items:start}
+  .expediente{background:var(--papel); color:var(--papel-ink); border-radius:6px 18px 18px 18px; padding:20px 20px 22px;
+    box-shadow:0 22px 50px rgba(0,0,0,.5); position:relative}
+  .expediente .solapa{position:absolute; top:-14px; left:0; background:var(--papel); border-radius:8px 8px 0 0; padding:3px 16px 0;
+    font-family:var(--maquina); font-size:13px; letter-spacing:.06em}
+  .expediente .escena{display:grid; place-items:center; background:#14171f; border-radius:8px; padding:16px; margin-bottom:16px}
+  .expediente .escena svg{width:min(300px,100%); height:auto}
+  .expediente h3{font-family:var(--maquina); font-weight:400; font-size:17px; letter-spacing:.04em; margin:0 0 6px}
+  .expediente p{font-family:var(--maquina); font-size:15px; line-height:1.55; margin:0 0 12px}
+  .expediente .aprende{border-top:1px dashed rgba(42,34,24,.35); padding-top:12px; margin-top:4px}
+  .expediente .aprende b{font-family:var(--body); font-weight:700; font-size:12px; letter-spacing:.07em; text-transform:uppercase; opacity:.7}
+  .expediente .aprende p{font-family:var(--body); font-size:14.5px; margin:4px 0 0}
+  .expediente .sello{top:18px; right:18px; font-size:17px; color:#2f7a12; border-color:#2f7a12; text-shadow:none}
+
+  .panel{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:var(--shadow-card)}
+  .panel h3{font-family:var(--display); font-weight:700; font-size:18px; letter-spacing:-.02em; margin:0 0 12px}
+  .pasos{list-style:none; margin:0 0 18px; padding:0; display:flex; flex-direction:column; gap:8px}
+  .pasos li{display:flex; gap:12px; align-items:flex-start; font-size:14.5px}
+  .pasos li span{flex:none; width:24px; height:24px; border-radius:7px; display:grid; place-items:center;
+    font-family:var(--mono); font-size:12px; font-weight:700; color:var(--c);
+    background:color-mix(in srgb, var(--c) 12%, transparent); border:1px solid color-mix(in srgb, var(--c) 35%, transparent)}
+  .metas{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:18px}
+  .meta{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:10px 12px}
+  .meta .lupas{margin-bottom:7px} .meta .lupas svg{width:14px; height:14px}
+  .meta span{font-size:12.5px; color:var(--muted); line-height:1.35; display:block}
+  .meta.ok{border-color:color-mix(in srgb, var(--oro) 45%, var(--line))}
+  .jugar-fila{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .jugar-fila .mejor{font-family:var(--mono); font-size:13px; color:var(--faint)}
+  .jugar-fila .mejor b{color:var(--ink)}
+  .aviso{margin:14px 0 0; font-size:13.5px; color:var(--muted); background:var(--surface-2); border:1px dashed var(--line);
+    border-radius:10px; padding:10px 12px}
+  .pista-caso{margin-top:14px; padding:12px 14px; border-radius:12px; font-size:14px; color:var(--muted);
+    background:color-mix(in srgb, var(--oro) 7%, transparent); border:1px solid color-mix(in srgb, var(--oro) 25%, transparent)}
+  .pista-caso b{color:var(--oro); font-weight:600}
+
+  .boton{
+    border:1px solid transparent; border-radius:12px; padding:12px 22px; font-family:var(--display); font-weight:700; font-size:17px;
+    background:var(--c, var(--oro)); color:#0a0c11; line-height:1.1;
+    box-shadow:0 0 24px color-mix(in srgb, var(--c, var(--oro)) 30%, transparent); transition:transform .12s, box-shadow .12s;
+  }
+  .boton:hover{transform:translateY(-1px); box-shadow:0 0 32px color-mix(in srgb, var(--c, var(--oro)) 45%, transparent)}
+  .boton:disabled{opacity:.45; cursor:default; transform:none; box-shadow:none}
+  .ghost{border:1px solid var(--line); background:var(--surface-2); border-radius:9px; padding:7px 13px;
+    font-size:13px; font-weight:500; color:var(--muted)}
+  .ghost:hover{color:var(--ink); border-color:var(--faint)}
+
+  /* ---------- piezas de los minijuegos ---------- */
+  .frac{display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; font-family:var(--mono); font-weight:700;
+    line-height:1.05; margin:0 .15em; font-size:1em}
+  .frac i{display:block; width:100%; min-width:1.1em; height:.12em; background:currentColor; border-radius:2px; margin:.08em 0}
+  .opcion .frac{font-size:.8em}
+  .consigna{margin:0}
+  .aviso-caso{font-family:var(--maquina); font-size:clamp(17px,3.6vw,21px); text-align:center; color:var(--ink)}
+  .aviso-caso .frac{color:var(--c); font-size:1.5em}
+  .aviso-caso b{font-weight:400}
+  .pregunta-caso{margin:0; font-size:clamp(17px,3.6vw,21px); text-align:center}
+  .pregunta-caso b{color:var(--c)}
+  .ayuda{margin:0; min-height:1.5em; text-align:center; color:var(--muted); font-size:14.5px; max-width:52ch}
+  .ayuda .frac{font-size:1.15em}
+  .ayuda.bien{color:var(--lima)} .ayuda.mal{color:#ff8fa3}
+  .ayuda b{color:var(--ink)}
+  .escenario .boton kbd{font-family:var(--mono); font-size:11px; opacity:.6; margin-left:6px}
+  .escenario.j1{gap:16px}
+  /* pizza */
+  .mesa-pizza{display:grid; place-items:center}
+  .pizza{max-width:70vw; height:auto; filter:drop-shadow(0 12px 22px rgba(0,0,0,.55))}
+  .pizza .porcion{fill:#f2b544; stroke:#0e1118; stroke-width:2.5; transition:fill .2s, opacity .2s}
+  .pizza.tocable .porcion{cursor:pointer}
+  .pizza.tocable .porcion:hover{fill:#f7c865}
+  .pizza .porcion.comida{fill:rgba(238,241,247,.05); stroke:rgba(238,241,247,.55); stroke-dasharray:6 5}
+  .pizza .corte{stroke:#0e1118; stroke-width:3; animation:corte .35s ease-out}
+  @keyframes corte{from{stroke-dasharray:0 200} to{stroke-dasharray:200 0}}
+  .controles{display:flex; align-items:center; gap:14px}
+  .cuchillo{width:46px; height:46px; font-size:22px; font-weight:700; color:var(--ink); padding:0}
+  .cuantas{font-family:var(--mono); font-size:15px; color:var(--muted); min-width:120px; text-align:center}
+  .cuantas b{font-size:24px; color:var(--c)}
+
+  /* cámara de seguridad */
+  .escenario.j2{gap:14px}
+  .camara{position:relative; padding:30px 22px 14px; border-radius:14px; border:2px solid color-mix(in srgb, var(--c) 70%, transparent);
+    background:#0b0d12; box-shadow:0 0 30px color-mix(in srgb, var(--c) 18%, transparent), inset 0 0 40px rgba(0,0,0,.6)}
+  .camara::after{content:""; position:absolute; inset:0; border-radius:12px; pointer-events:none;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,.035) 0 1px, transparent 1px 4px)}
+  .camara .rec{position:absolute; top:8px; left:12px; font-family:var(--mono); font-size:11px; font-weight:700; color:var(--rojo); animation:alarma 1.2s infinite}
+  .camara .hora{position:absolute; top:8px; right:12px; font-family:var(--mono); font-size:11px; color:var(--muted)}
+  .camara svg{display:block; max-width:62vw; height:auto}
+  /* chocolate y torta */
+  .barra{height:auto; filter:drop-shadow(0 10px 18px rgba(0,0,0,.5))}
+  .barra .pieza{fill:#7a4a2e}
+  .barra .pieza.torta{fill:#f19abc}
+  .barra .pieza.comida{fill:rgba(238,241,247,.04); stroke:rgba(238,241,247,.55); stroke-width:2; stroke-dasharray:6 5}
+
+  /* figuras cortadas (caso 3) y botones justo/trucho */
+  .escenario.j3{gap:16px}
+  .figura{max-width:70vw; height:auto; filter:drop-shadow(0 10px 18px rgba(0,0,0,.5))}
+  .figura .parte{fill:var(--c); stroke:#0e1118; stroke-width:3; stroke-linejoin:round}
+  .figura .parte:nth-child(even){fill:color-mix(in srgb, var(--c) 82%, #fff)}
+  .figura .parte.comida{fill:rgba(238,241,247,.05); stroke:rgba(238,241,247,.6); stroke-dasharray:6 5}
+  .mini-barra{width:min(420px,100%); height:6px; border-radius:99px; background:var(--surface-2); overflow:hidden}
+  .mini-barra i{display:block; height:100%; background:var(--c); transform-origin:left}
+  .vf-botones{display:grid; grid-template-columns:1fr 1fr; gap:12px; width:min(520px,100%)}
+  .vf-botones .opcion{font-family:var(--display); font-size:clamp(20px,4.4vw,26px)}
+  .vf-no{color:var(--rojo)} .vf-si{color:var(--lima)}
+
+  /* la calle (caso 4) */
+  .escenario.j4{gap:14px}
+  .calle{width:min(640px,100%); height:auto; touch-action:none; cursor:ew-resize; user-select:none}
+  .calle .asfalto{fill:#1a1f2b; stroke:var(--line)}
+  .calle .linea{stroke:rgba(238,241,247,.5); stroke-width:2; stroke-dasharray:14 10}
+  .calle .marca{stroke:var(--c); stroke-width:3; opacity:.8}
+  .calle .marca.nueva{animation:aparece .4s}
+  .calle .punta{stroke:var(--ink); stroke-width:4; stroke-linecap:round}
+  .calle .rotulo{fill:var(--ink); font-family:var(--mono); font-weight:700; font-size:22px; text-anchor:middle}
+  .calle .rotulo.sol{fill:var(--c); font-size:18px}
+  .calle .lugar{fill:var(--faint); font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-anchor:middle}
+  .calle .huella{fill:var(--c)}
+  .calle .distancia{stroke:var(--rojo); stroke-width:4; stroke-linecap:round; opacity:.8}
+  .lupa-calle .palo{stroke:var(--oro); stroke-width:4}
+  .lupa-calle .vidrio{fill:color-mix(in srgb, var(--oro) 18%, transparent); stroke:var(--oro); stroke-width:5}
+  .lupa-calle .pie{fill:var(--oro); stroke:#0e1118; stroke-width:3}
+
+  /* víctimas (caso 5) */
+  .escenario.j5{gap:16px}
+  .victimas{display:flex; flex-direction:column; gap:12px; width:min(600px,100%)}
+  .victima{display:grid; grid-template-columns:110px auto 1fr; align-items:center; gap:12px;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:14px; padding:10px 14px}
+  .victima .quien{font-family:var(--maquina); font-size:17px}
+  .victima .cuanto{font-size:14px; color:var(--muted); white-space:nowrap}
+  .victima .cuanto .frac{color:var(--c); font-size:1.5em}
+  .choco-caja{min-height:44px; display:grid; align-items:center}
+  .choco{width:100%; height:44px}
+  .choco .pieza{fill:#7a4a2e}
+  .choco .pieza.comida{fill:rgba(238,241,247,.04); stroke:rgba(238,241,247,.6); stroke-width:2; stroke-dasharray:6 5}
+  .sin-foto{font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint);
+    border:1px dashed var(--line); border-radius:8px; padding:12px; text-align:center}
+  .tres{display:grid; grid-template-columns:1fr minmax(96px,auto) 1fr; gap:10px; width:min(600px,100%)}
+  .tres .opcion{font-family:var(--display); font-size:clamp(17px,3.6vw,22px); padding:14px 16px 14px 28px}
+  @media (max-width:560px){ .victima{grid-template-columns:1fr auto} .choco-caja{grid-column:1 / -1} }
+
+  /* disfraces (caso 6) */
+  .escenario.j6{gap:16px}
+  .disfraz{display:flex; flex-direction:column; gap:8px; width:min(560px,100%)}
+  .disfraz:empty{display:none}
+  .rotulo-f{font-family:var(--maquina); font-size:16px; color:var(--ink)}
+  .rotulo-f .frac{color:var(--c); font-size:1.35em}
+  .franja{width:100%; height:48px}
+  .franja .tramo{fill:rgba(238,241,247,.05); stroke:rgba(238,241,247,.35); stroke-width:1.5}
+  .franja .tramo.lleno{fill:var(--c); stroke:#0e1118}
+  .franja.tocable .tramo{cursor:pointer}
+  .franja.tocable .tramo:hover{stroke:var(--c)}
+
+  /* devolución (caso 7) */
+  .escenario.j7{gap:14px}
+  .devolucion{display:flex; align-items:center; gap:22px; flex-wrap:wrap; justify-content:center}
+  .devolucion .mesa-pizza{position:relative}
+  .desborde{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%) rotate(-8deg); font-family:var(--display); font-weight:700;
+    font-size:20px; color:#fff; background:var(--rojo); padding:4px 12px; border-radius:8px; white-space:nowrap; animation:aparece .3s}
+  .cuenta-suma{display:flex; align-items:center; gap:4px; font-size:28px; min-height:80px; flex-wrap:wrap}
+  .cuenta-suma .frac{color:var(--ink)}
+  .cuenta-suma .frac.justo{color:var(--c); text-shadow:0 0 16px color-mix(in srgb, var(--c) 55%, transparent)}
+  .cuenta-suma .op{font-family:var(--mono); color:var(--faint); margin:0 4px}
+  .cuenta-suma .vacio{font-size:15px; color:var(--faint)}
+  .sueltas{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+  .suelta{display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 10px 6px; border-radius:14px;
+    border:1px solid var(--line); background:var(--surface-2); font-size:18px; box-shadow:0 4px 0 #05060a; transition:transform .1s, opacity .2s}
+  .suelta:hover:not(:disabled){border-color:var(--c); transform:translateY(-2px)}
+  .suelta.usada{opacity:.2}
+  .suelta .pizza{filter:none}
+  .suelta .pizza .porcion.comida{stroke:none; fill:none}
+  .fila-botones{display:flex; gap:8px}
+
+  /* botín (caso 8) */
+  .escenario.j8{gap:14px}
+  .aviso-caso > b{color:var(--c)}
+  .pila{display:flex; flex-wrap:wrap; gap:5px; justify-content:center; max-width:420px; min-height:22px}
+  .caramelo{display:inline-block; width:18px; height:18px; border-radius:50%; background:var(--k);
+    box-shadow:inset -3px -3px 0 rgba(0,0,0,.25), 0 2px 4px rgba(0,0,0,.4); animation:aparece .25s}
+  .bolsas{display:flex; gap:10px; flex-wrap:wrap; justify-content:center}
+  .bolsa{display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px; width:92px; min-height:108px;
+    padding:10px 8px 6px; border-radius:16px 16px 26px 26px; border:2px solid var(--line); background:#1a1f2b; cursor:default}
+  .bolsa:not(:disabled){cursor:pointer}
+  .bolsa:not(:disabled):hover{border-color:var(--c)}
+  .bolsa .dentro{display:flex; flex-wrap:wrap; gap:3px; justify-content:center}
+  .bolsa .caramelo{width:14px; height:14px}
+  .bolsa b{font-family:var(--mono); font-size:15px; color:var(--muted)}
+  .bolsa.robada{border-color:var(--c); background:color-mix(in srgb, var(--c) 16%, #1a1f2b); box-shadow:0 0 22px color-mix(in srgb, var(--c) 35%, transparent)}
+  .bolsa.robada b{color:var(--c)}
+  #paso{display:flex; justify-content:center; width:100%}
+
+  /* guarida (caso 9) */
+  .escenario.j9{gap:12px}
+  .guarida{display:flex; gap:12px; flex-wrap:wrap; justify-content:center}
+  .guarida .pizza{max-width:28vw}
+  .cuantas-p{margin:0; font-size:14px; color:var(--muted)}
+  .cuantas-p b{font-family:var(--mono); font-size:20px; color:var(--c)}
+  .mixto{display:inline-flex; align-items:center; gap:.2em; font-family:var(--mono); font-weight:700; vertical-align:middle}
+  .mixto > b{font-size:1.5em}
+  .mixto small{font-family:var(--body); font-weight:500; font-size:.6em; color:var(--muted)}
+  .pregunta-caso .mixto{color:var(--c)}
+  #opcs:empty{display:none}
+
+  /* caso final */
+  .escenario.j10{gap:14px; justify-content:flex-start}
+  .persecucion{display:flex; align-items:center; gap:12px; width:min(620px,100%)}
+  .pista-pers{position:relative; flex:1; height:74px; border-radius:14px; background:#141923; border:1px solid var(--line); overflow:hidden}
+  .pista-pers i{position:absolute; left:0; top:0; bottom:0; width:100%; background:color-mix(in srgb, var(--c) 14%, transparent);
+    transform-origin:left; transform:scaleX(0); transition:transform .4s}
+  .yo-pers{position:absolute; top:50%; left:0; transform:translate(4px,-50%); font-size:30px; transition:left .4s}
+  .el-pers{position:absolute; right:2px; top:2px; bottom:2px; width:82px}
+  .el-pers svg{width:100%; height:100%}
+  .pasos-pers{font-family:var(--mono); font-weight:700; color:var(--c); min-width:58px; text-align:right}
+  .preg-final{display:flex; flex-direction:column; align-items:center; gap:14px; width:100%}
+  .mini-dibujo{display:grid; place-items:center; margin-bottom:6px}
+  .mini-dibujo svg{width:170px; height:auto}
+  .num-op{font-size:1.1em}
+  .revelacion{display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; animation:aparece .6s}
+  .revelacion svg{width:230px; height:auto; filter:drop-shadow(0 0 30px color-mix(in srgb, var(--c) 40%, transparent))}
+  .revelacion h3{font-family:var(--display); font-size:38px; margin:0; color:var(--c)}
+  .revelacion p{margin:0; color:var(--muted); max-width:40ch}
+
+  footer{margin-top:48px; text-align:center; color:var(--faint); font-family:var(--mono); font-size:11.5px; letter-spacing:.04em}
+
+  @media (max-width:880px){
+    .casos, .pistas{grid-template-columns:repeat(2, minmax(0,1fr))}
+    .det{grid-template-columns:1fr}
+    .historia{grid-template-columns:minmax(0,1fr) 210px}
+  }
+  @media (max-width:600px){
+    .historia{grid-template-columns:1fr}
+    .buscado{max-width:250px; margin:6px auto 0}
+    .casos, .pistas{grid-template-columns:1fr}
+    .caso.final{flex-direction:column}
+    .caso.final .dibujo{width:auto; border-right:0; border-bottom:1px dashed color-mix(in srgb, var(--c) 30%, var(--line))}
+    .marca small{display:none}
+    .metas{grid-template-columns:1fr}
+    .det-cab .ghost{margin-left:0}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .caso:hover, .boton:hover{transform:none}
+    .etiqueta::before{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="fondo" aria-hidden="true"><div class="grilla"></div><div class="linterna"></div><div class="l2"></div></div>
+
+<div class="wrap">
+  <header>
+    <a class="volver" id="volverInicio" href="index.html" title="Todos los juegos">←</a>
+    <div class="marca"><h1>Desapariciones <em>Misteriosas</em></h1><small>Fracciones</small></div>
+    <span class="chip invitado" id="chip"><span class="cara" id="chipCara">·</span><span class="nom" id="chipNom">Invitado</span></span>
+  </header>
+
+  <!-- ===== tablero de casos ===== -->
+  <section id="inicio">
+    <div class="historia">
+      <div>
+        <span class="etiqueta">Alerta en el barrio</span>
+        <h2>Algo se está comiendo<br><span class="brillo">el barrio. De a pedacitos.</span></h2>
+        <p>Media pizza. Un cuarto de torta. Tres octavos de chocolate. Todas las noches desaparecen <b>partes</b> de cosas, y el único rastro es la marca de una mordida.</p>
+        <p>Nadie lo vio. Le dicen <b>El Mordisco</b>. Vos sos el detective: resolvé los 9 casos, juntá las pistas y descubrí quién es.</p>
+        <div class="resumen">
+          <div class="dato"><b id="totResueltos">0<small>/9</small></b><span>Casos resueltos</span></div>
+          <div class="dato oro"><b id="totLupas">0<small>/27</small></b><span>Lupas</span></div>
+          <div class="dato"><b id="totPistas">0<small>/9</small></b><span>Pistas</span></div>
+        </div>
+      </div>
+      <div class="buscado" aria-label="Cartel de Se busca: El Mordisco">
+        <h3>SE BUSCA</h3>
+        <div class="foto" id="fotoMordisco"></div>
+        <b>EL MORDISCO</b>
+        <small id="recompensa">Identidad: desconocida</small>
+      </div>
+    </div>
+
+    <div class="titulo-sec"><h2>Casos</h2><span>Se abren de a uno: resolvé uno para abrir el siguiente</span></div>
+    <div class="casos" id="casos"></div>
+
+    <div class="titulo-sec"><h2>Pistas</h2><span>Cada caso resuelto deja una pista sobre El Mordisco</span></div>
+    <div class="pistas" id="pistas"></div>
+  </section>
+
+  <!-- ===== expediente de un caso ===== -->
+  <section class="detalle" id="detalle" hidden>
+    <div class="det-cab">
+      <div><div class="num" id="dNum"></div><h2 id="dTitulo"></h2></div>
+      <button class="ghost" id="dVolver">← Todos los casos</button>
+    </div>
+    <div class="det">
+      <article class="expediente">
+        <span class="solapa" id="dSolapa"></span>
+        <span class="sello" id="dSello" hidden>RESUELTO</span>
+        <div class="escena" id="dEscena"></div>
+        <h3>Lo que pasó</h3>
+        <p id="dEscenaTxt"></p>
+        <div class="aprende">
+          <b>Lo que vas a aprender</b>
+          <p id="dAprende"></p>
+        </div>
+      </article>
+      <div class="panel">
+        <h3>Cómo se investiga</h3>
+        <ol class="pasos" id="dPasos"></ol>
+        <div class="metas" id="dMetas"></div>
+        <div class="jugar-fila">
+          <button class="boton" id="jugarBtn" disabled>Investigar ▶</button>
+          <span class="mejor" id="dMejor"></span>
+        </div>
+        <p class="aviso" id="dAviso">Este caso todavía está en investigación: muy pronto se va a poder jugar.</p>
+        <p class="pista-caso" id="dPista"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== partida (la arma motor.js) ===== -->
+  <section class="juego" id="juego" hidden></section>
+
+  <footer>DESAPARICIONES MISTERIOSAS · LOS PUNTOS SUMAN AL RANKING GENERAL</footer>
+</div>
+
+<script src="motor.js"></script>
+<script>
+
+// ---------- dibujos ----------
+// Todo lo que "desapareció" se dibuja con línea punteada: así se ve lo que queda y lo que falta, y juntos son el entero.
+const TINTA = '#eef1f7', FALTA = 'rgba(238,241,247,.45)';
+const svg = (w, h, cuerpo) => '<svg viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' + cuerpo + '</svg>';
+const punto = (cx, cy, r, a) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+// porción de círculo (de la parte i de n)
+function porcion(cx, cy, r, i, n) {
+  const a0 = -Math.PI / 2 + i * 2 * Math.PI / n, a1 = a0 + 2 * Math.PI / n;
+  const [x0, y0] = punto(cx, cy, r, a0), [x1, y1] = punto(cx, cy, r, a1);
+  return 'M' + cx + ' ' + cy + ' L' + x0.toFixed(1) + ' ' + y0.toFixed(1) +
+    ' A' + r + ' ' + r + ' 0 ' + (n === 1 ? 1 : 0) + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z';
+}
+// pizza de n porciones: `faltan` porciones desaparecidas (punteadas)
+function pizza(cx, cy, r, n, faltan, color) {
+  let g = '';
+  for (let i = 0; i < n; i++) {
+    const se_fue = i >= n - faltan;
+    g += se_fue
+      ? '<path d="' + porcion(cx, cy, r, i, n) + '" fill="none" stroke="' + FALTA + '" stroke-width="2" stroke-dasharray="5 5"/>'
+      : '<path d="' + porcion(cx, cy, r, i, n) + '" fill="' + color + '" stroke="#0e1118" stroke-width="2.5"/>' +
+        '<circle cx="' + punto(cx, cy, r * .6, -Math.PI / 2 + (i + .5) * 2 * Math.PI / n)[0].toFixed(1) + '" cy="' +
+        punto(cx, cy, r * .6, -Math.PI / 2 + (i + .5) * 2 * Math.PI / n)[1].toFixed(1) + '" r="' + (r * .09).toFixed(1) + '" fill="#c2334a"/>';
+  }
+  return g + '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="#d99a3a" stroke-width="' + (r * .08).toFixed(1) + '" opacity=".9"/>';
+}
+// barra de cols × filas cuadraditos: `faltan` desaparecidos (desde el final)
+function barra(x, y, cols, filas, lado, faltan, color) {
+  let g = '', total = cols * filas;
+  for (let f = 0; f < filas; f++) for (let c = 0; c < cols; c++) {
+    const i = f * cols + c, se_fue = i >= total - faltan;
+    g += '<rect x="' + (x + c * lado) + '" y="' + (y + f * lado) + '" width="' + (lado - 3) + '" height="' + (lado - 3) + '" rx="3" ' +
+      (se_fue ? 'fill="none" stroke="' + FALTA + '" stroke-width="1.6" stroke-dasharray="4 4"' : 'fill="' + color + '"') + '/>';
+  }
+  return g;
+}
+// una mordida: círculos del color del fondo que "comen" el borde
+const mordida = (x, y, r, fondo = '#14171f') =>
+  '<g fill="' + fondo + '"><circle cx="' + x + '" cy="' + y + '" r="' + r + '"/><circle cx="' + (x + r * 1.1) + '" cy="' + (y + r * .5) + '" r="' + r * .8 + '"/>' +
+  '<circle cx="' + (x - r * .9) + '" cy="' + (y + r * .6) + '" r="' + r * .75 + '"/></g>';
+const texto = (x, y, t, tam = 22, color = TINTA) =>
+  '<text x="' + x + '" y="' + y + '" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="' + tam + '" fill="' + color + '">' + t + '</text>';
+// El Mordisco: una sombra con orejas, antifaz y ojos que brillan (no se sabe qué es… todavía)
+function mordisco(conAntifaz) {
+  return svg(200, 170,
+    '<ellipse cx="100" cy="162" rx="62" ry="7" fill="rgba(0,0,0,.5)"/>' +
+    '<path d="M44 160 Q40 96 70 76 L60 34 L88 62 Q100 58 112 62 L140 34 L130 76 Q160 96 156 160 Z" fill="#05060a"/>' +
+    (conAntifaz ? '<path d="M62 96 Q100 80 138 96 Q132 116 112 110 Q100 104 88 110 Q68 116 62 96 Z" fill="#20242e"/>' : '') +
+    '<ellipse cx="84" cy="98" rx="9" ry="6" fill="#ffc53d"><animate attributeName="ry" values="6;6;.5;6" keyTimes="0;.92;.96;1" dur="4s" repeatCount="indefinite"/></ellipse>' +
+    '<ellipse cx="116" cy="98" rx="9" ry="6" fill="#ffc53d"><animate attributeName="ry" values="6;6;.5;6" keyTimes="0;.92;.96;1" dur="4s" repeatCount="indefinite"/></ellipse>' +
+    '<circle cx="86" cy="98" r="2.5" fill="#05060a"/><circle cx="118" cy="98" r="2.5" fill="#05060a"/>' +
+    '<path d="M86 128 Q100 138 114 128" stroke="#ffc53d" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".7"/>' +
+    '<path d="M92 130 l3 5 l3 -4 l3 5 l3 -4 l3 4" stroke="#ffc53d" stroke-width="1.8" fill="none" opacity=".7"/>');
+}
+
+// ---------- los 9 casos (y el final) ----------
+// listo: true cuando el minijuego del caso ya está programado
+const CASOS = {
+  1: { titulo: 'La pizzería', tema: 'Qué es una fracción', color: '#ffc53d', listo: true,
+       corto: 'A la pizza de Don Tito le faltan porciones. Reconstruí la escena.',
+       escena: 'Don Tito cortó una pizza en 8 porciones iguales y fue a buscar la gaseosa. Cuando volvió, faltaban 3. En la caja quedó la marca de una mordida.',
+       aprende: 'Una fracción dice en cuántas partes iguales se cortó algo (el número de abajo) y cuántas partes estamos contando (el de arriba). Si faltan 3 de 8 porciones, desapareció 3/8 de la pizza, y quedan 5/8.',
+       pasos: ['Reconstruí la escena: cortá la pizza en partes iguales con ＋ y −, y tocá las porciones que desaparecieron.',
+               'Leé la escena: mirá la pizza mordida y decí qué fracción desapareció y qué fracción queda.',
+               'Son 8 rondas, cada vez con más porciones.'],
+       marcador: ['1/8', 'Ronda'],
+       metas: ['Terminá con 6 aciertos', '1 error o menos', 'Sin errores'],
+       estrellas: p => p.aciertos < 6 ? 0 : !p.errores ? 3 : p.errores <= 1 ? 2 : 1,
+       pista: 'Siempre muerde partes exactamente iguales. Es muy prolijo.',
+       dibujo: () => svg(240, 180, pizza(120, 90, 72, 8, 3, '#f2b544') + mordida(66, 42, 9)) },
+  2: { titulo: 'Las cámaras', tema: 'Leer fracciones', color: '#3db8ff', listo: true,
+       corto: 'Las cámaras de seguridad grabaron las cosas a medio comer. ¿Qué fracción falta?',
+       escena: 'Las cámaras de la cuadra sacaron una foto por segundo toda la noche. En cada foto se ve algo al que le falta un pedazo. Hay que revisarlas rápido antes de que se borren.',
+       aprende: 'A leer una fracción mirando el dibujo: contar en cuántas partes iguales está dividido y cuántas partes faltan (o quedan).',
+       pasos: ['Mirá la foto: puede ser una pizza, una barra de chocolate o una torta.', 'Leé bien la pregunta: a veces es qué fracción desapareció y a veces qué fracción queda. Elegí con un toque o con 1, 2, 3, 4.', 'Tenés 60 segundos: cuantas más fotos revises bien, más puntos.'],
+       segundos: 60,
+       metas: ['8 fotos bien', '14 fotos y 80 % bien', '18 fotos sin errores'],
+       estrellas: p => p.aciertos >= 18 && !p.errores ? 3 : p.aciertos >= 14 && p.precision >= 80 ? 2 : p.aciertos >= 8 ? 1 : 0,
+       pista: 'En una cámara se ve una cola peluda con rayas.',
+       dibujo: () => svg(240, 180,
+         '<rect x="22" y="18" width="196" height="144" rx="10" fill="#0d1016" stroke="#3db8ff" stroke-width="3"/>' +
+         '<circle cx="40" cy="36" r="5" fill="#ff4d6d"><animate attributeName="opacity" values="1;.2;1" dur="1.2s" repeatCount="indefinite"/></circle>' +
+         texto(66, 41, 'REC', 13, '#ff4d6d') + barra(64, 66, 4, 2, 29, 3, '#8a5a3b') +
+         texto(120, 150, '02:47 AM', 12, 'rgba(238,241,247,.6)')) },
+  3: { titulo: 'Los mentirosos', tema: 'Partes iguales', color: '#ff4d8d', listo: true,
+       corto: 'Tres sospechosos dicen “yo sólo me comí 1/4”. ¿Quién miente?',
+       escena: 'Detuvimos a tres sospechosos. Todos dicen que sólo se comieron “un cuarto”. Pero algunos cortaron las cosas en partes de distinto tamaño, y eso no vale.',
+       aprende: 'Para que sea una fracción, las partes tienen que ser iguales. Una torta cortada en 4 pedazos distintos no está cortada en cuartos.',
+       pasos: ['Mirá cómo cortó cada sospechoso (lo punteado es lo que se comió).', '“Justo” (→ o J) si todas las partes son iguales; “Trucho” (← o T) si no. ¡Ojo con las trampas!', 'Tenés 45 segundos, y cada vez menos tiempo por sospechoso.'],
+       segundos: 45,
+       metas: ['12 sospechosos bien', '20 y 85 % bien', '24 y 95 % bien'],
+       estrellas: p => p.aciertos >= 24 && p.precision >= 95 ? 3 : p.aciertos >= 20 && p.precision >= 85 ? 2 : p.aciertos >= 12 ? 1 : 0,
+       pista: 'Un testigo dice que tiene manos chiquitas, con cinco dedos, como una persona.',
+       dibujo: () => svg(240, 180,
+         '<rect x="24" y="40" width="88" height="88" rx="6" fill="#ff4d8d"/><path d="M68 40 V128 M24 84 H112" stroke="#0e1118" stroke-width="3"/>' +
+         texto(68, 156, 'JUSTO', 14, '#b8ff3c') +
+         '<rect x="128" y="40" width="88" height="88" rx="6" fill="#ff4d8d"/><path d="M150 40 V128 M150 70 H216 M190 70 V128" stroke="#0e1118" stroke-width="3"/>' +
+         texto(172, 156, 'TRUCHO', 14, '#ff4d6d')) },
+  4: { titulo: 'Las huellas', tema: 'La recta numérica', color: '#2ee6c5', listo: true,
+       corto: 'El Mordisco escapó por la calle. Un testigo lo vio “a 3/4 del camino”.',
+       escena: 'Encontramos huellas en la calle que va de la plaza (0) a la estación (1). Un testigo lo vio parado a 3/4 del camino. Hay que marcar el lugar exacto antes de que se escape.',
+       aprende: 'Una fracción también es un número: tiene su lugar en la recta, entre el 0 y el 1. 3/4 queda más cerca del 1 que 1/4.',
+       pasos: ['Leé la fracción que dijo el testigo.', 'Arrastrá la lupa por la calle (o usá las flechas) y tocá “¡Lo vi acá!” (o Enter).', 'Son 10 testigos. En los primeros la calle tiene marcas; después, hay que calcular a ojo.'],
+       marcador: ['1/10', 'Testigo'],
+       metas: ['5 marcas cerca', '8 marcas cerca', '10 marcas perfectas'],
+       estrellas: p => p.perfectas >= 10 ? 3 : p.aciertos >= 8 ? 2 : p.aciertos >= 5 ? 1 : 0,
+       pista: 'Las huellas llevan hacia los techos: se mueve de noche.',
+       dibujo: () => {
+         let g = '<line x1="24" y1="112" x2="216" y2="112" stroke="' + TINTA + '" stroke-width="3" stroke-linecap="round"/>';
+         for (let i = 0; i <= 4; i++) g += '<line x1="' + (24 + i * 48) + '" y1="102" x2="' + (24 + i * 48) + '" y2="122" stroke="' + TINTA + '" stroke-width="2.5"/>';
+         g += texto(24, 146, '0', 16) + texto(216, 146, '1', 16) + texto(168, 146, '3/4', 14, '#2ee6c5');
+         for (let i = 0; i < 4; i++) g += '<ellipse cx="' + (44 + i * 32) + '" cy="' + (i % 2 ? 84 : 92) + '" rx="6" ry="9" fill="#2ee6c5" opacity="' + (.35 + i * .15) + '"/>';
+         g += '<path d="M168 56 L168 96" stroke="#2ee6c5" stroke-width="3"/><circle cx="168" cy="52" r="12" fill="none" stroke="#2ee6c5" stroke-width="4"/>';
+         return svg(240, 180, g);
+       } },
+  5: { titulo: 'Las víctimas', tema: 'Comparar fracciones', color: '#ff8a3d', listo: true,
+       corto: 'A dos vecinos les robaron chocolate. ¿A quién le sacaron más?',
+       escena: 'La señora Rosa dice que le robaron 1/3 de su chocolate. El señor Beto, 1/4 del suyo. Los dos quieren que investiguemos primero su caso. ¿Quién perdió más?',
+       aprende: 'A comparar fracciones: con el mismo número abajo, gana el de arriba más grande. Con el mismo número arriba, gana el de abajo más chico: 1/3 es más que 1/4 porque se cortó en menos partes.',
+       pasos: ['Leé cuánto chocolate le robaron a cada vecino.', 'Tocá a quién le robaron más, o “Igual” (también con 1, 2, 3).', 'Son 12 casos: en los primeros ves los chocolates; en los últimos, sólo los números… y después se comprueba con el dibujo.'],
+       marcador: ['1/12', 'Ronda'],
+       metas: ['7 comparaciones bien', '10 comparaciones bien', '12 de 12 bien'],
+       estrellas: p => p.aciertos >= 12 ? 3 : p.aciertos >= 10 ? 2 : p.aciertos >= 7 ? 1 : 0,
+       pista: 'Siempre prefiere lo dulce: chocolate, torta, caramelos.',
+       dibujo: () => svg(240, 180, barra(22, 44, 3, 3, 30, 3, '#8a5a3b') + barra(130, 44, 4, 3, 23, 3, '#8a5a3b') +
+         texto(66, 156, '1/3', 16, '#ff8a3d') + texto(174, 156, '1/4', 16, '#ff8a3d')) },
+  6: { titulo: 'Los disfraces', tema: 'Fracciones equivalentes', color: '#8b6bff', listo: true,
+       corto: 'El ladrón se disfraza: 1/2 se hace pasar por 2/4. ¡Desenmascaralo!',
+       escena: 'El Mordisco se volvió más astuto: ahora se disfraza. Se llevó 1/2 torta, pero lo anotó como 2/4 para confundirnos. Hay que descubrir qué fracciones son la misma aunque se vean distintas.',
+       aprende: 'Fracciones equivalentes: 1/2, 2/4 y 4/8 son el mismo pedazo cortado en más partes. Si multiplicás arriba y abajo por el mismo número, la fracción no cambia.',
+       pasos: ['Descubrí el disfraz: pintá en la barra de abajo las partes que tapan el mismo pedazo que arriba.', '¿Cuál es el disfraz?: elegí qué fracción es la misma que la de El Mordisco (con un toque o 1–4).', 'Son 10 disfraces. ¡Cuidado: sumar lo mismo arriba y abajo no sirve!'],
+       marcador: ['1/10', 'Disfraz'],
+       metas: ['Desenmascará 6', 'Desenmascará 8', '10 de 10'],
+       estrellas: p => p.aciertos >= 10 ? 3 : p.aciertos >= 8 ? 2 : p.aciertos >= 6 ? 1 : 0,
+       pista: 'Usa antifaz. Siempre.',
+       dibujo: () => svg(240, 180, barra(22, 54, 2, 1, 44, 1, '#8b6bff') + texto(64, 128, '1/2', 16, '#8b6bff') + texto(120, 88, '=', 26) +
+         barra(142, 54, 4, 1, 20, 2, '#8b6bff') + texto(180, 128, '2/4', 16, '#8b6bff') +
+         '<path d="M150 30 Q180 18 210 30 Q204 44 190 40 Q180 36 170 40 Q156 44 150 30 Z" fill="#05060a" stroke="#8b6bff" stroke-width="2"/>') },
+  7: { titulo: 'La devolución', tema: 'Sumar fracciones', color: '#b8ff3c', listo: true,
+       corto: 'Recuperamos porciones sueltas. Devolvé cada cosa completa, sin pasarte.',
+       escena: 'Encontramos una bolsa con porciones sueltas de lo que se robó. Hay que devolverle a cada vecino exactamente lo que le falta: ni más, ni menos.',
+       aprende: 'A sumar fracciones con el mismo denominador: 1/4 + 2/4 = 3/4. Se suman las partes, y el tamaño de cada parte (el número de abajo) no cambia.',
+       pasos: ['Mirá qué le falta a cada vecino (por ejemplo, 3/4 de pizza).', 'Tocá las porciones recuperadas para devolverlas, hasta completar justo lo que falta. “Sacar la última” deshace.', 'Si te pasás, se desborda y cuenta como error. Son 8 vecinos.'],
+       marcador: ['1/8', 'Vecino'],
+       metas: ['Devolvé las 8 cosas', 'Con 2 errores o menos', 'Sin errores'],
+       estrellas: p => p.aciertos < 8 ? 0 : !p.errores ? 3 : p.errores <= 2 ? 2 : 1,
+       pista: 'Antes de comer, lava la comida en un charco.',
+       dibujo: () => svg(240, 180, pizza(70, 86, 46, 4, 3, '#f2b544') + texto(136, 94, '+', 26) +
+         '<path d="' + porcion(186, 86, 46, 1, 4) + '" fill="#f2b544" stroke="#0e1118" stroke-width="2.5"/>' +
+         '<path d="' + porcion(186, 86, 46, 2, 4) + '" fill="#f2b544" stroke="#0e1118" stroke-width="2.5"/>' +
+         texto(70, 160, '1/4', 15, '#b8ff3c') + texto(186, 160, '2/4', 15, '#b8ff3c')) },
+  8: { titulo: 'El botín', tema: 'Fracción de un número', color: '#d65cff', listo: true,
+       corto: 'Encontramos 12 caramelos. El Mordisco se llevó 2/3. ¿Cuántos eran?',
+       escena: 'En un escondite encontramos 12 caramelos del kiosco. El kiosquero dice que El Mordisco se llevó 2/3 de todo lo que había. Hay que repartir para saber cuántos caramelos se llevó.',
+       aprende: 'A calcular una fracción de una cantidad: 2/3 de 12 es repartir los 12 en 3 grupos iguales (4 en cada uno) y tomar 2 grupos: 8.',
+       pasos: ['Tocá “Repartir” y mirá cómo el botín se reparte en bolsas iguales (el número de abajo).', 'Tocá las bolsas que se llevó El Mordisco (el número de arriba).', 'Escribí cuántos caramelos son en total. Son 8 botines.'],
+       marcador: ['1/8', 'Botín'],
+       metas: ['Resolvé 5 botines', 'Resolvé los 8', 'Los 8 sin errores'],
+       estrellas: p => p.aciertos >= 8 && !p.errores ? 3 : p.aciertos >= 8 ? 2 : p.aciertos >= 5 ? 1 : 0,
+       pista: 'Guarda todo lo que roba en una guarida, cerca de la pizzería.',
+       dibujo: () => {
+         let g = '';
+         for (let grupo = 0; grupo < 3; grupo++) {
+           const x0 = 20 + grupo * 72;
+           g += '<rect x="' + x0 + '" y="34" width="64" height="100" rx="10" fill="none" stroke="' + (grupo < 2 ? '#d65cff' : FALTA) + '" stroke-width="2" ' + (grupo < 2 ? '' : 'stroke-dasharray="5 5"') + '/>';
+           for (let i = 0; i < 4; i++) g += '<circle cx="' + (x0 + 20 + (i % 2) * 24) + '" cy="' + (60 + Math.floor(i / 2) * 44) + '" r="10" fill="' + ['#ff4d8d', '#ffc53d', '#2ee6c5', '#8b6bff'][i] + '"/>';
+         }
+         return svg(240, 180, g + texto(120, 162, '2/3 de 12', 15, '#d65cff'));
+       } },
+  9: { titulo: 'La guarida', tema: 'Fracciones mayores que 1', color: '#ff4d6d', listo: true,
+       corto: 'En la guarida hay más de una pizza robada. Armá el inventario.',
+       escena: 'Encontramos la guarida: un contenedor atrás de la pizzería. Adentro hay porciones de muchas pizzas. En el inventario dice “5/4 de pizza”. ¿Cómo puede haber más de una pizza entera?',
+       aprende: 'Una fracción puede ser más grande que 1: 5/4 son 4/4 (una pizza entera) más 1/4. O sea, 1 pizza y un cuarto.',
+       pasos: ['Armá el inventario: pintá las porciones que dice la fracción (pueden ser más de una pizza) y decí cuántas enteras son.', 'Leé el inventario: mirá las pizzas de la guarida y decí qué fracción es.', 'Son 8 inventarios (12 respuestas).'],
+       marcador: ['1/8', 'Inventario'],
+       metas: ['6 aciertos', '10 aciertos', 'Los 12 sin errores'],
+       estrellas: p => p.aciertos >= 12 && !p.errores ? 3 : p.aciertos >= 10 ? 2 : p.aciertos >= 6 ? 1 : 0,
+       pista: 'En la guarida hay pelos grises y un olor a basura… y huellas de algo que camina en cuatro patas.',
+       dibujo: () => svg(240, 180, pizza(68, 84, 48, 4, 0, '#f2b544') + texto(128, 92, '+', 24) +
+         '<path d="' + porcion(186, 84, 48, 0, 4) + '" fill="#f2b544" stroke="#0e1118" stroke-width="2.5"/>' +
+         '<circle cx="186" cy="84" r="48" fill="none" stroke="' + FALTA + '" stroke-width="2" stroke-dasharray="5 5"/>' +
+         texto(120, 162, '5/4', 17, '#ff4d6d')) },
+};
+// el caso final se maneja como el "caso 10": se abre con 1 lupa en el caso 9
+const FINAL = CASOS[10] = { titulo: 'Cara a cara', tema: 'Todo mezclado', color: '#ffc53d', listo: true,
+  corto: 'Ya sabemos dónde se esconde. Es hora de enfrentar a El Mordisco… y descubrir quién es.',
+  escena: 'Todas las pistas llevan al contenedor de atrás de la pizzería. Esta noche lo vamos a esperar ahí. Pero El Mordisco no se va a rendir fácil: va a intentar confundirnos con todas las fracciones que conoce.',
+  aprende: 'Todo lo que aprendiste en los 9 casos, mezclado: leer, comparar, equivalentes, sumar y fracciones de una cantidad.',
+  pasos: ['El Mordisco te hace preguntas de todos los casos: respondé antes de que se vacíe la barra (con un toque o 1–4).', 'Cada acierto te acerca un paso: con 10, lo atrapás.', 'Si te equivocás o se acaba el tiempo, perdés una vida. Tenés 3.'],
+  marcador: [corazones(3), 'Vidas'],
+  metas: ['Atrapalo', 'Atrapalo perdiendo 1 vida o menos', 'Atrapalo sin perder vidas'],
+  estrellas: p => !p.gano ? 0 : !p.perdidas ? 3 : p.perdidas <= 1 ? 2 : 1,
+  pista: '¡Era un mapache! Tenía hambre y se llevaba sólo partes iguales para compartir con su familia.',
+  dibujo: () => mordisco(true) };
+const REVELADO = 'Un mapache hambriento';
+// el culpable, cuando por fin se lo ve: un mapache con antifaz y cola rayada
+function mapache() {
+  return svg(220, 190,
+    '<ellipse cx="110" cy="180" rx="70" ry="7" fill="rgba(0,0,0,.45)"/>' +
+    // cola rayada
+    '<path d="M150 150 Q205 150 200 95" stroke="#8d8f99" stroke-width="22" fill="none" stroke-linecap="round"/>' +
+    '<path d="M186 142 l14 -8 M196 124 l14 -2 M199 106 l14 2" stroke="#2a2c33" stroke-width="9" stroke-linecap="round"/>' +
+    // cuerpo y cabeza
+    '<ellipse cx="110" cy="140" rx="48" ry="38" fill="#8d8f99"/>' +
+    '<path d="M62 50 L74 18 L96 44 Z M158 50 L146 18 L124 44 Z" fill="#6f717b"/><path d="M70 44 L75 28 L86 42 Z M150 44 L145 28 L134 42 Z" fill="#2a2c33"/>' +
+    '<ellipse cx="110" cy="82" rx="54" ry="44" fill="#a3a5ae"/>' +
+    '<path d="M60 80 Q84 60 110 76 Q136 60 160 80 Q150 100 128 94 Q110 86 92 94 Q70 100 60 80 Z" fill="#1e2027"/>' +
+    '<path d="M72 64 Q86 56 100 64 M120 64 Q134 56 148 64" stroke="#f4f4f6" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+    '<circle cx="88" cy="82" r="7" fill="#fff"/><circle cx="132" cy="82" r="7" fill="#fff"/><circle cx="89" cy="83" r="3.5" fill="#111"/><circle cx="133" cy="83" r="3.5" fill="#111"/>' +
+    '<path d="M86 104 Q110 124 134 104 Q124 96 110 96 Q96 96 86 104 Z" fill="#f4f4f6"/><ellipse cx="110" cy="104" rx="8" ry="5.5" fill="#111"/>' +
+    '<path d="M104 114 Q110 119 116 114" stroke="#111" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+    // una porción de pizza en las manos
+    '<path d="M92 150 L128 150 L110 120 Z" fill="#f2b544" stroke="#d99a3a" stroke-width="3"/><circle cx="110" cy="140" r="4" fill="#c2334a"/>');
+}
+
+// ---------- sesión y progreso ----------
+const CLAVE = 'misterios.' + (sesion && sesion.apodo ? sesion.apodo.toLowerCase() : 'invitado');
+// progreso = { 1: { lupas: 0-3, mejor: puntos }, ... }
+let progreso = {};
+try { progreso = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) {}
+const prog = n => progreso[n] || { lupas: 0, mejor: 0 };
+// se abren de a uno: el caso n se abre con al menos 1 lupa en el n-1
+const abierto = n => n === 1 || prog(n - 1).lupas > 0;
+// lupas: las ganadas en dorado, las que faltan apagadas
+const LUPA = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="3"/>' +
+  '<path d="M15 15 L21 21" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/></svg>';
+const lupas = n => '<span class="lupas" aria-label="' + n + ' de 3 lupas">' +
+  '<b>' + LUPA.repeat(n) + '</b>' + LUPA.repeat(3 - n) + '</span>';
+const tachar = t => '<span class="tachado">' + esc(t) + '</span>';
+
+if (sesion && sesion.apodo) {
+  $('chip').classList.remove('invitado');
+  $('chipCara').textContent = sesion.apodo[0].toUpperCase();
+  $('chipNom').textContent = sesion.apodo;
+}
+if (location.search) $('volverInicio').href += location.search;   // mantiene ?api=
+
+// ---------- tablero de casos ----------
+function pintarInicio() {
+  let resueltos = 0, total = 0;
+  let html = '';
+  for (let n = 1; n <= 9; n++) {
+    const c = CASOS[n], p = prog(n), num = 'CASO ' + String(n).padStart(2, '0');
+    total += p.lupas;
+    if (p.lupas) resueltos++;
+    if (!abierto(n)) {
+      html += '<button class="caso bloqueado" aria-disabled="true" style="--c:' + c.color + '">' +
+        '<div class="dibujo">' + c.dibujo() + '<span class="num">' + num + '</span></div>' +
+        '<div class="cuerpo"><div class="tema">' + tachar(c.tema) + '</div><h3>' + tachar(c.titulo) + '</h3>' +
+        '<p>Resolvé el caso ' + (n - 1) + ' para abrir este expediente.</p>' +
+        '<div class="pie">' + lupas(0) + '<span class="estado">Clasificado</span></div></div></button>';
+      continue;
+    }
+    html += '<button class="caso" data-n="' + n + '" style="--c:' + c.color + '">' +
+      '<div class="dibujo">' + c.dibujo() + '<span class="num">' + num + '</span>' + (p.lupas ? '<span class="sello">RESUELTO</span>' : '') + '</div>' +
+      '<div class="cuerpo"><div class="tema">' + esc(c.tema) + '</div><h3>' + esc(c.titulo) + '</h3><p>' + esc(c.corto) + '</p>' +
+      '<div class="pie">' + lupas(p.lupas) + '<span class="estado">' +
+      (p.mejor ? 'Mejor <b>' + p.mejor + '</b>' : c.listo ? 'Sin resolver' : 'En investigación') + '</span></div></div></button>';
+  }
+  const fin = abierto(10), pf = prog(10);
+  html += '<button class="caso final' + (fin ? '' : ' bloqueado') + '" ' + (fin ? 'data-n="10" ' : 'aria-disabled="true" ') + 'style="--c:' + FINAL.color + '">' +
+    '<div class="dibujo">' + FINAL.dibujo() + '<span class="num">CASO FINAL</span>' + (pf.lupas ? '<span class="sello">ATRAPADO</span>' : '') + '</div>' +
+    '<div class="cuerpo"><div class="tema">' + esc(FINAL.tema) + '</div><h3>' + esc(FINAL.titulo) + '</h3>' +
+    '<p>' + (fin ? esc(FINAL.corto) : 'Resolvé los 9 casos para enfrentar a El Mordisco.') + '</p>' +
+    (fin ? '<div class="pie">' + lupas(pf.lupas) + '<span class="estado">' + (pf.mejor ? 'Mejor <b>' + pf.mejor + '</b>' : 'Sin resolver') + '</span></div>' : '') +
+    '</div></button>';
+  $('casos').innerHTML = html;
+
+  // pistas: se ven las de los casos resueltos
+  let pistas = '', vistas = 0;
+  for (let n = 1; n <= 9; n++) {
+    const ok = prog(n).lupas > 0;
+    if (ok) vistas++;
+    pistas += ok
+      ? '<div class="pista"><i>Pista ' + n + ' · ' + esc(CASOS[n].titulo) + '</i>' + esc(CASOS[n].pista) + '</div>'
+      : '<div class="pista oculta"><i>Pista ' + n + '</i>Resolvé el caso ' + n + ' para conseguirla.</div>';
+  }
+  $('pistas').innerHTML = pistas;
+  $('totResueltos').innerHTML = resueltos + '<small>/9</small>';
+  $('totLupas').innerHTML = total + '<small>/27</small>';
+  $('totPistas').innerHTML = vistas + '<small>/9</small>';
+  // el cartel: la identidad se revela al atraparlo
+  const atrapado = pf.lupas > 0;
+  $('fotoMordisco').innerHTML = mordisco(prog(6).lupas > 0);   // el antifaz aparece con la pista del caso 6
+  $('recompensa').textContent = atrapado ? '¡Atrapado! Era: ' + REVELADO.toLowerCase() : 'Identidad: desconocida';
+}
+$('casos').addEventListener('click', e => {
+  const b = e.target.closest('.caso[data-n]');
+  if (b) location.hash = 'caso-' + b.dataset.n;
+});
+
+// ---------- expediente ----------
+let casoActual = 1;
+function pintarDetalle(n) {
+  casoActual = n;
+  const c = CASOS[n], p = prog(n), fin = n === 10;
+  $('detalle').style.setProperty('--c', c.color);
+  $('dNum').textContent = fin ? 'CASO FINAL' : 'CASO ' + String(n).padStart(2, '0') + ' · ' + c.tema.toUpperCase();
+  $('dTitulo').textContent = c.titulo;
+  $('dSolapa').textContent = 'EXPEDIENTE ' + (fin ? 'FINAL' : String(n).padStart(2, '0'));
+  $('dSello').hidden = !p.lupas;
+  $('dSello').textContent = fin ? 'ATRAPADO' : 'RESUELTO';
+  $('dEscena').innerHTML = c.dibujo();
+  $('dEscenaTxt').textContent = c.escena;
+  $('dAprende').textContent = c.aprende;
+  $('dPasos').innerHTML = c.pasos.map((t, i) => '<li><span>' + (i + 1) + '</span>' + esc(t) + '</li>').join('');
+  $('dMetas').innerHTML = c.metas.map((t, i) =>
+    '<div class="meta' + (p.lupas > i ? ' ok' : '') + '">' + lupas(i + 1) + '<span>' + esc(t) + '</span></div>').join('');
+  $('dMejor').innerHTML = p.mejor ? 'Tu mejor: <b>' + p.mejor + '</b> pts' : '';
+  $('jugarBtn').disabled = !c.listo;
+  $('dAviso').hidden = c.listo;
+  $('dPista').innerHTML = p.lupas
+    ? '<b>Pista conseguida:</b> ' + esc(c.pista)
+    : '<b>Pista:</b> resolvé este caso para conseguir una pista sobre El Mordisco.';
+}
+$('dVolver').addEventListener('click', () => { location.hash = ''; });
+$('jugarBtn').addEventListener('click', () => { location.hash = 'jugar-' + casoActual; });
+
+// ---------- motor común (motor.js) ----------
+for (const n in CASOS) { CASOS[n].nombre = CASOS[n].titulo; CASOS[n].tipo = CASOS[n].tema; }
+const guardarProgreso = () => { try { localStorage.setItem(CLAVE, JSON.stringify(progreso)); } catch (e) {} };
+Motor.iniciar({
+  app: 'misterios', niveles: CASOS, ultimo: 10,
+  prog: n => ({ premio: prog(n).lupas, mejor: prog(n).mejor }),
+  guardar: (n, premio, mejor) => { progreso[n] = { lupas: premio, mejor }; guardarProgreso(); },
+  abierto,
+  nombre: n => n === 10 ? 'Caso final' : 'Caso ' + String(n).padStart(2, '0'),
+  rutaNivel: n => 'caso-' + n,
+  premio: { icono: LUPA, uno: 'lupa', varios: 'lupas', nuevo: '🔍 Nueva lupa' },
+  titulos: ['Caso sin resolver', '¡Caso resuelto!', '¡Gran trabajo, detective!', '¡Detective estrella!'],
+  textos: {
+    dominado: n => n === 10 ? '¡Atrapaste a El Mordisco!' : 'Conseguiste la pista del caso: mirala en el tablero.',
+    desbloqueado: n => n === 10 ? 'Caso final desbloqueado' : 'Caso ' + String(n).padStart(2, '0') + ' desbloqueado',
+  },
+});
+
+// ---------- piezas de dibujo para los minijuegos ----------
+// fracción escrita como en el cuaderno: arriba, raya, abajo
+const frac = (a, b, cls = '') => '<span class="frac ' + cls + '"><b>' + a + '</b><i></i><b>' + b + '</b></span>';
+// pizza interactiva: n porciones; `comidas` = Set de índices mordidos
+function pizzaSVG(n, comidas, { tocable = false, tam = 250 } = {}) {
+  const r = 100, c = 110;
+  let g = '<circle cx="' + c + '" cy="' + c + '" r="' + (r + 6) + '" fill="#14171f"/>';
+  if (n === 1) {
+    g += '<circle class="porcion' + (comidas.has(0) ? ' comida' : '') + '" data-i="0" cx="' + c + '" cy="' + c + '" r="' + r + '"/>';
+  } else {
+    for (let i = 0; i < n; i++)
+      g += '<path class="porcion' + (comidas.has(i) ? ' comida' : '') + '" data-i="' + i + '" d="' + porcion(c, c, r, i, n) + '"/>';
+  }
+  // pepperonis en las que quedan
+  for (let i = 0; i < n; i++) {
+    if (comidas.has(i)) continue;
+    const a = -Math.PI / 2 + (i + .5) * 2 * Math.PI / n, [x, y] = punto(c, c, n === 1 ? 0 : r * .58, a);
+    g += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="9" fill="#c2334a" pointer-events="none"/>';
+  }
+  // cortes
+  if (n > 1) for (let i = 0; i < n; i++) {
+    const [x, y] = punto(c, c, r + 4, -Math.PI / 2 + i * 2 * Math.PI / n);
+    g += '<line class="corte" x1="' + c + '" y1="' + c + '" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '"/>';
+  }
+  g += '<circle cx="' + c + '" cy="' + c + '" r="' + r + '" fill="none" stroke="#d99a3a" stroke-width="8" pointer-events="none"/>';
+  return '<svg class="pizza' + (tocable ? ' tocable' : '') + '" viewBox="0 0 220 220" width="' + tam + '" height="' + tam + '">' + g + '</svg>';
+}
+// barra de chocolate (o torta, si es una sola fila) de cols × filas; `comidas` = Set de índices mordidos
+function barraSVG(cols, filas, comidas, { torta = false, tam = 250 } = {}) {
+  const L = torta ? 200 / cols : Math.min(200 / cols, 140 / filas), W = cols * L, H = torta ? 90 : filas * L;
+  const x0 = (220 - W) / 2, y0 = (160 - H) / 2;
+  let g = '<rect x="' + (x0 - 6) + '" y="' + (y0 - 6) + '" width="' + (W + 12) + '" height="' + (H + 12) + '" rx="10" fill="#14171f"/>';
+  for (let f = 0; f < filas; f++) for (let c = 0; c < cols; c++) {
+    const i = f * cols + c, x = x0 + c * L, y = y0 + f * (H / filas), w = L - 4, h = H / filas - 4;
+    g += comidas.has(i)
+      ? '<rect class="pieza comida" x="' + (x + 2) + '" y="' + (y + 2) + '" width="' + w + '" height="' + h + '" rx="5"/>'
+      : '<rect class="pieza' + (torta ? ' torta' : '') + '" x="' + (x + 2) + '" y="' + (y + 2) + '" width="' + w + '" height="' + h + '" rx="5"/>' +
+        (torta ? '<rect x="' + (x + 2) + '" y="' + (y + 2) + '" width="' + w + '" height="' + (h * .22) + '" rx="4" fill="#fbe9f0"/>'
+               : '<rect x="' + (x + 7) + '" y="' + (y + 7) + '" width="' + (w - 10) + '" height="' + (h - 10) + '" rx="3" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2"/>');
+  }
+  return '<svg class="barra" viewBox="0 0 220 160" width="' + tam + '" height="' + (tam * 160 / 220).toFixed(0) + '">' + g + '</svg>';
+}
+// una cosa al azar a la que le faltan partes: { n (partes), k (mordidas), svg }
+function cosaMordida(dificil) {
+  const tipo = azar(0, 2);
+  if (tipo === 0) {
+    const n = mezclar(dificil ? [5, 6, 8, 10] : [2, 3, 4, 6])[0], k = azar(1, n - 1);
+    return { n, k, svg: pizzaSVG(n, new Set(mezclar([...Array(n).keys()]).slice(0, k)), { tam: 210 }), que: 'de la pizza' };
+  }
+  if (tipo === 1) {
+    const [c, f] = mezclar(dificil ? [[3, 3], [4, 3], [5, 2], [4, 2]] : [[2, 2], [3, 2], [4, 2], [2, 1]])[0], n = c * f, k = azar(1, n - 1);
+    return { n, k, svg: barraSVG(c, f, new Set(mezclar([...Array(n).keys()]).slice(0, k)), { tam: 250 }), que: 'del chocolate' };
+  }
+  const n = mezclar(dificil ? [5, 6, 7, 8] : [2, 3, 4, 5])[0], k = azar(1, n - 1);
+  return { n, k, svg: barraSVG(n, 1, new Set(mezclar([...Array(n).keys()]).slice(0, k)), { torta: true, tam: 250 }), que: 'de la torta' };
+}
+
+// opciones de fracción (usa .opcion del motor: se eligen con clic o con 1–4)
+const opcionesFrac = (lista) => '<div class="opciones">' + lista.map(([a, b], i) =>
+  '<button class="opcion" data-v="' + a + '/' + b + '"><kbd>' + (i + 1) + '</kbd>' + frac(a, b) + '</button>').join('') + '</div>';
+// 3 distractores distintos de la respuesta, a partir de una lista de candidatos [a, b].
+// Salvo que se pida (mayores = true), sólo fracciones entre 1/b y b/b: al principio, 0/2 o 5/4 confunden más de lo que enseñan.
+function distractores(bien, candidatos, mayores = false) {
+  const vistos = new Set([bien.join('/')]), out = [];
+  for (const [a, b] of mezclar(candidatos)) {
+    if (a < 1 || b < 2 || (!mayores && a >= b) || a > b * 3 || a * bien[1] === b * bien[0]) continue;   // nunca otra que valga lo mismo
+    const k = a + '/' + b;
+    if (!vistos.has(k) && out.length < 3) { vistos.add(k); out.push([a, b]); }
+  }
+  // si faltan, se completa con fracciones del mismo denominador o de los de al lado (con 1/2 no hay otras “de 2”)
+  for (const b of [bien[1], bien[1] + 1, bien[1] + 2, bien[1] - 1]) {
+    for (let a = 1; out.length < 3 && b >= 2 && a < (mayores ? b * 2 : b); a++) {
+      const k = a + '/' + b;
+      if (!vistos.has(k) && a * bien[1] !== b * bien[0]) { vistos.add(k); out.push([a, b]); }
+    }
+  }
+  return out;
+}
+function teclasOpciones() {
+  partida.onTecla = e => {
+    const i = '1234'.indexOf(e.key);
+    if (i >= 0) { const b = motor.escenario.querySelectorAll('.opcion')[i]; if (b && partida.onElegir) partida.onElegir(b); }
+  };
+}
+
+// ---------- los minijuegos ----------
+// Caso 1 · La pizzería: 8 rondas que alternan "reconstruir" (cortar y marcar) y "leer" (qué falta y qué queda).
+MINIJUEGOS[1] = m => {
+  const RONDAS = 8, NS = [4, 2, 3, 6, 4, 8, 5, 10];
+  let r = 0;
+  function ronda() {
+    r++; m.marcador(r + '/' + RONDAS, 'Ronda');
+    const n = NS[r - 1], k = azar(1, n - 1);
+    (r % 2 ? reconstruir : leer)(n, k);
+  }
+  const siguiente = ms => m.espera(() => (r === RONDAS ? m.fin() : ronda()), ms);
+
+  // A · Reconstruir: "desaparecieron k/n": cortar en n y morder k porciones
+  function reconstruir(n, k) {
+    let cortes = 1, comidas = new Set(), listo = false;
+    m.escenario.innerHTML =
+      '<p class="consigna">Reconstruí la escena</p>' +
+      '<div class="aviso-caso">Don Tito dice: <b>desaparecieron</b> ' + frac(k, n) + ' <b>de la pizza</b></div>' +
+      '<div class="mesa-pizza" id="mesaPizza"></div>' +
+      '<div class="controles"><button class="ghost cuchillo" id="menos" aria-label="Menos porciones">−</button>' +
+      '<span class="cuantas"><b id="cuantas">1</b> porción</span>' +
+      '<button class="ghost cuchillo" id="mas" aria-label="Más porciones">＋</button></div>' +
+      '<p class="ayuda" id="ayuda">1) Cortá la pizza en partes iguales. 2) Tocá las porciones que desaparecieron.</p>' +
+      '<button class="boton" id="listoBtn">¡Listo! <kbd>Enter</kbd></button>';
+    const pintar = () => {
+      $('mesaPizza').innerHTML = pizzaSVG(cortes, comidas, { tocable: !listo });
+      $('cuantas').textContent = cortes;
+      $('cuantas').nextSibling.textContent = cortes === 1 ? ' porción' : ' porciones';
+    };
+    const cambiar = d => {
+      if (listo) return;
+      cortes = Math.max(1, Math.min(12, cortes + d));
+      comidas = new Set();                  // si se vuelve a cortar, la escena arranca de nuevo
+      bip(300 + cortes * 30, .05, 'triangle', .04); pintar();
+    };
+    $('menos').addEventListener('click', () => cambiar(-1));
+    $('mas').addEventListener('click', () => cambiar(1));
+    $('mesaPizza').addEventListener('click', e => {
+      const p = e.target.closest('.porcion');
+      if (!p || listo) return;
+      const i = +p.dataset.i;
+      comidas.has(i) ? comidas.delete(i) : comidas.add(i);
+      bip(comidas.has(i) ? 420 : 300, .05); pintar();
+    });
+    const comprobar = () => {
+      if (listo || !partida.activa) return;
+      listo = true; $('listoBtn').disabled = true;
+      if (cortes === n && comidas.size === k) {
+        m.flota('+' + m.acierto(30), $('mesaPizza'));
+        $('ayuda').innerHTML = '¡Exacto! Cortada en <b>' + n + '</b> partes iguales, desaparecieron <b>' + k + '</b>: ' + frac(k, n) + '. Quedan ' + frac(n - k, n) + '.';
+        $('ayuda').className = 'ayuda bien'; pintar();
+        return siguiente(2200);
+      }
+      m.error();
+      $('ayuda').innerHTML = cortes !== n
+        ? 'El número de abajo dice en cuántas partes iguales estaba cortada: <b>' + n + '</b>. Mirá cómo era.'
+        : 'El número de arriba dice cuántas porciones desaparecieron: <b>' + k + '</b>. Mirá cómo era.';
+      $('ayuda').className = 'ayuda mal';
+      // muestra la escena correcta
+      m.espera(() => { cortes = n; comidas = new Set([...Array(k).keys()].map(i => n - 1 - i)); pintar(); }, 700);
+      siguiente(3400);
+    };
+    $('listoBtn').addEventListener('click', comprobar);
+    partida.onTecla = e => {
+      if (e.key === 'Enter') { e.preventDefault(); comprobar(); }
+      if (e.key === '+' || e.key === 'ArrowRight' || e.key === 'ArrowUp') cambiar(1);
+      if (e.key === '-' || e.key === 'ArrowLeft' || e.key === 'ArrowDown') cambiar(-1);
+    };
+    pintar();
+  }
+
+  // B · Leer: pizza de n porciones con k mordidas. ¿Qué desapareció? ¿Y qué queda?
+  function leer(n, k) {
+    const comidas = new Set(mezclar([...Array(n).keys()]).slice(0, k));
+    m.escenario.innerHTML =
+      '<p class="consigna">Leé la escena</p>' +
+      '<div class="mesa-pizza">' + pizzaSVG(n, comidas) + '</div>' +
+      '<p class="pregunta-caso" id="pregunta"></p><div id="opcs"></div><p class="ayuda" id="ayuda"></p>';
+    const preguntas = [
+      { txt: '¿Qué fracción de la pizza <b>desapareció</b>?', bien: [k, n], otros: [[n - k, n], [k, n - k], [k + 1, n], [k, n + 1], [k - 1, n]] },
+      { txt: '¿Y qué fracción de la pizza <b>queda</b>?', bien: [n - k, n], otros: [[k, n], [n - k, k], [n - k + 1, n], [n - k, n + 2], [n - k - 1, n]] },
+    ];
+    let q = 0;
+    function preguntar() {
+      const P = preguntas[q];
+      $('pregunta').innerHTML = P.txt;
+      $('opcs').innerHTML = opcionesFrac(mezclar([P.bien, ...distractores(P.bien, P.otros)]));
+      $('ayuda').textContent = ''; $('ayuda').className = 'ayuda';
+      let respondida = false;
+      partida.onElegir = b => {
+        if (respondida || !partida.activa) return;
+        respondida = true;
+        const ok = b.dataset.v === P.bien.join('/');
+        if (ok) { b.classList.add('bien'); m.flota('+' + m.acierto(20), b); }
+        else {
+          b.classList.add('mal'); m.error();
+          m.escenario.querySelector('.opcion[data-v="' + P.bien.join('/') + '"]').classList.add('era');
+          $('ayuda').innerHTML = q === 0
+            ? 'La pizza tenía <b>' + n + '</b> porciones y desaparecieron <b>' + k + '</b>: ' + frac(k, n) + '.'
+            : 'De <b>' + n + '</b> porciones quedan <b>' + (n - k) + '</b>: ' + frac(n - k, n) + '. Lo que falta más lo que queda es la pizza entera.';
+          $('ayuda').className = 'ayuda mal';
+        }
+        if (++q < 2) m.espera(preguntar, ok ? 700 : 2600);
+        else siguiente(ok ? 900 : 2800);
+      };
+    }
+    teclasOpciones();
+    preguntar();
+  }
+  ronda();
+};
+
+// Caso 2 · Las cámaras: 60 segundos de fotos; en cada una, qué fracción desapareció (o cuál queda).
+MINIJUEGOS[2] = m => {
+  m.temporizador(60000);
+  let fotos = 0;
+  function foto() {
+    fotos++;
+    const { n, k, svg, que } = cosaMordida(fotos > 6);
+    const queda = fotos > 3 && Math.random() < .4;          // las primeras siempre preguntan qué falta
+    const bien = queda ? [n - k, n] : [k, n];
+    const otros = queda ? [[k, n], [n - k, k], [n - k + 1, n], [n - k - 1, n], [n - k, n + 1]]
+                        : [[n - k, n], [k, n - k], [k + 1, n], [k - 1, n], [k, n + 1]];
+    m.escenario.innerHTML =
+      '<div class="camara"><span class="rec">● REC</span><span class="hora">CÁM ' + String(azar(1, 12)).padStart(2, '0') + ' · 02:' +
+      String(10 + fotos * 3 % 50).padStart(2, '0') + ' AM</span>' + svg + '</div>' +
+      '<p class="pregunta-caso">¿Qué fracción ' + que + ' <b>' + (queda ? 'queda' : 'desapareció') + '</b>?</p>' +
+      opcionesFrac(mezclar([bien, ...distractores(bien, otros)])) + '<p class="ayuda" id="ayuda"></p>';
+    let respondida = false;
+    partida.onElegir = b => {
+      if (respondida || !partida.activa) return;
+      respondida = true;
+      if (b.dataset.v === bien.join('/')) { b.classList.add('bien'); m.flota('+' + m.acierto(), b); m.espera(foto, 300); }
+      else {
+        b.classList.add('mal'); m.error();
+        m.escenario.querySelector('.opcion[data-v="' + bien.join('/') + '"]').classList.add('era');
+        $('ayuda').innerHTML = 'Son <b>' + n + '</b> partes y ' + (queda ? 'quedan <b>' + (n - k) : 'faltan <b>' + k) + '</b>: ' + frac(...bien) + '.';
+        $('ayuda').className = 'ayuda mal';
+        m.espera(foto, 1500);
+      }
+    };
+  }
+  teclasOpciones();
+  foto();
+};
+
+// Caso 3 · Los mentirosos: ¿las partes son iguales (justo) o no (trucho)?
+// Cada figura es una lista de partes (paths); una está "comida" (punteada). Hay trampas en las dos direcciones.
+function figuraCortada() {
+  const C = 'M', fmt = v => v.toFixed(1);
+  const rect = (x, y, w, h) => C + fmt(x) + ' ' + fmt(y) + ' h' + fmt(w) + ' v' + fmt(h) + ' h' + fmt(-w) + ' Z';
+  const pesos = (n, iguales) => {
+    if (iguales) return Array(n).fill(1);
+    let w; do w = Array.from({ length: n }, () => .5 + Math.random() * 1.5); while (Math.max(...w) / Math.min(...w) < 1.7);
+    return w;
+  };
+  const tipos = [
+    // tiras de una barra
+    () => {
+      const n = azar(2, 5), justo = Math.random() < .5, w = pesos(n, justo), T = w.reduce((a, b) => a + b);
+      let x = 20; const partes = w.map(v => { const ancho = 180 * v / T, p = rect(x, 30, ancho, 100); x += ancho; return p; });
+      return { partes, justo, explica: justo ? 'Las ' + n + ' tiras tienen el mismo ancho.' : 'Las tiras tienen anchos distintos: no son partes iguales.' };
+    },
+    // porciones de una pizza
+    () => {
+      const n = azar(3, 6), justo = Math.random() < .5, w = pesos(n, justo), T = w.reduce((a, b) => a + b);
+      let a = -Math.PI / 2; const partes = w.map(v => {
+        const a1 = a + 2 * Math.PI * v / T, [x0, y0] = punto(110, 80, 70, a), [x1, y1] = punto(110, 80, 70, a1);
+        const p = 'M110 80 L' + fmt(x0) + ' ' + fmt(y0) + ' A70 70 0 ' + (a1 - a > Math.PI ? 1 : 0) + ' 1 ' + fmt(x1) + ' ' + fmt(y1) + ' Z';
+        a = a1; return p;
+      });
+      return { partes, justo, explica: justo ? 'Las ' + n + ' porciones tienen el mismo ángulo.' : 'Hay porciones más grandes que otras.' };
+    },
+    // trampa: círculo cortado con dos rectas paralelas (parecen tercios, pero no)
+    () => {
+      const h = x => Math.sqrt(70 * 70 - (x - 110) * (x - 110));
+      const a = 110 - 70 / 3, b = 110 + 70 / 3;
+      const partes = [
+        'M' + fmt(a) + ' ' + fmt(80 - h(a)) + ' A70 70 0 0 0 ' + fmt(a) + ' ' + fmt(80 + h(a)) + ' Z',
+        'M' + fmt(a) + ' ' + fmt(80 - h(a)) + ' L' + fmt(b) + ' ' + fmt(80 - h(b)) + ' L' + fmt(b) + ' ' + fmt(80 + h(b)) + ' L' + fmt(a) + ' ' + fmt(80 + h(a)) + ' Z',
+        'M' + fmt(b) + ' ' + fmt(80 - h(b)) + ' A70 70 0 0 1 ' + fmt(b) + ' ' + fmt(80 + h(b)) + ' Z',
+      ];
+      return { partes, justo: false, explica: '¡Trampa! La parte del medio es mucho más grande que las de los costados.' };
+    },
+    // trampa: cuadrado cortado en diagonal (parecen raras, pero son iguales)
+    () => {
+      const dos = Math.random() < .5;
+      const partes = dos
+        ? ['M50 20 L170 20 L50 140 Z', 'M170 20 L170 140 L50 140 Z']
+        : ['M50 20 L170 20 L110 80 Z', 'M170 20 L170 140 L110 80 Z', 'M170 140 L50 140 L110 80 Z', 'M50 140 L50 20 L110 80 Z'];
+      return { partes, justo: true, explica: '¡Aunque sean triángulos, las ' + partes.length + ' partes son iguales!' };
+    },
+    // cuadrado en 4: con los cortes al medio o corridos
+    () => {
+      const justo = Math.random() < .5, cx = justo ? 110 : 110 + mezclar([-30, 30])[0], cy = justo ? 80 : 80 + mezclar([-24, 24])[0];
+      const partes = [rect(50, 20, cx - 50, cy - 20), rect(cx, 20, 170 - cx, cy - 20), rect(50, cy, cx - 50, 140 - cy), rect(cx, cy, 170 - cx, 140 - cy)];
+      return { partes, justo, explica: justo ? 'Los cortes pasan justo por el medio: 4 partes iguales.' : 'Los cortes no pasan por el medio: las partes son distintas.' };
+    },
+    // trampa: rectángulo cortado desde una esquina hasta el medio del otro lado
+    () => ({
+      partes: ['M30 30 L190 30 L110 130 L30 130 Z', 'M190 30 L190 130 L110 130 Z'], justo: false,
+      explica: 'Un pedazo es mucho más chico que el otro: no son mitades.',
+    }),
+  ];
+  // las tiras, pizzas y cuadrados salen más seguido; las trampas (2 y 5), de vez en cuando
+  const f = tipos[mezclar([0, 0, 1, 1, 3, 4, 4, 2, 5])[0]]();
+  const comida = azar(0, f.partes.length - 1);
+  f.svg = '<svg class="figura" viewBox="0 0 220 160" width="260" height="189">' +
+    f.partes.map((d, i) => '<path d="' + d + '" class="parte' + (i === comida ? ' comida' : '') + '"/>').join('') + '</svg>';
+  f.n = f.partes.length;
+  return f;
+}
+MINIJUEGOS[3] = m => {
+  m.temporizador(45000);
+  let actual, t1, limite, bloqueado, vistos = 0;
+  const NOMBRES = ['Sospechoso', 'Sospechosa'];
+  function sospechoso() {
+    vistos++;
+    actual = figuraCortada();
+    limite = Math.max(1800, 4200 - partida.aciertos * 110);
+    t1 = performance.now(); bloqueado = false;
+    const k = actual.n;
+    m.escenario.innerHTML =
+      '<p class="aviso-caso">' + NOMBRES[vistos % 2] + ' #' + vistos + ': “yo sólo me comí ' + frac(1, k) + '”</p>' +
+      actual.svg + '<div class="mini-barra"><i id="vfBarra"></i></div>' +
+      '<div class="vf-botones"><button class="opcion vf-no" data-r="0"><kbd>←</kbd>✗ Trucho</button>' +
+      '<button class="opcion vf-si" data-r="1"><kbd>→</kbd>✓ Justo</button></div><p class="ayuda" id="ayuda"></p>';
+  }
+  function responder(dijo, b) {
+    if (bloqueado || !partida.activa) return;
+    bloqueado = true;
+    if (dijo === actual.justo) {
+      if (b) { b.classList.add('bien'); m.flota('+' + m.acierto(), b); } else m.acierto();
+      m.espera(sospechoso, 300);
+    } else {
+      if (b) b.classList.add('mal');
+      m.escenario.querySelector(actual.justo ? '.vf-si' : '.vf-no').classList.add('era');
+      m.error();
+      $('ayuda').textContent = (b ? '' : '¡Se acabó el tiempo! ') + actual.explica;
+      $('ayuda').className = 'ayuda mal';
+      m.espera(sospechoso, 2000);
+    }
+  }
+  partida.onElegir = b => responder(b.dataset.r === '1', b);
+  partida.onTecla = e => {
+    const t = e.key.toLowerCase();
+    if (e.key === 'ArrowLeft' || t === 't') responder(false, m.escenario.querySelector('.vf-no'));
+    if (e.key === 'ArrowRight' || t === 'j') responder(true, m.escenario.querySelector('.vf-si'));
+  };
+  const tick = ahora => {
+    const f = 1 - (ahora - t1) / limite, barra = $('vfBarra');
+    if (barra) barra.style.transform = 'scaleX(' + Math.max(0, f) + ')';
+    if (f <= 0 && !bloqueado) responder(!actual.justo, null);   // se acabó el tiempo: cuenta como error
+    m.cuadro(tick);
+  };
+  sospechoso(); m.cuadro(tick);
+};
+
+// Caso 4 · Las huellas: llevar la lupa a k/n de la calle (0 = plaza, 1 = estación).
+// Perfecta: a menos de 3 % de la calle. Cerca: a menos de 8 %. Las primeras 4 rondas muestran las divisiones.
+MINIJUEGOS[4] = m => {
+  const RONDAS = 10, X0 = 40, X1 = 560;
+  const CON_MARCAS = [[1, 2], [1, 4], [3, 4], [2, 3]];
+  const SIN_MARCAS = mezclar([[1, 3], [2, 5], [5, 6], [3, 8], [7, 10], [1, 5], [4, 5], [5, 8], [1, 6], [3, 5]]).slice(0, RONDAS - CON_MARCAS.length);
+  const lista = [...CON_MARCAS, ...SIN_MARCAS];
+  partida.perfectas = 0;
+  let r = 0;
+  const xDe = v => X0 + (X1 - X0) * v;
+  const marcas = (n, cls) => Array.from({ length: n - 1 }, (_, i) =>
+    '<line class="' + cls + '" x1="' + xDe((i + 1) / n) + '" y1="60" x2="' + xDe((i + 1) / n) + '" y2="100"/>').join('');
+  function ronda() {
+    r++; m.marcador(r + '/' + RONDAS, 'Testigo');
+    const [k, n] = lista[r - 1], objetivo = k / n, ayuda = r <= CON_MARCAS.length;
+    let v = 0, listo = false;
+    m.escenario.innerHTML =
+      '<p class="aviso-caso">Testigo #' + r + ': “lo vi a ' + frac(k, n) + ' del camino”</p>' +
+      '<svg class="calle" id="calle" viewBox="0 0 600 170" role="img" aria-label="Calle de la plaza (0) a la estación (1)">' +
+        '<rect x="' + (X0 - 14) + '" y="66" width="' + (X1 - X0 + 28) + '" height="28" rx="14" class="asfalto"/>' +
+        '<line x1="' + X0 + '" y1="80" x2="' + X1 + '" y2="80" class="linea"/>' +
+        (ayuda ? marcas(n, 'marca') : '') +
+        '<line x1="' + X0 + '" y1="54" x2="' + X0 + '" y2="106" class="punta"/><line x1="' + X1 + '" y1="54" x2="' + X1 + '" y2="106" class="punta"/>' +
+        '<text x="' + X0 + '" y="134" class="rotulo">0</text><text x="' + X0 + '" y="154" class="lugar">PLAZA</text>' +
+        '<text x="' + X1 + '" y="134" class="rotulo">1</text><text x="' + X1 + '" y="154" class="lugar">ESTACIÓN</text>' +
+        '<g id="solucion"></g>' +
+        '<g id="lupa" class="lupa-calle"><line x1="0" y1="80" x2="0" y2="40" class="palo"/><circle cx="0" cy="26" r="16" class="vidrio"/>' +
+        '<circle cx="0" cy="80" r="7" class="pie"/></g>' +
+      '</svg>' +
+      '<button class="boton" id="listoBtn">¡Lo vi acá! <kbd>Enter</kbd></button><p class="ayuda" id="ayuda">' +
+      (ayuda ? 'La calle está dividida en <b>' + n + '</b> partes iguales. Contá <b>' + k + '</b> desde la plaza.' : 'Ahora sin marcas: calculá a ojo.') + '</p>';
+    const svg = $('calle'), lupa = $('lupa');
+    const mover = nv => { if (listo) return; v = Math.max(0, Math.min(1, nv)); lupa.setAttribute('transform', 'translate(' + xDe(v) + ' 0)'); };
+    const desdePuntero = e => {
+      const b = svg.getBoundingClientRect(), x = (e.clientX - b.left) * 600 / b.width;
+      mover((x - X0) / (X1 - X0));
+    };
+    let arrastrando = false;
+    svg.addEventListener('pointerdown', e => { arrastrando = true; svg.setPointerCapture(e.pointerId); desdePuntero(e); });
+    svg.addEventListener('pointermove', e => { if (arrastrando) desdePuntero(e); });
+    svg.addEventListener('pointerup', () => { arrastrando = false; });
+    function confirmar() {
+      if (listo || !partida.activa) return;
+      listo = true; $('listoBtn').disabled = true;
+      const dist = Math.abs(v - objetivo);
+      const sol = '<line x1="' + xDe(objetivo) + '" y1="80" x2="' + xDe(v) + '" y2="80" class="distancia"/>' +
+        (ayuda ? '' : marcas(n, 'marca nueva')) +
+        '<g transform="translate(' + xDe(objetivo) + ' 0)"><ellipse cx="-6" cy="112" rx="5" ry="8" class="huella"/><ellipse cx="7" cy="118" rx="5" ry="8" class="huella"/>' +
+        '<text y="48" class="rotulo sol">' + k + '/' + n + '</text></g>';
+      $('solucion').innerHTML = sol;
+      if (dist <= .03) {
+        partida.perfectas++;
+        m.flota('¡Perfecto! +' + m.acierto(30), lupa);
+        $('ayuda').innerHTML = '¡Justo ahí! ' + frac(k, n) + ' del camino.'; $('ayuda').className = 'ayuda bien';
+      } else if (dist <= .08) {
+        m.flota('Cerca +' + m.acierto(15), lupa);
+        $('ayuda').innerHTML = 'Muy cerca. ' + frac(k, n) + ' es donde están las huellas.'; $('ayuda').className = 'ayuda bien';
+      } else {
+        m.error();
+        $('ayuda').innerHTML = 'Se escapó. Para ' + frac(k, n) + ' dividí la calle en <b>' + n + '</b> partes iguales y contá <b>' + k + '</b> desde la plaza.';
+        $('ayuda').className = 'ayuda mal';
+      }
+      m.espera(() => (r === RONDAS ? m.fin() : ronda()), dist <= .08 ? 1600 : 3000);
+    }
+    $('listoBtn').addEventListener('click', confirmar);
+    partida.onTecla = e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); mover(v + (e.shiftKey ? .05 : .01)); }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); mover(v - (e.shiftKey ? .05 : .01)); }
+      if (e.key === 'Enter') { e.preventDefault(); confirmar(); }
+    };
+    mover(0);
+  }
+  ronda();
+};
+
+// Caso 5 · Las víctimas: a quién le robaron más chocolate. Los chocolates tienen el mismo tamaño,
+// así que lo robado (punteado, desde la derecha) se puede comparar de un vistazo.
+function chocoSVG(a, b) {
+  const W = 300, x0 = 10, L = W / b;
+  let g = '';
+  for (let i = 0; i < b; i++) {
+    const robado = i >= b - a;
+    g += '<rect class="pieza' + (robado ? ' comida' : '') + '" x="' + (x0 + i * L + 2).toFixed(1) + '" y="6" width="' + (L - 4).toFixed(1) + '" height="36" rx="5"/>';
+  }
+  return '<svg class="choco" viewBox="0 0 320 48" preserveAspectRatio="none">' + g + '</svg>';
+}
+MINIJUEGOS[5] = m => {
+  const RONDAS = 12, CON_DIBUJO = 6;
+  const PERSONAS = mezclar(['Rosa', 'Beto', 'Lucía', 'Tomás', 'Don Tito', 'Carla', 'Nico', 'Sofi', 'la seño Marta', 'Juancho']);
+  const d = (a, b) => a / b;
+  // qué tipo de comparación toca en cada ronda
+  function par(r) {
+    let A, B;
+    do {
+      if (r <= 3) { const b = azar(3, 8); A = [azar(1, b - 1), b]; B = [azar(1, b - 1), b]; }                 // mismo denominador
+      else if (r <= 6) { const a = azar(1, 3); A = [a, azar(a + 1, 8)]; B = [a, azar(a + 1, 8)]; }              // mismo numerador
+      else if (r === 10 || r === 12) {                                                                          // equivalentes: iguales
+        const [x, y] = mezclar([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5]])[0], k = azar(2, 3);
+        A = [x, y]; B = [x * k, y * k];
+      } else { const b1 = azar(2, 8), b2 = azar(2, 8); A = [azar(1, b1 - 1), b1]; B = [azar(1, b2 - 1), b2]; } // distintos
+    } while (A.join() === B.join() || (d(...A) !== d(...B) && Math.abs(d(...A) - d(...B)) < .08));
+    return mezclar([A, B]);
+  }
+  let r = 0;
+  function ronda() {
+    r++; m.marcador(r + '/' + RONDAS, 'Ronda');
+    const [A, B] = par(r), conDibujo = r <= CON_DIBUJO;
+    const [pa, pb] = [PERSONAS[(2 * r) % PERSONAS.length], PERSONAS[(2 * r + 1) % PERSONAS.length]];
+    const fila = (quien, [a, b], id) => '<div class="victima"><span class="quien">' + quien + '</span>' +
+      '<span class="cuanto">le robaron ' + frac(a, b) + '</span>' +
+      '<div class="choco-caja" id="' + id + '">' + (conDibujo ? chocoSVG(a, b) : '<span class="sin-foto">sin foto</span>') + '</div></div>';
+    m.escenario.innerHTML =
+      '<p class="pregunta-caso">¿A quién le robaron <b>más</b> chocolate?</p>' +
+      '<div class="victimas">' + fila(pa, A, 'chA') + fila(pb, B, 'chB') + '</div>' +
+      '<div class="tres">' +
+      '<button class="opcion" data-r="A"><kbd>1</kbd>' + pa + '</button>' +
+      '<button class="opcion" data-r="=" ><kbd>2</kbd>Igual</button>' +
+      '<button class="opcion" data-r="B"><kbd>3</kbd>' + pb + '</button></div>' +
+      '<p class="ayuda" id="ayuda">' + (r === 1 ? 'Los dos chocolates son del mismo tamaño.' : r === CON_DIBUJO + 1 ? 'Ahora no hay fotos: pensalo con los números.' : '') + '</p>';
+    const bien = d(...A) > d(...B) ? 'A' : d(...A) < d(...B) ? 'B' : '=';
+    let respondida = false;
+    partida.onElegir = b => {
+      if (respondida || !partida.activa) return;
+      respondida = true;
+      if (!conDibujo) { $('chA').innerHTML = chocoSVG(...A); $('chB').innerHTML = chocoSVG(...B); }   // se comprueba con el dibujo
+      const ok = b.dataset.r === bien;
+      const [ga, gb] = bien === 'A' ? [A, B] : [B, A];
+      const por = A[1] === B[1] ? 'Con el mismo número abajo, gana el que tiene más partes arriba.'
+        : A[0] === B[0] ? 'Con el mismo número arriba, gana el de abajo más chico: las partes son más grandes.'
+        : 'Mirá los chocolates: la parte punteada más larga es la que perdió más.';
+      if (ok) { b.classList.add('bien'); m.flota('+' + m.acierto(20), b); }
+      else { b.classList.add('mal'); m.error(); m.escenario.querySelector('.opcion[data-r="' + bien + '"]').classList.add('era'); }
+      $('ayuda').innerHTML = bien === '='
+        ? (ok ? '¡Bien! ' : '') + frac(...A) + ' y ' + frac(...B) + ' son <b>la misma cantidad</b>: el mismo pedazo, cortado en distinta cantidad de partes.'
+        : (ok ? '¡Bien! ' : '') + frac(...ga) + ' es más que ' + frac(...gb) + '. ' + por;
+      $('ayuda').className = 'ayuda ' + (ok ? 'bien' : 'mal');
+      m.espera(() => (r === RONDAS ? m.fin() : ronda()), ok ? 1900 : 3200);
+    };
+  }
+  partida.onTecla = e => {
+    const i = '123'.indexOf(e.key);
+    if (i >= 0 && partida.onElegir) partida.onElegir(m.escenario.querySelectorAll('.tres .opcion')[i]);
+  };
+  ronda();
+};
+
+// Caso 6 · Los disfraces: fracciones equivalentes. Una barra con a/b pintado (lo que se llevó) y otra
+// cortada en d = b·k partes: hay que pintar las que tapan el mismo pedazo (a·k). Y rondas de elegir el disfraz.
+function franjaSVG(a, b, { tocable = false, id = '' } = {}) {
+  const W = 300, L = W / b;
+  let g = '';
+  for (let i = 0; i < b; i++)
+    g += '<rect class="tramo' + (i < a ? ' lleno' : '') + '" data-i="' + i + '" x="' + (10 + i * L + 1.5).toFixed(1) + '" y="4" width="' + (L - 3).toFixed(1) + '" height="40" rx="5"/>';
+  return '<svg class="franja' + (tocable ? ' tocable' : '') + '"' + (id ? ' id="' + id + '"' : '') + ' viewBox="0 0 320 48" preserveAspectRatio="none">' + g + '</svg>';
+}
+MINIJUEGOS[6] = m => {
+  const RONDAS = 10;
+  const BASES = mezclar([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5], [1, 2], [3, 5], [1, 3], [2, 3]]);
+  let r = 0;
+  const siguiente = (ok) => m.espera(() => (r === RONDAS ? m.fin() : ronda()), ok ? 2000 : 3300);
+  function ronda() {
+    r++; m.marcador(r + '/' + RONDAS, 'Disfraz');
+    const [a, b] = BASES[r - 1], k = azar(2, b <= 3 ? 4 : 2);
+    (r % 2 ? pintar : elegir)(a, b, k);
+  }
+  // A · pintar en la barra de abajo (cortada en b·k) el mismo pedazo que a/b
+  function pintar(a, b, k) {
+    const d = b * k;
+    let x = 0, listo = false;
+    m.escenario.innerHTML =
+      '<p class="consigna">Descubrí el disfraz</p>' +
+      '<div class="disfraz"><span class="rotulo-f">El Mordisco se llevó ' + frac(a, b) + '</span>' + franjaSVG(a, b) +
+      '<span class="rotulo-f">…y lo anotó como <span id="anota">' + frac('?', d) + '</span></span><div id="abajo"></div></div>' +
+      '<p class="ayuda" id="ayuda">Tocá las partes de abajo hasta tapar <b>el mismo pedazo</b> que arriba.</p>' +
+      '<button class="boton" id="listoBtn">¡Desenmascarar! <kbd>Enter</kbd></button>';
+    const dibujar = () => {
+      $('abajo').innerHTML = franjaSVG(x, d, { tocable: !listo });
+      $('anota').innerHTML = frac(x || '?', d);
+    };
+    $('abajo').addEventListener('click', e => {
+      const t = e.target.closest('.tramo');
+      if (!t || listo) return;
+      const i = +t.dataset.i;
+      x = i < x ? i : i + 1;               // se pinta de izquierda a derecha hasta la parte tocada
+      bip(360 + x * 20, .04); dibujar();
+    });
+    const confirmar = () => {
+      if (listo || !partida.activa) return;
+      listo = true; $('listoBtn').disabled = true;
+      const ok = x === a * k;
+      if (ok) m.flota('+' + m.acierto(25), $('abajo'));
+      else { m.error(); x = a * k; }
+      dibujar();
+      $('ayuda').innerHTML = (ok ? '¡Desenmascarado! ' : 'Eran <b>' + a * k + '</b> partes. ') + frac(a, b) + ' = ' + frac(a * k, d) +
+        ': cada parte de arriba se cortó en <b>' + k + '</b>, entonces hay ' + k + ' veces más partes arriba y abajo.';
+      $('ayuda').className = 'ayuda ' + (ok ? 'bien' : 'mal');
+      siguiente(ok);
+    };
+    $('listoBtn').addEventListener('click', confirmar);
+    partida.onTecla = e => {
+      if (e.key === 'Enter') { e.preventDefault(); confirmar(); }
+      if (e.key === 'ArrowRight' && !listo) { x = Math.min(d, x + 1); dibujar(); }
+      if (e.key === 'ArrowLeft' && !listo) { x = Math.max(0, x - 1); dibujar(); }
+    };
+    dibujar();
+  }
+  // B · elegir cuál es la misma fracción (sin dibujo; el dibujo aparece al responder)
+  function elegir(a, b, k) {
+    const bien = [a * k, b * k];
+    const otros = [[a + k, b + k], [a * k, b], [a, b * k], [a * k + 1, b * k], [a * k - 1, b * k], [a + 1, b + 1]];
+    m.escenario.innerHTML =
+      '<p class="consigna">¿Cuál es el disfraz?</p>' +
+      '<p class="aviso-caso">El Mordisco se llevó ' + frac(a, b) + '. ¿Cuál de estas es <b>la misma</b> cantidad?</p>' +
+      opcionesFrac(mezclar([bien, ...distractores(bien, otros)])) +
+      '<div class="disfraz" id="prueba"></div><p class="ayuda" id="ayuda"></p>';
+    let respondida = false;
+    partida.onElegir = btn => {
+      if (respondida || !partida.activa) return;
+      respondida = true;
+      const [x, y] = btn.dataset.v.split('/').map(Number), ok = x === bien[0] && y === bien[1];
+      if (ok) { btn.classList.add('bien'); m.flota('+' + m.acierto(25), btn); }
+      else { btn.classList.add('mal'); m.error(); m.escenario.querySelector('.opcion[data-v="' + bien.join('/') + '"]').classList.add('era'); }
+      // la prueba: las dos barras, una arriba de la otra
+      $('prueba').innerHTML = franjaSVG(a, b) + franjaSVG(bien[0], bien[1]) + (ok ? '' : franjaSVG(Math.min(x, y), y));
+      $('ayuda').innerHTML = (ok ? '¡Bien! ' : (x - a === y - b ? 'Sumar lo mismo arriba y abajo cambia el pedazo. ' : '')) +
+        frac(a, b) + ' = ' + frac(...bien) + ': se multiplicó arriba y abajo por <b>' + k + '</b>.';
+      $('ayuda').className = 'ayuda ' + (ok ? 'bien' : 'mal');
+      siguiente(ok);
+    };
+    teclasOpciones();
+  }
+  ronda();
+};
+
+// Caso 7 · La devolución: sumar fracciones con el mismo denominador. A la pizza le faltan `falta` porciones de n;
+// hay porciones sueltas (de 1, 2 o 3 porciones) y hay que devolver justo lo que falta.
+MINIJUEGOS[7] = m => {
+  const RONDAS = 8, NS = [4, 3, 6, 4, 8, 5, 6, 10];
+  const VECINOS = mezclar(['Rosa', 'Beto', 'Don Tito', 'Lucía', 'Carla', 'Nico', 'Sofi', 'Tomás']);
+  let r = 0;
+  function ronda() {
+    r++; m.marcador(r + '/' + RONDAS, 'Vecino');
+    const n = NS[r - 1], falta = azar(2, Math.min(n - 1, 5));
+    // porciones sueltas: una forma de sumar lo que falta (en 2 o 3 pedazos) + 1 o 2 pedazos de más, para elegir bien
+    const partes = [];
+    let resto = falta;
+    while (resto > 0) { const p = Math.min(resto, azar(1, Math.max(1, Math.min(3, resto - (partes.length ? 0 : 1)) ))); partes.push(p); resto -= p; }
+    // (ninguna suelta vale justo lo que falta: así siempre hay que sumar)
+    const extra = Array.from({ length: azar(1, 2) }, () => { let v; do v = azar(1, Math.min(3, n - 1)); while (v === falta); return v; });
+    const sueltas = mezclar([...partes, ...extra]).map((v, i) => ({ v, id: i, usada: false }));
+    let puestas = [], listo = false;
+    const tiene = new Set([...Array(n).keys()].filter(i => i < n - falta));   // lo que le quedó al vecino
+    m.escenario.innerHTML =
+      '<p class="aviso-caso">A ' + VECINOS[r - 1] + ' le falta ' + frac(falta, n) + ' de pizza</p>' +
+      '<div class="devolucion"><div class="mesa-pizza" id="mesaPizza"></div>' +
+      '<div class="cuenta-suma" id="suma"></div></div>' +
+      '<div class="sueltas" id="sueltas"></div>' +
+      '<div class="fila-botones"><button class="ghost" id="deshacer">↩ Sacar la última</button></div>' +
+      '<p class="ayuda" id="ayuda">Tocá las porciones de abajo para devolverlas.</p>';
+    const pintar = (desborde = 0) => {
+      const llenas = new Set(tiene);
+      let i = n - falta;
+      for (const p of puestas) for (let j = 0; j < p.v; j++) llenas.add(i++);
+      const comidas = new Set([...Array(n).keys()].filter(i => !llenas.has(i)));
+      $('mesaPizza').innerHTML = pizzaSVG(n, comidas, { tam: 220 }) + (desborde ? '<span class="desborde">+' + desborde + ' de más</span>' : '');
+      const suma = puestas.reduce((a, p) => a + p.v, 0);
+      $('suma').innerHTML = puestas.length
+        ? puestas.map(p => frac(p.v, n)).join('<span class="op">+</span>') + '<span class="op">=</span>' + frac(suma, n, suma === falta ? 'justo' : '')
+        : '<span class="vacio">devolviste ' + frac(0, n) + '</span>';
+      $('sueltas').innerHTML = sueltas.map(s => '<button class="suelta' + (s.usada ? ' usada' : '') + '" data-id="' + s.id + '"' + (s.usada || listo ? ' disabled' : '') + '>' +
+        pizzaSVG(n, new Set([...Array(n).keys()].filter(i => i >= s.v)), { tam: 64 }) + frac(s.v, n) + '</button>').join('');
+    };
+    $('sueltas').addEventListener('click', e => {
+      const b = e.target.closest('.suelta');
+      if (!b || listo || !partida.activa) return;
+      const s = sueltas[b.dataset.id];
+      if (s.usada) return;
+      s.usada = true; puestas.push(s); bip(500, .05);
+      const suma = puestas.reduce((a, p) => a + p.v, 0);
+      if (suma > falta) {
+        m.error(); pintar(suma - falta);
+        $('ayuda').innerHTML = '¡Se desbordó! Le faltaban ' + frac(falta, n) + ' y le diste ' + frac(suma, n) + '. Saco la última.';
+        $('ayuda').className = 'ayuda mal';
+        m.espera(() => { const u = puestas.pop(); if (u) u.usada = false; pintar(); }, 1300);
+        return;
+      }
+      pintar();
+      if (suma === falta) {
+        listo = true;
+        m.flota('+' + m.acierto(30), $('mesaPizza'));
+        $('ayuda').innerHTML = '¡Pizza completa! ' + puestas.map(p => frac(p.v, n)).join(' + ') + ' = ' + frac(falta, n) +
+          ': se suman las porciones, y el tamaño de cada una (el de abajo) no cambia.';
+        $('ayuda').className = 'ayuda bien';
+        pintar();
+        m.espera(() => (r === RONDAS ? m.fin() : ronda()), 2600);
+      } else { $('ayuda').textContent = falta - suma === 1 ? 'Todavía falta 1 porción.' : 'Todavía faltan ' + (falta - suma) + ' porciones.'; $('ayuda').className = 'ayuda'; }
+    });
+    $('deshacer').addEventListener('click', () => {
+      if (listo) return;
+      const u = puestas.pop(); if (u) { u.usada = false; pintar(); }
+    });
+    pintar();
+  }
+  ronda();
+};
+
+// Caso 8 · El botín: a/b de N caramelos. Se reparte en b bolsas (se ve cómo), se eligen a bolsas y se cuenta.
+MINIJUEGOS[8] = m => {
+  const RONDAS = 8;
+  const LISTA = [[1, 2], [2, 3], [1, 4], [3, 4], [2, 5], [1, 3], [5, 6], [3, 5]];
+  const COLORES = ['#ff4d8d', '#ffc53d', '#2ee6c5', '#8b6bff', '#ff8a3d', '#3db8ff'];
+  const caramelo = i => '<i class="caramelo" style="--k:' + COLORES[i % COLORES.length] + '"></i>';
+  let r = 0;
+  function ronda() {
+    r++; m.marcador(r + '/' + RONDAS, 'Botín');
+    const [a, b] = LISTA[r - 1], q = azar(2, b <= 3 ? 5 : 4), N = b * q;
+    let fase = 'repartir', elegidas = new Set();
+    m.escenario.innerHTML =
+      '<p class="aviso-caso">Botín: <b>' + N + ' caramelos</b>. El Mordisco se llevó ' + frac(a, b) + '.</p>' +
+      '<div class="pila" id="pila">' + Array.from({ length: N }, (_, i) => caramelo(i)).join('') + '</div>' +
+      '<div class="bolsas" id="bolsas">' + Array.from({ length: b }, (_, i) => '<button class="bolsa" data-i="' + i + '" disabled><span class="dentro"></span><b>0</b></button>').join('') + '</div>' +
+      '<div id="paso"><button class="boton" id="repartir">Repartir en ' + b + ' bolsas iguales <kbd>Enter</kbd></button></div>' +
+      '<p class="ayuda" id="ayuda">El número de abajo (' + b + ') dice en cuántas partes iguales se reparte.</p>';
+    const bolsas = [...$('bolsas').children];
+    function repartir() {
+      if (fase !== 'repartir' || !partida.activa) return;
+      fase = 'repartiendo'; $('repartir').disabled = true;
+      let i = 0;
+      const uno = () => {
+        const c = $('pila').lastElementChild;
+        if (!c) return elegir();
+        const bolsa = bolsas[i % b];
+        bolsa.querySelector('.dentro').appendChild(c);
+        bolsa.querySelector('b').textContent = bolsa.querySelectorAll('.caramelo').length;
+        bip(500 + (i % b) * 60, .03, 'triangle', .03);
+        i++;
+        m.espera(uno, Math.max(45, 260 - N * 8));
+      };
+      uno();
+    }
+    function elegir() {
+      fase = 'elegir';
+      bolsas.forEach(x => { x.disabled = false; });
+      $('ayuda').innerHTML = 'Quedaron <b>' + q + '</b> en cada bolsa. Ahora tocá ' + (a === 1 ? '<b>la bolsa</b> que se llevó' : 'las <b>' + a + '</b> bolsas que se llevó') + ' (el número de arriba).';
+      $('ayuda').className = 'ayuda';
+      $('paso').innerHTML = '<button class="boton" id="listoBolsas">¡Listo! <kbd>Enter</kbd></button>';
+      $('listoBolsas').addEventListener('click', confirmarBolsas);
+    }
+    $('bolsas').addEventListener('click', e => {
+      const x = e.target.closest('.bolsa');
+      if (!x || fase !== 'elegir') return;
+      const i = +x.dataset.i;
+      elegidas.has(i) ? elegidas.delete(i) : elegidas.add(i);
+      x.classList.toggle('robada', elegidas.has(i)); bip(420, .04);
+    });
+    function confirmarBolsas() {
+      if (fase !== 'elegir' || !partida.activa) return;
+      if (elegidas.size !== a) {
+        m.error();
+        $('ayuda').innerHTML = 'Tienen que ser <b>' + a + '</b> ' + (a === 1 ? 'bolsa' : 'bolsas') + ' de las ' + b + ' (tocaste ' + elegidas.size + ').';
+        $('ayuda').className = 'ayuda mal';
+        return;
+      }
+      fase = 'contar';
+      bolsas.forEach(x => { x.disabled = true; });
+      $('ayuda').innerHTML = frac(a, b) + ' = ' + a + (a === 1 ? ' bolsa' : ' bolsas') + ' de ' + q + ' caramelos. <b>¿Cuántos caramelos se llevó?</b>';
+      $('ayuda').className = 'ayuda';
+      $('paso').innerHTML = '<div id="entradaCaja"></div>';
+      m.entrada($('entradaCaja'), v => {
+        if (fase !== 'contar') return 'mal';
+        const res = m.comprobar(v, a * q);
+        if (res === 'ok') {
+          fase = 'fin';
+          m.flota('+' + m.acierto(30), $('bolsas'));
+          $('ayuda').innerHTML = '¡Exacto! ' + frac(a, b) + ' de ' + N + ' = ' + N + ' ÷ ' + b + ' × ' + a + ' = <b>' + a * q + '</b> caramelos.';
+          $('ayuda').className = 'ayuda bien';
+          m.espera(() => (r === RONDAS ? m.fin() : ronda()), 2500);
+        }
+        if (res === 'mal') {
+          m.error();
+          $('ayuda').innerHTML = 'Contá los caramelos de las bolsas marcadas: ' + a + ' × ' + q + '.';
+          $('ayuda').className = 'ayuda mal';
+        }
+        return res;
+      });
+    }
+    $('repartir').addEventListener('click', repartir);
+    partida.onTecla = e => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      if (fase === 'repartir') repartir(); else if (fase === 'elegir') confirmarBolsas();
+    };
+  }
+  ronda();
+};
+
+// Caso 9 · La guarida: fracciones mayores que 1 (a/b con a > b) y su forma con enteros (1 y 1/4).
+const mixto = (e, a, b) => '<span class="mixto">' + (e ? '<b>' + e + '</b>' : '') + (e && a ? '<small>y</small>' : '') + (a ? frac(a, b) : '') + '</span>';
+MINIJUEGOS[9] = m => {
+  const RONDAS = 8, BS = [4, 2, 3, 4, 6, 3, 2, 4];
+  let r = 0;
+  const siguiente = ok => m.espera(() => (r === RONDAS ? m.fin() : ronda()), ok ? 2200 : 3300);
+  function ronda() {
+    r++; m.marcador(r + '/' + RONDAS, 'Inventario');
+    const b = BS[r - 1];
+    let a; do a = azar(b + 1, 3 * b - 1); while (a % b === 0);     // entre 1 y 3 pizzas, nunca justo enteras
+    (r % 2 ? armar : leer)(a, b);
+  }
+  const pizzas = (cant, b, llenas, tocable) => Array.from({ length: cant }, (_, p) => {
+    const desde = p * b, comidas = new Set([...Array(b).keys()].filter(i => desde + i >= llenas));
+    return '<div class="pz" data-p="' + p + '">' + pizzaSVG(b, comidas, { tocable, tam: 118 }) + '</div>';
+  }).join('');
+  // elegir la forma con enteros de a/b
+  function preguntarMixto(a, b, alTerminar) {
+    const e = Math.floor(a / b), resto = a % b;
+    const bien = e + '+' + resto;
+    const cands = mezclar([[e + 1, resto], [e, resto + 1], [e - 1, resto], [e, b - resto], [resto, e], [e, resto - 1]])
+      .filter(([x, y]) => x >= 0 && y >= 0 && y < b && (x || y) && x + '+' + y !== bien);
+    const vistos = new Set([bien]), ops = [[e, resto]];
+    for (const c of cands) { const k = c.join('+'); if (!vistos.has(k) && ops.length < 4) { vistos.add(k); ops.push(c); } }
+    $('pregunta').innerHTML = '¿Cómo se dice ' + frac(a, b) + ' con pizzas <b>enteras</b>?';
+    $('opcs').innerHTML = '<div class="opciones">' + mezclar(ops).map(([x, y], i) =>
+      '<button class="opcion" data-v="' + x + '+' + y + '"><kbd>' + (i + 1) + '</kbd>' + mixto(x, y, b) + '</button>').join('') + '</div>';
+    let respondida = false;
+    partida.onElegir = btn => {
+      if (respondida || !partida.activa) return;
+      respondida = true;
+      const ok = btn.dataset.v === bien;
+      if (ok) { btn.classList.add('bien'); m.flota('+' + m.acierto(25), btn); }
+      else { btn.classList.add('mal'); m.error(); m.escenario.querySelector('.opcion[data-v="' + bien + '"]').classList.add('era'); }
+      $('ayuda').innerHTML = (ok ? '¡Bien! ' : '') + frac(a, b) + ' = ' + frac(e * b, b) + ' + ' + frac(resto, b) + ' = ' + mixto(e, resto, b) +
+        ': cada ' + frac(b, b) + ' es una pizza entera.';
+      $('ayuda').className = 'ayuda ' + (ok ? 'bien' : 'mal');
+      alTerminar(ok);
+    };
+    teclasOpciones();
+  }
+  // A · pintar a porciones en varias pizzas de b, y después decirlo con enteros
+  function armar(a, b) {
+    const cant = Math.ceil(a / b) + 1;
+    const llenas = new Set();
+    let listo = false;
+    m.escenario.innerHTML =
+      '<p class="aviso-caso">Inventario: ' + frac(a, b) + ' de pizza</p>' +
+      '<div class="guarida" id="guarida"></div>' +
+      '<p class="cuantas-p">Pintadas: <b id="pintadas">0</b> porciones de ' + frac(1, b) + '</p>' +
+      '<div id="paso" class="fila-botones"><button class="ghost" id="enteraBtn">＋1 pizza entera (' + frac(b, b) + ')</button>' +
+      '<button class="boton" id="listoBtn">¡Listo! <kbd>Enter</kbd></button></div>' +
+      '<p class="pregunta-caso" id="pregunta"></p><div id="opcs"></div>' +
+      '<p class="ayuda" id="ayuda">Cada pizza está cortada en <b>' + b + '</b>. Tocá <b>' + a + '</b> porciones.</p>';
+    const dibujar = () => {
+      $('guarida').innerHTML = Array.from({ length: cant }, (_, p) => {
+        const comidas = new Set([...Array(b).keys()].filter(i => !llenas.has(p * b + i)));
+        return '<div class="pz" data-p="' + p + '">' + pizzaSVG(b, comidas, { tocable: !listo, tam: 118 }) + '</div>';
+      }).join('');
+      $('pintadas').textContent = llenas.size;
+    };
+    $('guarida').addEventListener('click', e => {
+      const t = e.target.closest('.porcion'), pz = e.target.closest('.pz');
+      if (!t || !pz || listo) return;
+      const i = +pz.dataset.p * b + +t.dataset.i;
+      llenas.has(i) ? llenas.delete(i) : llenas.add(i);
+      bip(llenas.has(i) ? 460 : 320, .04); dibujar();
+    });
+    const confirmar = () => {
+      if (listo || !partida.activa) return;
+      listo = true;
+      const ok = llenas.size === a;
+      if (ok) m.flota('+' + m.acierto(25), $('guarida'));
+      else {
+        m.error();
+        $('ayuda').innerHTML = 'Eran <b>' + a + '</b> porciones de ' + frac(1, b) + ' (pintaste ' + llenas.size + '). Así queda:'; $('ayuda').className = 'ayuda mal';
+        llenas.clear(); for (let i = 0; i < a; i++) llenas.add(i);
+      }
+      dibujar();
+      $('paso').innerHTML = '';
+      m.espera(() => preguntarMixto(a, b, siguiente), ok ? 500 : 1800);
+    };
+    // completa la primera pizza que no está llena
+    $('enteraBtn').addEventListener('click', () => {
+      if (listo) return;
+      for (let p = 0; p < cant; p++) {
+        const faltan = [...Array(b).keys()].map(i => p * b + i).filter(i => !llenas.has(i));
+        if (faltan.length) { faltan.forEach(i => llenas.add(i)); bip(520, .08); return dibujar(); }
+      }
+    });
+    $('listoBtn').addEventListener('click', confirmar);
+    partida.onTecla = e => { if (e.key === 'Enter') { e.preventDefault(); confirmar(); } };
+    dibujar();
+  }
+  // B · pizzas ya armadas en la guarida: ¿qué fracción es?
+  function leer(a, b) {
+    const cant = Math.ceil(a / b), e = Math.floor(a / b), resto = a % b;
+    m.escenario.innerHTML =
+      '<p class="consigna">Leé el inventario</p>' +
+      '<div class="guarida">' + pizzas(cant, b, a, false) + '</div>' +
+      '<p class="pregunta-caso">Hay ' + mixto(e, resto, b) + ' pizzas. ¿Qué fracción anotamos en el inventario?</p>' +
+      opcionesFrac(mezclar([[a, b], ...distractores([a, b], [[e + resto, b], [a + 1, b], [a - 1, b], [a, b + 1], [resto, b], [a, e]], true)])) +
+      '<p class="ayuda" id="ayuda"></p>';
+    let respondida = false;
+    partida.onElegir = btn => {
+      if (respondida || !partida.activa) return;
+      respondida = true;
+      const ok = btn.dataset.v === a + '/' + b;
+      if (ok) { btn.classList.add('bien'); m.flota('+' + m.acierto(25), btn); }
+      else { btn.classList.add('mal'); m.error(); m.escenario.querySelector('.opcion[data-v="' + a + '/' + b + '"]').classList.add('era'); }
+      $('ayuda').innerHTML = (ok ? '¡Bien! ' : '') + e + (e === 1 ? ' pizza entera = ' : ' pizzas enteras = ') + frac(e * b, b) + ', más ' + frac(resto, b) + ': en total ' + frac(a, b) + '.';
+      $('ayuda').className = 'ayuda ' + (ok ? 'bien' : 'mal');
+      siguiente(ok);
+    };
+    teclasOpciones();
+  }
+  ronda();
+};
+
+// Caso final · Cara a cara: preguntas de todos los casos, con tiempo. 10 aciertos lo atrapan; 3 errores, se escapa.
+MINIJUEGOS[10] = m => {
+  const META = 10, PERSONAJE = mordisco(true);
+  let vidas = 3, pasos = 0, t1, limite, respondida = true, ultimoTipo = -1;
+  m.marcador(corazones(vidas), 'Vidas');
+  m.escenario.innerHTML =
+    '<div class="persecucion"><div class="pista-pers"><i id="avance"></i><span class="yo-pers" id="yoPers">🔍</span>' +
+    '<span class="el-pers">' + PERSONAJE + '</span></div><span class="pasos-pers" id="pasosPers">0 / ' + META + '</span></div>' +
+    '<div class="mini-barra"><i id="fBarra"></i></div>' +
+    '<div id="pregFinal" class="preg-final"></div><p class="ayuda" id="ayuda"></p>';
+  // cada tipo de pregunta devuelve { html (el enunciado), ops: [[valor, html]], bien: valor, explica }
+  const fOpc = (bien, otros, mayores) => mezclar([bien, ...distractores(bien, otros, mayores)]).map(f => [f.join('/'), frac(...f)]);
+  const TIPOS = [
+    () => { const c = cosaMordida(true), bien = [c.k, c.n];
+      return { html: '<div class="mini-dibujo">' + c.svg + '</div>¿Qué fracción ' + c.que + ' <b>desapareció</b>?',
+        ops: fOpc(bien, [[c.n - c.k, c.n], [c.k, c.n - c.k], [c.k + 1, c.n], [c.k, c.n + 1]]), bien: bien.join('/'),
+        explica: 'Son ' + c.n + ' partes y faltan ' + c.k + ': ' + frac(c.k, c.n) + '.' }; },
+    () => { // la más grande de cuatro
+      let fs; do fs = Array.from({ length: 4 }, () => { const b = azar(2, 9); return [azar(1, b - 1), b]; });
+      while (new Set(fs.map(([a, b]) => (a / b).toFixed(3))).size < 4);
+      const g = fs.reduce((x, y) => (y[0] / y[1] > x[0] / x[1] ? y : x));
+      return { html: '¿Cuál es la fracción <b>más grande</b>?', ops: fs.map(f => [f.join('/'), frac(...f)]), bien: g.join('/'),
+        explica: frac(...g) + ' es la más grande: es la que más se acerca a 1 entero.' }; },
+    () => { const [a, b] = mezclar([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5]])[0], k = azar(2, 4), bien = [a * k, b * k];
+      return { html: '¿Cuál es <b>la misma</b> cantidad que ' + frac(a, b) + '?',
+        ops: fOpc(bien, [[a + k, b + k], [a * k, b], [a, b * k], [a * k + 1, b * k]]), bien: bien.join('/'),
+        explica: frac(a, b) + ' = ' + frac(...bien) + ': arriba y abajo por ' + k + '.' }; },
+    () => { const b = azar(3, 10), x = azar(1, b - 2), y = azar(1, b - 1 - x), bien = [x + y, b];
+      return { html: frac(x, b) + ' + ' + frac(y, b) + ' = <b>?</b>',
+        ops: fOpc(bien, [[x + y, 2 * b], [x * y, b], [x + y + 1, b], [x + y - 1, b]]), bien: bien.join('/'),
+        explica: 'Se suman las partes (' + x + ' + ' + y + ') y el tamaño queda igual: ' + frac(...bien) + '.' }; },
+    () => { const [a, b] = mezclar([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5], [3, 5]])[0], q = azar(2, 6), N = b * q, bien = a * q;
+      const ops = [...new Set([bien, q, N - bien, bien + q, a + b, bien - 1].filter(v => v > 0))].slice(0, 4);
+      while (ops.length < 4) { const v = azar(1, N); if (!ops.includes(v)) ops.push(v); }
+      return { html: '¿Cuánto es ' + frac(a, b) + ' de <b>' + N + '</b> caramelos?', ops: mezclar(ops).map(v => [String(v), '<span class="num-op">' + v + '</span>']),
+        bien: String(bien), explica: N + ' ÷ ' + b + ' = ' + q + ', y ' + a + ' × ' + q + ' = ' + bien + '.' }; },
+    () => { const b = azar(2, 5); let a; do a = azar(b + 1, 3 * b - 1); while (a % b === 0);
+      const e = Math.floor(a / b), rr = a % b, bien = e + '+' + rr;
+      const cands = [[e + 1, rr], [e, rr + 1], [e - 1, rr], [e, b - rr], [rr, e]].filter(([x, y]) => x >= 0 && y > 0 && y < b && x + '+' + y !== bien);
+      const ops = [[e, rr], ...[...new Map(cands.map(c => [c.join('+'), c])).values()].slice(0, 3)];
+      for (let x = e + 2; ops.length < 4; x++) ops.push([x, rr]);        // con medios (b = 2) hay pocas opciones parecidas
+      return { html: '¿Cómo se dice ' + frac(a, b) + ' con <b>enteros</b>?', ops: mezclar(ops).map(([x, y]) => [x + '+' + y, mixto(x, y, b)]),
+        bien, explica: frac(a, b) + ' = ' + mixto(e, rr, b) + ': cada ' + frac(b, b) + ' es un entero.' }; },
+  ];
+  let actual;
+  function pregunta() {
+    let tipo; do tipo = azar(0, TIPOS.length - 1); while (tipo === ultimoTipo);
+    ultimoTipo = tipo;
+    actual = TIPOS[tipo]();
+    limite = Math.max(7000, 13000 - pasos * 600);
+    t1 = performance.now(); respondida = false;
+    $('pregFinal').innerHTML = '<div class="pregunta-caso">' + actual.html + '</div><div class="opciones">' +
+      actual.ops.map(([v, h], i) => '<button class="opcion" data-v="' + v + '"><kbd>' + (i + 1) + '</kbd>' + h + '</button>').join('') + '</div>';
+    $('ayuda').textContent = ''; $('ayuda').className = 'ayuda';
+  }
+  function mover() {
+    $('avance').style.transform = 'scaleX(' + pasos / META + ')';
+    $('yoPers').style.left = (pasos / META * 82) + '%';
+    $('pasosPers').textContent = pasos + ' / ' + META;
+  }
+  function responder(b) {
+    if (respondida || !partida.activa) return;
+    respondida = true;
+    const ok = b && b.dataset.v === actual.bien;
+    if (ok) {
+      b.classList.add('bien'); m.flota('+' + m.acierto(25), b);
+      pasos++; mover();
+      if (pasos === META) return atrapado();
+      return m.espera(pregunta, 700);
+    }
+    if (b) b.classList.add('mal');
+    const correcta = $('pregFinal').querySelector('.opcion[data-v="' + actual.bien + '"]');
+    if (correcta) correcta.classList.add('era');
+    vidas--; m.error(); m.marcador(corazones(vidas));
+    $('ayuda').innerHTML = (b ? '' : '¡Se acabó el tiempo! ') + actual.explica; $('ayuda').className = 'ayuda mal';
+    if (!vidas) {
+      partida.gano = false; partida.perdidas = 3;
+      partida.mensaje = 'El Mordisco se escapó a ' + (META - pasos) + (META - pasos === 1 ? ' paso.' : ' pasos.');
+      return m.espera(() => m.fin(), 2200);
+    }
+    m.espera(pregunta, 2600);
+  }
+  function atrapado() {
+    partida.gano = true; partida.perdidas = 3 - vidas;
+    m.bono(vidas * 60);
+    partida.mensaje = '¡Atrapaste a El Mordisco! Era un mapache hambriento que compartía todo en partes iguales con su familia.';
+    m.escenario.innerHTML = '<div class="revelacion"><p class="consigna">Le sacamos el antifaz… y era…</p>' + mapache() +
+      '<h3>¡Un mapache!</h3><p>Tenía hambre, y se llevaba sólo partes iguales para compartir con su familia.</p></div>';
+    bip(660, .15, 'triangle', .06); m.espera(() => bip(880, .3, 'triangle', .06), 180);
+    m.espera(() => m.fin(), 4200);
+  }
+  partida.onElegir = responder;
+  teclasOpciones();
+  const tick = ahora => {
+    const f = respondida ? 0 : 1 - (ahora - t1) / limite, barra = $('fBarra');
+    if (barra) barra.style.transform = 'scaleX(' + Math.max(0, f) + ')';
+    if (!respondida && f <= 0) responder(null);
+    m.cuadro(tick);
+  };
+  mover(); pregunta(); m.cuadro(tick);
+};
+
+// ---------- navegación: #caso-N (expediente) y #jugar-N (partida) ----------
+function ruta() {
+  let m = location.hash.match(/^#(caso|jugar)-([1-9]|10)$/);
+  if (m && (!abierto(+m[2]) || (m[1] === 'jugar' && !CASOS[+m[2]].listo))) {
+    history.replaceState(null, '', location.pathname + location.search); m = null;
+  }
+  Motor.limpiar();
+  const vista = m ? (m[1] === 'jugar' ? 'juego' : 'detalle') : 'inicio';
+  ['inicio', 'detalle', 'juego'].forEach(id => { $(id).hidden = id !== vista; });
+  if (vista === 'juego') Motor.jugar(+m[2]);
+  else if (vista === 'detalle') pintarDetalle(+m[2]);
+  else pintarInicio();
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', ruta);
+ruta();
+</script>
+</body>
+</html>
