@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Factor X</title>
+<meta name="description" content="Las tablas del 1 al 9: un minijuego distinto para cada una.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='14' y='14' width='72' height='72' rx='16' fill='%230a0c11' stroke='%238b5cff' stroke-width='6'/><text x='50' y='67' text-anchor='middle' font-family='monospace' font-weight='700' font-size='46' fill='%238b5cff'>×</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+  /* misma estética que el resto del sitio: oscuro, grilla sutil, acentos neón */
+  :root{
+    --bg:#0a0c11; --surface:#12151d; --surface-2:#0e1118; --line:#232a37;
+    --ink:#eef1f7; --muted:#98a2b6; --faint:#5f6a80;
+    --lima:#b8ff3c; --violeta:#8b5cff; --rosa:#ff4d8d; --cian:#2ee6c5; --rojo:#ff4d6d; --oro:#ffc53d;
+    --shadow-card:0 0 0 1px rgba(255,255,255,.02), 0 18px 50px rgba(0,0,0,.5);
+    --display:'Space Grotesk', system-ui, sans-serif;
+    --body:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0; min-height:100%}
+  body{
+    font-family:var(--body); font-size:16px; line-height:1.5; color:var(--ink);
+    background:var(--bg); min-height:100vh; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit; color:inherit; cursor:pointer}
+  :focus-visible{outline:2px solid var(--lima); outline-offset:3px}
+
+  .fondo{position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden}
+  .fondo .grilla{position:absolute; inset:0;
+    background:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px) 0 0/44px 44px,
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px) 0 0/44px 44px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
+            mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%)}
+  .fondo .luz{position:absolute; border-radius:50%; filter:blur(90px)}
+  .fondo .l1{width:520px; height:520px; top:-220px; left:-120px; background:var(--violeta); opacity:.3}
+  .fondo .l2{width:420px; height:420px; bottom:-220px; right:-140px; background:var(--cian); opacity:.1}
+
+  .wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:22px 16px 48px}
+
+  /* ---------- cabecera ---------- */
+  header{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .volver{display:grid; place-items:center; width:36px; height:36px; border-radius:10px; flex:none;
+    border:1px solid var(--line); background:var(--surface); color:var(--muted); text-decoration:none; font-weight:600}
+  .volver:hover{color:var(--ink); border-color:var(--faint)}
+  .marca{display:flex; align-items:baseline; gap:10px; margin-right:auto; min-width:0}
+  .marca h1{font-family:var(--display); font-weight:700; font-size:26px; letter-spacing:-.04em; margin:0; line-height:1}
+  .marca h1 em{font-style:normal; color:var(--violeta)}
+  .marca small{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+  .chip{display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 12px; border-radius:10px;
+    border:1px solid var(--line); background:var(--surface); font-size:14px; font-weight:600; max-width:200px}
+  .chip .cara{width:22px; height:22px; border-radius:50%; background:var(--violeta); color:#fff; display:grid; place-items:center;
+    font-size:11px; font-weight:700; flex:none}
+  .chip .nom{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .chip.invitado{color:var(--faint); font-weight:500}
+  .chip.invitado .cara{background:var(--line); color:var(--muted)}
+
+  /* ---------- resumen ---------- */
+  .intro{display:flex; align-items:flex-end; gap:24px; flex-wrap:wrap; margin:34px 0 26px}
+  .intro .txt{flex:1 1 360px}
+  .etiqueta{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--violeta); border:1px solid color-mix(in srgb, var(--violeta) 35%, transparent);
+    background:color-mix(in srgb, var(--violeta) 8%, transparent); border-radius:999px; padding:5px 12px; margin-bottom:16px}
+  .intro h2{font-family:var(--display); font-weight:700; font-size:clamp(34px,5.6vw,56px); line-height:1; letter-spacing:-.045em; margin:0 0 12px}
+  .intro h2 .brillo{background:linear-gradient(90deg, var(--violeta), var(--rosa) 55%, var(--oro));
+    -webkit-background-clip:text; background-clip:text; color:transparent}
+  .intro p{margin:0; color:var(--muted); max-width:46ch}
+  .resumen{display:flex; gap:10px; flex-wrap:wrap}
+  .dato{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 16px; min-width:120px}
+  .dato b{display:block; font-family:var(--mono); font-size:24px; line-height:1.1; font-variant-numeric:tabular-nums}
+  .dato b small{font-size:14px; color:var(--faint); font-weight:500}
+  .dato span{font-family:var(--mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+  .dato.oro b{color:var(--oro)}
+
+  /* ---------- grilla de tablas ---------- */
+  .tablas{display:grid; gap:14px; grid-template-columns:repeat(3, 1fr)}
+  .tabla{
+    --c:var(--violeta);
+    position:relative; text-align:left; border:1px solid var(--line); border-radius:18px; overflow:hidden;
+    background:linear-gradient(160deg, color-mix(in srgb, var(--c) 13%, var(--surface)) 0%, var(--surface) 55%);
+    padding:18px 18px 16px; display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto 1fr auto; column-gap:14px; row-gap:10px;
+    transition:transform .18s, border-color .18s, box-shadow .18s; min-height:170px;
+  }
+  .tabla:hover{transform:translateY(-3px); border-color:color-mix(in srgb, var(--c) 60%, var(--line));
+    box-shadow:var(--shadow-card), 0 0 36px color-mix(in srgb, var(--c) 16%, transparent)}
+  .tabla .num{
+    grid-row:1 / 3; width:64px; height:64px; border-radius:15px; display:grid; place-items:center;
+    font-family:var(--mono); font-weight:700; font-size:30px; color:var(--c);
+    background:#0d1016; border:1px solid color-mix(in srgb, var(--c) 50%, transparent);
+    box-shadow:0 5px 0 #05060a, 0 0 22px color-mix(in srgb, var(--c) 28%, transparent);
+  }
+  .tabla .num i{font-style:normal; font-size:.6em; opacity:.7; margin-right:1px}
+  .tabla .cab{min-width:0}
+  .tabla .tipo{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--c)}
+  .tabla h3{font-family:var(--display); font-weight:700; font-size:21px; letter-spacing:-.03em; margin:2px 0 0; line-height:1.1}
+  .tabla p{grid-column:2; margin:0; color:var(--muted); font-size:13.5px; line-height:1.4}
+  .tabla .pie{grid-column:1 / 3; display:flex; align-items:center; gap:10px; padding-top:10px; border-top:1px solid var(--line)}
+  .estrellas{font-size:15px; letter-spacing:2px; color:var(--line); line-height:1}
+  .estrellas b{color:var(--oro); font-weight:400; text-shadow:0 0 10px color-mix(in srgb, var(--oro) 50%, transparent)}
+  .tabla .mejor{margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--faint)}
+  .tabla .mejor b{color:var(--ink); font-weight:700}
+  .tabla.final{--c:var(--oro); grid-column:1 / -1; min-height:0}
+  .tabla.final .num{font-size:26px}
+  .tabla.bloqueada{cursor:not-allowed; background:var(--surface-2); border-style:dashed}
+  .tabla.bloqueada:hover{transform:none; box-shadow:none; border-color:var(--line)}
+  .tabla.bloqueada .num{color:var(--faint); border-color:var(--line); box-shadow:0 5px 0 #05060a}
+  .tabla.bloqueada .tipo, .tabla.bloqueada h3{color:var(--faint)}
+
+  /* ---------- detalle de una tabla ---------- */
+  .detalle{margin-top:26px}
+  .det-cab{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:22px}
+  .det-cab .num{
+    width:76px; height:76px; border-radius:18px; display:grid; place-items:center; flex:none;
+    font-family:var(--mono); font-weight:700; font-size:36px; color:var(--c); background:#0d1016;
+    border:1px solid color-mix(in srgb, var(--c) 50%, transparent);
+    box-shadow:0 6px 0 #05060a, 0 0 30px color-mix(in srgb, var(--c) 30%, transparent);
+  }
+  .det-cab .num i{font-style:normal; font-size:.6em; opacity:.7}
+  .det-cab .tipo{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--c)}
+  .det-cab h2{font-family:var(--display); font-weight:700; font-size:clamp(28px,4.6vw,42px); letter-spacing:-.04em; margin:2px 0 0; line-height:1.05}
+  .det-cab .ghost{margin-left:auto}
+  .det{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:16px; align-items:start}
+  .panel{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:var(--shadow-card)}
+  .panel h3{font-family:var(--display); font-weight:700; font-size:18px; letter-spacing:-.02em; margin:0}
+  .panel-cab{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+  .panel-cab .ghost{margin-left:auto}
+  .lista-tabla{display:grid; grid-template-columns:1fr 1fr; gap:6px}
+  .fila{display:flex; align-items:center; justify-content:space-between; gap:8px;
+    background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:8px 12px;
+    font-family:var(--mono); font-size:17px; font-variant-numeric:tabular-nums}
+  .fila .op{color:var(--muted)}
+  .fila .res{font-weight:700; color:var(--c); min-width:3ch; text-align:right; transition:filter .2s, opacity .2s}
+  .oculto .fila .res{filter:blur(7px); opacity:.6}
+  .oculto .fila:hover .res{filter:none; opacity:1}
+  .truco{margin:14px 0 0; padding:12px 14px; border-radius:12px; font-size:14px; color:var(--muted);
+    background:color-mix(in srgb, var(--c) 8%, transparent); border:1px solid color-mix(in srgb, var(--c) 25%, transparent)}
+  .truco b{color:var(--ink); font-weight:600}
+
+  .juego-desc{margin:0 0 16px; color:var(--muted)}
+  .pasos{list-style:none; margin:0 0 18px; padding:0; display:flex; flex-direction:column; gap:8px}
+  .pasos li{display:flex; gap:12px; align-items:flex-start; font-size:14.5px}
+  .pasos li span{flex:none; width:24px; height:24px; border-radius:7px; display:grid; place-items:center;
+    font-family:var(--mono); font-size:12px; font-weight:700; color:var(--c);
+    background:color-mix(in srgb, var(--c) 12%, transparent); border:1px solid color-mix(in srgb, var(--c) 35%, transparent)}
+  .metas{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:18px}
+  .meta{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:10px 12px}
+  .meta .estrellas{font-size:13px; display:block; margin-bottom:4px}
+  .meta span{font-size:12.5px; color:var(--muted); line-height:1.35; display:block}
+  .meta.ok{border-color:color-mix(in srgb, var(--oro) 45%, var(--line))}
+  .jugar-fila{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .jugar-fila .mejor{font-family:var(--mono); font-size:13px; color:var(--faint)}
+  .jugar-fila .mejor b{color:var(--ink)}
+  .aviso{margin:14px 0 0; font-size:13.5px; color:var(--muted); background:var(--surface-2); border:1px dashed var(--line);
+    border-radius:10px; padding:10px 12px}
+
+  .boton{
+    border:1px solid transparent; border-radius:12px; padding:12px 22px; font-family:var(--display); font-weight:700; font-size:17px;
+    background:var(--c, var(--lima)); color:#0a0c11; line-height:1.1;
+    box-shadow:0 0 24px color-mix(in srgb, var(--c, var(--lima)) 30%, transparent); transition:transform .12s, box-shadow .12s;
+  }
+  .boton:hover{transform:translateY(-1px); box-shadow:0 0 32px color-mix(in srgb, var(--c, var(--lima)) 45%, transparent)}
+  .boton:disabled{opacity:.45; cursor:default; transform:none; box-shadow:none}
+  .ghost{border:1px solid var(--line); background:var(--surface-2); border-radius:9px; padding:7px 13px;
+    font-size:13px; font-weight:500; color:var(--muted)}
+  .ghost:hover{color:var(--ink); border-color:var(--faint)}
+
+  /* ---------- partida ---------- */
+  .juego{margin-top:26px}
+  .j-cab{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:14px}
+  .j-cab .tipo{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--c)}
+  .j-cab h2{font-family:var(--display); font-weight:700; font-size:clamp(24px,4vw,32px); letter-spacing:-.04em; margin:0; line-height:1.05}
+  .hud{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+  .hud div{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:7px 14px; min-width:80px}
+  .hud b{display:block; font-family:var(--mono); font-size:20px; line-height:1.15; font-variant-numeric:tabular-nums}
+  .hud span{font-family:var(--mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+  .hud .combo.on{border-color:color-mix(in srgb, var(--c) 55%, var(--line))}
+  .hud .combo.on b{color:var(--c); text-shadow:0 0 12px color-mix(in srgb, var(--c) 60%, transparent)}
+  .tiempo{height:8px; background:var(--surface-2); border:1px solid var(--line); border-radius:99px; overflow:hidden; margin-bottom:14px}
+  .tiempo i{display:block; height:100%; background:var(--c); transform-origin:left; box-shadow:0 0 12px var(--c)}
+  .tiempo.apuro i{background:var(--rojo); box-shadow:0 0 12px var(--rojo)}
+  .escenario, .resultado{
+    position:relative; min-height:430px; background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    box-shadow:var(--shadow-card); padding:28px 20px; overflow:hidden;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:30px;
+  }
+  .escenario.sacude{animation:sacude .3s}
+  @keyframes sacude{20%{transform:translateX(-6px)} 60%{transform:translateX(6px)}}
+  .cuenta{font-family:var(--mono); font-weight:700; font-size:120px; line-height:1; color:var(--c);
+    text-shadow:0 0 40px color-mix(in srgb, var(--c) 50%, transparent); animation:aparece .6s}
+  @keyframes aparece{from{opacity:0; transform:scale(1.6)} to{opacity:1; transform:none}}
+  .pregunta{font-family:var(--mono); font-weight:700; font-size:clamp(48px,11vw,96px); line-height:1;
+    display:flex; gap:.28em; align-items:center; font-variant-numeric:tabular-nums}
+  .pregunta .igual{color:var(--faint)}
+  .pregunta .hueco{min-width:1.4em; text-align:center; color:var(--c); border-bottom:4px solid color-mix(in srgb, var(--c) 45%, transparent)}
+  .pregunta .hueco.bien{color:var(--lima); border-color:var(--lima)}
+  .pregunta .hueco.mal{color:var(--rojo); border-color:var(--rojo)}
+  .opciones{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; width:min(520px,100%)}
+  .opcion{
+    position:relative; border:1px solid var(--line); background:var(--surface-2); border-radius:16px; padding:18px 12px;
+    font-family:var(--mono); font-weight:700; font-size:clamp(28px,6vw,40px); line-height:1;
+    box-shadow:0 5px 0 #05060a; transition:transform .06s, box-shadow .06s, border-color .12s, background .12s;
+  }
+  .opcion:hover{border-color:color-mix(in srgb, var(--c) 60%, var(--line))}
+  .opcion:active{transform:translateY(3px); box-shadow:0 2px 0 #05060a}
+  .opcion kbd{position:absolute; top:8px; left:10px; font-family:var(--mono); font-size:11px; font-weight:500; color:var(--faint);
+    border:1px solid var(--line); border-radius:5px; padding:0 5px}
+  .opcion.bien, .opcion.era{border-color:var(--lima); color:var(--lima); background:color-mix(in srgb, var(--lima) 12%, var(--surface-2))}
+  .opcion.bien{box-shadow:0 5px 0 #05060a, 0 0 26px color-mix(in srgb, var(--lima) 35%, transparent)}
+  .opcion.mal{border-color:var(--rojo); color:var(--rojo); background:color-mix(in srgb, var(--rojo) 12%, var(--surface-2))}
+  .flota{position:absolute; font-family:var(--mono); font-weight:700; font-size:26px; color:var(--lima); pointer-events:none;
+    text-shadow:0 0 14px color-mix(in srgb, var(--lima) 60%, transparent); animation:flota .75s forwards}
+  @keyframes flota{from{opacity:1; transform:translate(-50%,0)} to{opacity:0; transform:translate(-50%,-56px)}}
+
+  .resultado{text-align:center; gap:16px}
+  .r-estrellas{font-size:clamp(44px,9vw,64px); letter-spacing:10px; line-height:1; color:var(--line)}
+  .r-estrellas b{display:inline-block; color:var(--oro); font-weight:400; text-shadow:0 0 22px color-mix(in srgb, var(--oro) 60%, transparent);
+    animation:estrella .45s backwards}
+  .r-estrellas b:nth-child(2){animation-delay:.25s} .r-estrellas b:nth-child(3){animation-delay:.5s}
+  @keyframes estrella{from{opacity:0; transform:scale(2.2) rotate(-25deg)}}
+  .resultado h3{font-family:var(--display); font-weight:700; font-size:clamp(28px,5vw,40px); letter-spacing:-.04em; margin:0; line-height:1}
+  .resultado > p{margin:0; color:var(--muted); max-width:44ch}
+  .r-datos{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; width:min(560px,100%)}
+  .r-datos div{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:10px 8px}
+  .r-datos b{display:block; font-family:var(--mono); font-size:22px; line-height:1.15; font-variant-numeric:tabular-nums}
+  .r-datos span{font-family:var(--mono); font-size:10px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+  .r-insignias{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+  .insignia{font-size:13.5px; font-weight:600; border-radius:999px; padding:5px 14px; color:var(--oro);
+    background:color-mix(in srgb, var(--oro) 10%, transparent); border:1px solid color-mix(in srgb, var(--oro) 40%, transparent)}
+  .insignia.lima{color:var(--lima); background:color-mix(in srgb, var(--lima) 9%, transparent); border-color:color-mix(in srgb, var(--lima) 40%, transparent)}
+  .r-botones{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; margin-top:4px}
+  .r-servidor{font-family:var(--mono); font-size:11.5px; color:var(--faint); margin:0}
+
+  footer{margin-top:48px; text-align:center; color:var(--faint); font-family:var(--mono); font-size:11.5px; letter-spacing:.04em}
+
+  @media (max-width:860px){
+    .tablas{grid-template-columns:repeat(2, 1fr)}
+    .det{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    .tablas{grid-template-columns:1fr}
+    .tabla{min-height:0}
+    .marca small{display:none}
+    .metas{grid-template-columns:1fr}
+    .det-cab .ghost{margin-left:0}
+    .hud{margin-left:0; width:100%}
+    .hud div{flex:1; min-width:0; padding:6px 10px}
+    .escenario, .resultado{min-height:380px; padding:22px 14px}
+    .r-datos{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .tabla:hover, .boton:hover{transform:none}
+    .escenario.sacude, .cuenta, .r-estrellas b, .flota{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="fondo" aria-hidden="true"><div class="grilla"></div><div class="luz l1"></div><div class="luz l2"></div></div>
+
+<div class="wrap">
+  <header>
+    <a class="volver" id="volverInicio" href="index.html" title="Todos los juegos">←</a>
+    <div class="marca"><h1>Factor <em>X</em></h1><small>Tablas del 1 al 9</small></div>
+    <span class="chip invitado" id="chip"><span class="cara" id="chipCara">·</span><span class="nom" id="chipNom">Invitado</span></span>
+  </header>
+
+  <!-- ===== elegir tabla ===== -->
+  <section id="inicio">
+    <div class="intro">
+      <div class="txt">
+        <span class="etiqueta">9 tablas · 9 minijuegos</span>
+        <h2>Cada tabla,<br><span class="brillo">un juego distinto.</span></h2>
+        <p>Empezá por la tabla del 1: cada estrella que ganás abre la tabla siguiente. Con las 9 abiertas, el desafío final queda desbloqueado.</p>
+      </div>
+      <div class="resumen">
+        <div class="dato oro"><b id="totEstrellas">0<small>/27</small></b><span>Estrellas</span></div>
+        <div class="dato"><b id="totDominadas">0<small>/9</small></b><span>Dominadas</span></div>
+        <div class="dato"><b id="totPuntos">0</b><span>Puntos</span></div>
+      </div>
+    </div>
+    <div class="tablas" id="tablas"></div>
+  </section>
+
+  <!-- ===== una tabla ===== -->
+  <section class="detalle" id="detalle" hidden>
+    <div class="det-cab">
+      <div class="num" id="dNum"></div>
+      <div><div class="tipo" id="dTipo"></div><h2 id="dTitulo"></h2></div>
+      <button class="ghost" id="dVolver">← Todas las tablas</button>
+    </div>
+    <div class="det">
+      <div class="panel" id="panelTabla">
+        <div class="panel-cab">
+          <h3 id="dTablaTit">La tabla</h3>
+          <button class="ghost" id="ocultarBtn" aria-pressed="false">Ocultar resultados</button>
+        </div>
+        <div class="lista-tabla" id="dLista"></div>
+        <p class="truco" id="dTruco"></p>
+      </div>
+      <div class="panel">
+        <div class="panel-cab"><h3>Cómo se juega</h3></div>
+        <p class="juego-desc" id="dDesc"></p>
+        <ol class="pasos" id="dPasos"></ol>
+        <div class="metas" id="dMetas"></div>
+        <div class="jugar-fila">
+          <button class="boton" id="jugarBtn" disabled>Jugar ▶</button>
+          <span class="mejor" id="dMejor"></span>
+        </div>
+        <p class="aviso" id="dAviso">Este minijuego está en construcción. Mientras tanto, repasá la tabla con “Ocultar resultados”.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== partida ===== -->
+  <section class="juego" id="juego" hidden>
+    <div class="j-cab">
+      <button class="ghost" id="jSalir" title="Salir (Esc)">✕ Salir</button>
+      <div><div class="tipo" id="jTipo"></div><h2 id="jTitulo"></h2></div>
+      <button class="ghost" id="sonidoBtn" aria-pressed="true" title="Sonido">🔊</button>
+      <div class="hud">
+        <div><b id="hTiempo">30</b><span>Tiempo</span></div>
+        <div><b id="hAciertos">0</b><span>Aciertos</span></div>
+        <div class="combo" id="hCombo"><b id="hMulti">×1</b><span>Combo</span></div>
+        <div><b id="hPuntos">0</b><span>Puntos</span></div>
+      </div>
+    </div>
+    <div class="tiempo" id="tiempo"><i id="tiempoBarra"></i></div>
+    <div class="escenario" id="escenario"></div>
+    <div class="resultado" id="resultado" hidden>
+      <div class="r-estrellas" id="rEstrellas"></div>
+      <h3 id="rTitulo"></h3>
+      <p id="rSub"></p>
+      <div class="r-datos">
+        <div><b id="rAciertos"></b><span>Aciertos</span></div>
+        <div><b id="rPrecision"></b><span>Precisión</span></div>
+        <div><b id="rRacha"></b><span>Mejor racha</span></div>
+        <div><b id="rPuntos"></b><span>Puntos</span></div>
+      </div>
+      <div class="r-insignias" id="rInsignias"></div>
+      <div class="r-botones">
+        <button class="boton" id="rOtra">Otra vez ↻</button>
+        <button class="ghost" id="rSiguiente" hidden></button>
+        <button class="ghost" id="rVolver">Volver a la tabla</button>
+      </div>
+      <p class="r-servidor" id="rServidor"></p>
+    </div>
+  </section>
+
+  <footer>FACTOR X · LOS PUNTOS SUMAN AL RANKING GENERAL</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ---------- los 9 minijuegos (y el desafío final) ----------
+// listo: true cuando el minijuego ya está programado
+const JUEGOS = {
+  1: { nombre: 'Espejo', tipo: 'Tutorial · contrarreloj', color: '#98a2b6', listo: true,
+       corto: 'Respondé todo lo que puedas en 30 segundos. Ideal para aprender los controles.',
+       desc: 'Aparece una cuenta y cuatro respuestas. Tocá la correcta lo más rápido que puedas: el reloj no se detiene.',
+       pasos: ['Aparece una cuenta: 1 × 7 = ?', 'Tocá la respuesta correcta o apretá 1, 2, 3 o 4.', 'Cada 5 aciertos seguidos tus puntos se multiplican (hasta ×4).'],
+       metas: ['8 aciertos', '14 aciertos y 80 % bien', '18 aciertos sin errores'],
+       estrellas: p => p.aciertos >= 18 && !p.errores ? 3 : p.aciertos >= 14 && p.precision >= 80 ? 2 : p.aciertos >= 8 ? 1 : 0,
+       truco: '<b>Cualquier número × 1 da el mismo número.</b> Es un espejo: 1 × 7 = 7.' },
+  2: { nombre: 'Dobles', tipo: 'Memoria', color: '#2ee6c5', listo: false,
+       corto: 'Dá vuelta las cartas y juntá cada cuenta con su resultado.',
+       desc: 'Un tablero de cartas boca abajo. Encontrá los pares: la cuenta 2 × 6 va con la carta 12.',
+       pasos: ['Dá vuelta dos cartas.', 'Si la cuenta y el resultado coinciden, quedan descubiertas.', 'Menos intentos = más puntos.'],
+       truco: '<b>Multiplicar por 2 es sumar el número dos veces.</b> 2 × 8 = 8 + 8 = 16.' },
+  3: { nombre: 'Saltos', tipo: 'Ritmo', color: '#3db8ff', listo: false,
+       corto: 'Tocá los múltiplos de 3 en orden en una grilla de números.',
+       desc: 'Una grilla llena de números. Tocá 3, 6, 9, 12… en orden antes de que se acabe el tiempo. Cada nivel mezcla más.',
+       pasos: ['Encontrá el siguiente múltiplo de 3.', 'Tocalo antes de que la barra se vacíe.', 'Si tocás uno que no va, perdés tiempo.'],
+       truco: '<b>La tabla del 3 va de 3 en 3.</b> Si sumás las cifras de un resultado, siempre te da 3, 6 o 9.' },
+  4: { nombre: 'Lluvia', tipo: 'Caída', color: '#b8ff3c', listo: false,
+       corto: 'Las cuentas caen: escribí el resultado antes de que toquen el piso.',
+       desc: 'Como en Tecla a Tecla, pero con números: las cuentas caen cada vez más rápido. Escribí el resultado para romperlas.',
+       pasos: ['Escribí el resultado con el teclado.', 'La cuenta que coincide se rompe.', 'Si tres cuentas tocan el piso, se termina.'],
+       truco: '<b>× 4 es el doble del doble.</b> 4 × 7: el doble de 7 es 14, y el doble de 14 es 28.' },
+  5: { nombre: 'Verdad o Falso', tipo: 'Reflejos', color: '#ffd23f', listo: false,
+       corto: '¿5 × 7 = 35? Decidí en menos de 2 segundos si es cierto.',
+       desc: 'Aparecen cuentas ya resueltas, algunas con trampa. Decidí rápido si están bien o mal.',
+       pasos: ['Leé la cuenta con su resultado.', '← Falso · Verdadero → (o tocá los botones).', 'Cada vez tenés menos tiempo para pensar.'],
+       truco: '<b>La tabla del 5 siempre termina en 0 o en 5.</b> Si no termina así, es falso.' },
+  6: { nombre: 'Duelo', tipo: '1 vs bot', color: '#ff8a3d', listo: false,
+       corto: 'Vos contra el bot: el primero en responder gana la ronda.',
+       desc: 'Un duelo al mejor de 9 rondas contra un bot que se pone más rápido cada vez que le ganás.',
+       pasos: ['Aparece la cuenta para los dos a la vez.', 'Escribí el resultado antes que el bot.', 'Ganá 5 rondas para ganar el duelo.'],
+       truco: '<b>× 6 es × 5 más una vez más.</b> 6 × 7 = 35 + 7 = 42.' },
+  7: { nombre: 'Camino', tipo: 'Laberinto', color: '#ff4d8d', listo: false,
+       corto: 'Cruzá el tablero pisando sólo los múltiplos de 7.',
+       desc: 'Un tablero de casilleros con números. Para llegar al otro lado sólo podés pisar los que son resultados de la tabla del 7.',
+       pasos: ['Movete con las flechas o tocando casilleros vecinos.', 'Pisá sólo múltiplos de 7.', 'Si pisás otro, volvés al inicio.'],
+       truco: '<b>La del 7 es la más difícil: memorizá las “raras”.</b> 7 × 7 = 49 y 7 × 8 = 56 (5, 6, 7, 8).' },
+  8: { nombre: 'Bomba', tipo: 'Presión', color: '#ff4d6d', listo: false,
+       corto: 'Cada respuesta correcta corta un cable. El reloj no perdona.',
+       desc: 'Una bomba con 10 cables y una cuenta regresiva. Cada respuesta correcta corta un cable; cada error adelanta el reloj.',
+       pasos: ['Respondé la cuenta del cable encendido.', 'Acierto: se corta el cable.', 'Error: el reloj pierde 3 segundos.'],
+       truco: '<b>× 8 es doblar tres veces.</b> 8 × 6: 6 → 12 → 24 → 48.' },
+  9: { nombre: 'Jefe final', tipo: 'Boss', color: '#8b5cff', listo: false,
+       corto: 'Bajale la vida al jefe con respuestas correctas. Si fallás, te pega.',
+       desc: 'Un jefe con una barra de vida. Cada respuesta correcta es un golpe; cada error, él te golpea a vos. Rápido = golpe crítico.',
+       pasos: ['Respondé para atacar.', 'Responder rápido hace golpes críticos.', 'Tenés 3 vidas.'],
+       truco: '<b>Truco de los dedos:</b> para 9 × 4 bajá el 4.º dedo. Quedan 3 a la izquierda y 6 a la derecha: 36.' },
+};
+const FINAL = { nombre: 'Desafío final', tipo: 'Todas mezcladas · supervivencia', color: '#ffc53d',
+  corto: 'Todas las tablas mezcladas hasta que falles. Se desbloquea con al menos 1 estrella en las 9 tablas.' };
+const METAS = ['Terminá el minijuego', 'Acertá el 80 % o más', 'Acertá todo y rápido'];
+
+// ---------- sesión y progreso ----------
+const sesion = (() => { try { return JSON.parse(localStorage.getItem('aprender.sesion')); } catch (e) { return null; } })();
+const CLAVE = 'factorx.' + (sesion && sesion.apodo ? sesion.apodo.toLowerCase() : 'invitado');
+// progreso = { 1: { estrellas: 0-3, mejor: puntos }, ... }
+let progreso = {};
+try { progreso = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) {}
+const prog = n => progreso[n] || { estrellas: 0, mejor: 0 };
+// se desbloquean de a una: la tabla n se abre con al menos 1 estrella en la n-1
+const abierta = n => n === 1 || prog(n - 1).estrellas > 0;
+const estrellas = n => '<span class="estrellas" aria-label="' + n + ' de 3 estrellas">' +
+  '<b>★</b>'.repeat(n) + '★'.repeat(3 - n) + '</span>';
+
+if (sesion && sesion.apodo) {
+  $('chip').classList.remove('invitado');
+  $('chipCara').textContent = sesion.apodo[0].toUpperCase();
+  $('chipNom').textContent = sesion.apodo;
+}
+if (location.search) $('volverInicio').href += location.search;   // mantiene ?api=
+
+// ---------- pantalla de inicio ----------
+function pintarInicio() {
+  let tot = 0, dom = 0, pts = 0, todas = true;
+  let html = '';
+  for (let n = 1; n <= 9; n++) {
+    const j = JUEGOS[n], p = prog(n);
+    tot += p.estrellas; pts += p.mejor;
+    if (p.estrellas === 3) dom++;
+    if (p.estrellas === 0) todas = false;
+    if (!abierta(n)) {
+      html += '<button class="tabla bloqueada" aria-disabled="true" style="--c:' + j.color + '">' +
+        '<span class="num">🔒</span>' +
+        '<div class="cab"><div class="tipo">Tabla del ' + n + '</div><h3>' + esc(j.nombre) + '</h3></div>' +
+        '<p>Conseguí al menos 1 estrella en la tabla del ' + (n - 1) + ' para desbloquearla.</p>' +
+        '<div class="pie">' + estrellas(0) + '<span class="mejor">Bloqueada</span></div></button>';
+      continue;
+    }
+    html += '<button class="tabla" data-n="' + n + '" style="--c:' + j.color + '">' +
+      '<span class="num"><i>×</i>' + n + '</span>' +
+      '<div class="cab"><div class="tipo">' + esc(j.tipo) + '</div><h3>' + esc(j.nombre) + '</h3></div>' +
+      '<p>' + esc(j.corto) + '</p>' +
+      '<div class="pie">' + estrellas(p.estrellas) +
+      '<span class="mejor">' + (p.mejor ? 'Mejor <b>' + p.mejor + '</b>' : (j.listo ? 'Sin jugar' : 'Próximamente')) + '</span></div>' +
+      '</button>';
+  }
+  html += '<button class="tabla final' + (todas ? '' : ' bloqueada') + '" ' + (todas ? '' : 'aria-disabled="true" ') + 'style="--c:' + FINAL.color + '">' +
+    '<span class="num">' + (todas ? '∞' : '🔒') + '</span>' +
+    '<div class="cab"><div class="tipo">' + esc(FINAL.tipo) + '</div><h3>' + esc(FINAL.nombre) + '</h3></div>' +
+    '<p>' + esc(FINAL.corto) + '</p></button>';
+  $('tablas').innerHTML = html;
+  $('totEstrellas').innerHTML = tot + '<small>/27</small>';
+  $('totDominadas').innerHTML = dom + '<small>/9</small>';
+  $('totPuntos').textContent = pts;
+}
+$('tablas').addEventListener('click', e => {
+  const b = e.target.closest('.tabla[data-n]');
+  if (b) location.hash = 'tabla-' + b.dataset.n;
+});
+
+// ---------- detalle de una tabla ----------
+let tablaActual = 1;
+function pintarDetalle(n) {
+  tablaActual = n;
+  const j = JUEGOS[n], p = prog(n);
+  $('detalle').style.setProperty('--c', j.color);
+  $('dNum').innerHTML = '<i>×</i>' + n;
+  $('dTipo').textContent = 'Tabla del ' + n + ' · ' + j.tipo;
+  $('dTitulo').textContent = j.nombre;
+  $('dTablaTit').textContent = 'La tabla del ' + n;
+  let filas = '';
+  for (let i = 1; i <= 10; i++)
+    filas += '<div class="fila"><span class="op">' + n + ' × ' + i + '</span><span class="res">' + n * i + '</span></div>';
+  $('dLista').innerHTML = filas;
+  $('dTruco').innerHTML = j.truco;
+  $('dDesc').textContent = j.desc;
+  $('dPasos').innerHTML = j.pasos.map((t, i) => '<li><span>' + (i + 1) + '</span>' + esc(t) + '</li>').join('');
+  $('dMetas').innerHTML = (j.metas || METAS).map((t, i) =>
+    '<div class="meta' + (p.estrellas > i ? ' ok' : '') + '">' + estrellas(i + 1) + '<span>' + t + '</span></div>').join('');
+  $('dMejor').innerHTML = p.mejor ? 'Tu mejor: <b>' + p.mejor + '</b> pts' : '';
+  $('jugarBtn').disabled = !j.listo;
+  $('dAviso').hidden = j.listo;
+}
+$('ocultarBtn').addEventListener('click', () => {
+  const on = $('panelTabla').classList.toggle('oculto');
+  $('ocultarBtn').setAttribute('aria-pressed', String(on));
+  $('ocultarBtn').textContent = on ? 'Mostrar resultados' : 'Ocultar resultados';
+});
+$('dVolver').addEventListener('click', () => { location.hash = ''; });
+$('jugarBtn').addEventListener('click', () => { location.hash = 'jugar-' + tablaActual; });
+
+// ---------- servidor (el mismo que usa todo el sitio) ----------
+// ?api=http://localhost:8787 usa el servidor local. Sólo se acepta la propia computadora.
+const API = (() => {
+  const q = new URLSearchParams(location.search).get('api');
+  return q && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(q) ? q
+    : 'https://br-fancy-cherry-auqw065l-clase.compute.c-10.us-east-1.aws.neon.tech';
+})();
+function enviarResultado(puntos, ms) {
+  if (!sesion || !sesion.token) return Promise.resolve('invitado');
+  if (!puntos) return Promise.resolve('cero');
+  return fetch(API + '/resultado', { method: 'POST', headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ token: sesion.token, r: { app: 'tablas', m: 'p', p: Math.min(5000, puntos), ms: Math.round(ms), lg: 'es' } }) })
+    .then(r => r.json()).then(r => r.ok ? 'ok' : r.error === 'sesion' ? 'sesion' : 'error')
+    .catch(() => 'error');
+}
+const guardarProgreso = () => { try { localStorage.setItem(CLAVE, JSON.stringify(progreso)); } catch (e) {} };
+
+// ---------- sonido ----------
+let sonido = true, audio;
+try { sonido = localStorage.getItem('factorx.sonido') !== '0'; } catch (e) {}
+function pintarSonido() {
+  $('sonidoBtn').textContent = sonido ? '🔊' : '🔇';
+  $('sonidoBtn').setAttribute('aria-pressed', String(sonido));
+}
+$('sonidoBtn').addEventListener('click', () => {
+  sonido = !sonido; pintarSonido();
+  try { localStorage.setItem('factorx.sonido', sonido ? '1' : '0'); } catch (e) {}
+});
+pintarSonido();
+function bip(frec, dur = .09, tipo = 'sine', vol = .07) {
+  if (!sonido) return;
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const t = audio.currentTime, o = audio.createOscillator(), g = audio.createGain();
+    o.type = tipo; o.frequency.value = frec;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g).connect(audio.destination); o.start(t); o.stop(t + dur);
+  } catch (e) {}
+}
+
+// ---------- motor común de los minijuegos ----------
+// Cada minijuego recibe `motor` y usa: escenario, espera, cuadro, reloj, acierto, error, opciones, fin.
+const partida = { activa: false, timers: [], raf: 0, onTecla: null, onElegir: null };
+function limpiar() {
+  partida.activa = false; partida.onTecla = null; partida.onElegir = null;
+  partida.timers.forEach(clearTimeout); partida.timers = [];
+  cancelAnimationFrame(partida.raf);
+}
+const mezclar = a => { for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(Math.random() * (i + 1)); [a[i], a[k]] = [a[k], a[i]]; } return a; };
+const multi = () => Math.min(4, 1 + Math.floor(partida.racha / 5));
+function hud() {
+  $('hAciertos').textContent = partida.aciertos;
+  $('hPuntos').textContent = partida.puntos;
+  $('hMulti').textContent = '×' + multi();
+  $('hCombo').classList.toggle('on', multi() > 1);
+}
+const motor = {
+  get escenario() { return $('escenario'); },
+  espera(fn, ms) { partida.timers.push(setTimeout(fn, ms)); },
+  cuadro(fn) { partida.raf = requestAnimationFrame(fn); },
+  // barra de tiempo: frac de 1 a 0, y los segundos que quedan
+  reloj(frac, seg) {
+    $('tiempoBarra').style.transform = 'scaleX(' + Math.max(0, frac) + ')';
+    $('tiempo').classList.toggle('apuro', seg <= 5);
+    $('hTiempo').textContent = Math.max(0, seg);
+  },
+  acierto(base = 10) {
+    partida.aciertos++; partida.racha++;
+    partida.mejorRacha = Math.max(partida.mejorRacha, partida.racha);
+    const pts = base * multi();
+    partida.puntos += pts; hud();
+    bip(620 + Math.min(partida.racha, 12) * 45);
+    return pts;
+  },
+  error() {
+    partida.errores++; partida.racha = 0; hud();
+    bip(150, .2, 'square', .045);
+    const e = $('escenario'); e.classList.remove('sacude'); void e.offsetWidth; e.classList.add('sacude');
+  },
+  // "+20" que sube desde un elemento
+  flota(texto, el) {
+    const r = el.getBoundingClientRect(), base = $('escenario').getBoundingClientRect();
+    const f = document.createElement('span');
+    f.className = 'flota'; f.textContent = texto;
+    f.style.left = (r.left - base.left + r.width / 2) + 'px'; f.style.top = (r.top - base.top - 10) + 'px';
+    $('escenario').appendChild(f);
+    setTimeout(() => f.remove(), 800);
+  },
+  // 4 respuestas para n × k: la correcta y 3 parecidas (las de al lado en la tabla, ±1, ±2…)
+  opciones(n, k) {
+    const c = n * k, set = new Set();
+    mezclar([n * (k + 1), n * (k - 1), c + 1, c - 1, c + 2, c - 2, c + 10, (n + 1) * k, (n - 1) * k])
+      .forEach(v => { if (v > 0 && v !== c && set.size < 3) set.add(v); });
+    while (set.size < 3) { const v = 1 + Math.floor(Math.random() * (c + 10)); if (v !== c) set.add(v); }
+    return mezclar([c, ...set]);
+  },
+  fin() { terminar(); },
+};
+
+function jugar(n) {
+  limpiar();
+  const j = JUEGOS[n];
+  $('juego').style.setProperty('--c', j.color);
+  $('jTipo').textContent = 'Tabla del ' + n + ' · ' + j.tipo;
+  $('jTitulo').textContent = j.nombre;
+  Object.assign(partida, { n, puntos: 0, aciertos: 0, errores: 0, racha: 0, mejorRacha: 0 });
+  $('resultado').hidden = true; $('escenario').hidden = false; $('tiempo').hidden = false;
+  hud(); motor.reloj(1, j.segundos || 30);
+  let k = 3;
+  const paso = () => {
+    if (k === 0) { partida.activa = true; partida.t0 = performance.now(); MINIJUEGOS[n](motor); return; }
+    $('escenario').innerHTML = '<div class="cuenta" aria-live="polite">' + k + '</div>';
+    bip(k === 1 ? 660 : 440, .12); k--;
+    motor.espera(paso, 650);
+  };
+  paso();
+}
+
+const TITULOS = ['Seguí practicando', '¡Bien!', '¡Muy bien!', '¡Perfecto!'];
+function terminar() {
+  if (!partida.activa) return;
+  const ms = performance.now() - partida.t0;
+  limpiar();
+  const n = partida.n, j = JUEGOS[n], antes = prog(n);
+  const total = partida.aciertos + partida.errores;
+  partida.precision = total ? Math.round(partida.aciertos * 100 / total) : 0;
+  const est = j.estrellas(partida);
+  const siguienteAntes = n < 9 && abierta(n + 1);
+  const record = partida.puntos > antes.mejor;
+  progreso[n] = { estrellas: Math.max(antes.estrellas, est), mejor: Math.max(antes.mejor, partida.puntos) };
+  guardarProgreso();
+  const desbloqueo = n < 9 && !siguienteAntes && abierta(n + 1);
+
+  $('escenario').hidden = true; $('tiempo').hidden = true; $('resultado').hidden = false;
+  $('rEstrellas').innerHTML = '<b>★</b>'.repeat(est) + '★'.repeat(3 - est);
+  $('rEstrellas').setAttribute('aria-label', est + ' de 3 estrellas');
+  $('rTitulo').textContent = TITULOS[est];
+  const metas = j.metas || METAS;
+  $('rSub').textContent = est < 3 ? 'Para ' + (est + 1) + (est ? ' estrellas' : ' estrella') + ': ' + metas[est].toLowerCase() + '.'
+                                  : '¡Tabla del ' + n + ' dominada!';
+  $('rAciertos').textContent = partida.aciertos;
+  $('rPrecision').textContent = partida.precision + '%';
+  $('rRacha').textContent = partida.mejorRacha;
+  $('rPuntos').textContent = partida.puntos;
+  $('rInsignias').innerHTML =
+    (record && partida.puntos ? '<span class="insignia">🏆 Nuevo récord</span>' : '') +
+    (est > antes.estrellas && antes.estrellas ? '<span class="insignia">⭐ Nueva estrella</span>' : '') +
+    (desbloqueo ? '<span class="insignia lima">🔓 Tabla del ' + (n + 1) + ' desbloqueada</span>' : '');
+  const sig = n < 9 && abierta(n + 1);
+  $('rSiguiente').hidden = !sig;
+  $('rSiguiente').textContent = 'Tabla del ' + (n + 1) + ' →';
+  bip(est ? 880 : 300, .25, 'triangle', .06);
+
+  $('rServidor').textContent = '';
+  enviarResultado(partida.puntos, ms).then(e => {
+    $('rServidor').textContent = {
+      ok: '✓ Puntos sumados al ranking general',
+      invitado: 'Jugás como invitado: entrá con tu apodo para sumar al ranking',
+      sesion: 'Tu sesión venció: volvé a entrar para sumar al ranking',
+      error: 'No se pudieron guardar los puntos en el ranking (¿hay internet?)',
+    }[e] || '';
+  });
+}
+$('rOtra').addEventListener('click', () => jugar(partida.n));
+$('rVolver').addEventListener('click', () => { location.hash = 'tabla-' + partida.n; });
+$('rSiguiente').addEventListener('click', () => { location.hash = 'tabla-' + (partida.n + 1); });
+$('jSalir').addEventListener('click', () => { location.hash = 'tabla-' + partida.n; });
+$('escenario').addEventListener('click', e => {
+  const b = e.target.closest('.opcion');
+  if (b && partida.onElegir) partida.onElegir(b);
+});
+document.addEventListener('keydown', e => {
+  if ($('juego').hidden) return;
+  if (e.key === 'Escape') { location.hash = 'tabla-' + partida.n; return; }
+  if (partida.onTecla) partida.onTecla(e);
+});
+
+// ---------- los minijuegos ----------
+const MINIJUEGOS = {};
+
+// ×1 · Espejo: 30 segundos, 4 opciones por cuenta
+MINIJUEGOS[1] = m => {
+  const DUR = 30000, fin = performance.now() + DUR;
+  let ultimo = 0, bloqueado = false, c = 0;
+  function pregunta() {
+    let k; do k = 1 + Math.floor(Math.random() * 10); while (k === ultimo);
+    ultimo = k; c = k; bloqueado = false;
+    const txt = Math.random() < .3 ? k + ' × 1' : '1 × ' + k;   // a veces al revés: el orden no importa
+    m.escenario.innerHTML =
+      '<div class="pregunta" aria-live="polite"><span>' + txt + '</span><span class="igual">=</span><span class="hueco" id="hueco">?</span></div>' +
+      '<div class="opciones">' + m.opciones(1, k).map((v, i) =>
+        '<button class="opcion" data-v="' + v + '"><kbd>' + (i + 1) + '</kbd>' + v + '</button>').join('') + '</div>';
+  }
+  partida.onElegir = b => {
+    if (bloqueado || !partida.activa) return;
+    bloqueado = true;
+    const hueco = $('hueco');
+    hueco.textContent = c;
+    if (+b.dataset.v === c) {
+      b.classList.add('bien'); hueco.classList.add('bien');
+      m.flota('+' + m.acierto(), b);
+      m.espera(pregunta, 220);
+    } else {
+      b.classList.add('mal'); hueco.classList.add('mal');
+      m.escenario.querySelector('.opcion[data-v="' + c + '"]').classList.add('era');
+      m.error();
+      m.espera(pregunta, 700);
+    }
+  };
+  partida.onTecla = e => {
+    const i = '1234'.indexOf(e.key);
+    if (i >= 0) { const b = m.escenario.querySelectorAll('.opcion')[i]; if (b) partida.onElegir(b); }
+  };
+  const tick = () => {
+    const resta = fin - performance.now();
+    m.reloj(resta / DUR, Math.ceil(resta / 1000));
+    if (resta <= 0) return m.fin();
+    m.cuadro(tick);
+  };
+  pregunta(); tick();
+};
+
+// ---------- navegación: #tabla-N (detalle) y #jugar-N (partida) ----------
+function ruta() {
+  let m = location.hash.match(/^#(tabla|jugar)-([1-9])$/);
+  if (m && (!abierta(+m[2]) || (m[1] === 'jugar' && !JUEGOS[+m[2]].listo))) {
+    history.replaceState(null, '', location.pathname + location.search); m = null;
+  }
+  limpiar();
+  const vista = m ? (m[1] === 'jugar' ? 'juego' : 'detalle') : 'inicio';
+  ['inicio', 'detalle', 'juego'].forEach(id => { $(id).hidden = id !== vista; });
+  if (vista === 'juego') jugar(+m[2]);
+  else if (vista === 'detalle') pintarDetalle(+m[2]);
+  else pintarInicio();
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', ruta);
+ruta();
+</script>
+</body>
+</html>

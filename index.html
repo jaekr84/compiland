@@ -4,37 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>¡A Jugar!</title>
-<meta name="description" content="Juegos para chicos de primaria.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎈</text></svg>">
+<meta name="description" content="Juegos para practicar, competir y subir en el ranking.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='14' y='14' width='72' height='72' rx='16' fill='%230a0c11' stroke='%23b8ff3c' stroke-width='6'/><text x='50' y='66' text-anchor='middle' font-family='monospace' font-weight='700' font-size='44' fill='%23b8ff3c'>A</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lexend:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
+  /* estética oscura tipo gamer: fondo casi negro, grilla sutil, acentos neón */
   :root{
-    --cielo:#bfe6ff; --cielo-2:#e6f6ff; --pasto:#9fdc7c;
-    --surface:#ffffff; --surface-2:#f4f9ff; --line:#d6e4f0;
-    --ink:#1d2b3a; --muted:#56687a; --faint:#8fa1b3;
-    --sol:#ffc93c; --rojo:#ff6b6b; --naranja:#ff9f43; --verde:#2ecc71; --azul:#3d8bfd; --violeta:#9b6bff; --rosa:#ff7eb6;
-    --btn:#ff9f43; --btn-borde:#e0801f; --btn-ink:#ffffff;
-    --shadow-card:0 6px 0 rgba(29,43,58,.08), 0 18px 40px rgba(29,43,58,.12);
-    --display:'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
-    --body:'Lexend', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    color-scheme:light;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --cielo:#1b2a4a; --cielo-2:#23365c; --pasto:#2f5d3a;
-      --surface:#1e2a3d; --surface-2:#18233a; --line:#33476a;
-      --ink:#f1f6ff; --muted:#a9b9d0; --faint:#7487a3;
-      --shadow-card:0 6px 0 rgba(0,0,0,.25), 0 18px 40px rgba(0,0,0,.35);
-      color-scheme:dark;
-    }
-  }
-  :root[data-theme="dark"]{
-    --cielo:#1b2a4a; --cielo-2:#23365c; --pasto:#2f5d3a;
-    --surface:#1e2a3d; --surface-2:#18233a; --line:#33476a;
-    --ink:#f1f6ff; --muted:#a9b9d0; --faint:#7487a3;
-    --shadow-card:0 6px 0 rgba(0,0,0,.25), 0 18px 40px rgba(0,0,0,.35);
+    --bg:#0a0c11; --surface:#12151d; --surface-2:#0e1118; --line:#232a37;
+    --ink:#eef1f7; --muted:#98a2b6; --faint:#5f6a80;
+    --lima:#b8ff3c; --violeta:#8b5cff; --rosa:#ff4d8d; --cian:#2ee6c5; --rojo:#ff4d6d; --oro:#ffc53d;
+    --btn:var(--lima); --btn-ink:#0a0c11;
+    --shadow-card:0 0 0 1px rgba(255,255,255,.02), 0 18px 50px rgba(0,0,0,.5);
+    --display:'Space Grotesk', system-ui, sans-serif;
+    --body:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     color-scheme:dark;
   }
   *{box-sizing:border-box}
@@ -42,195 +27,215 @@
   html,body{margin:0; min-height:100%}
   body{
     font-family:var(--body); font-size:16px; line-height:1.5; color:var(--ink);
-    background:linear-gradient(to bottom, var(--cielo) 0%, var(--cielo-2) 70%, var(--pasto) 70.1%, var(--pasto) 100%);
-    background-attachment:fixed; min-height:100vh; overflow-x:hidden;
+    background:var(--bg); min-height:100vh; overflow-x:hidden;
     -webkit-font-smoothing:antialiased;
   }
   button, input{font:inherit; color:inherit}
   button{cursor:pointer}
 
-  /* ---------- decorado ---------- */
+  /* ---------- fondo ---------- */
   .fondo{position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden}
-  .sol{position:absolute; top:28px; right:7%; width:92px; height:92px; border-radius:50%;
-    background:var(--sol); box-shadow:0 0 0 14px color-mix(in srgb, var(--sol) 30%, transparent), 0 0 0 30px color-mix(in srgb, var(--sol) 14%, transparent)}
-  .nube{position:absolute; background:#fff; border-radius:999px; opacity:.92}
-  .nube::before,.nube::after{content:""; position:absolute; background:inherit; border-radius:50%}
-  .nube::before{width:55%; height:160%; left:14%; bottom:20%}
-  .nube::after{width:40%; height:120%; right:12%; bottom:25%}
-  .n1{width:150px; height:42px; top:70px; left:6%; animation:flota 26s linear infinite alternate}
-  .n2{width:110px; height:32px; top:170px; right:24%; animation:flota 32s linear infinite alternate-reverse}
-  .n3{width:130px; height:36px; top:330px; left:62%; opacity:.7; animation:flota 38s linear infinite alternate}
-  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .nube{opacity:.12} :root:not([data-theme="light"]) .sol{background:#f3efd2; box-shadow:inset -18px -6px 0 #d9d3ad, 0 0 0 14px rgba(243,239,210,.08)} }
-  :root[data-theme="dark"] .nube{opacity:.12}
-  :root[data-theme="dark"] .sol{background:#f3efd2; box-shadow:inset -18px -6px 0 #d9d3ad, 0 0 0 14px rgba(243,239,210,.08)}
-  @keyframes flota{to{transform:translateX(60px)}}
+  .fondo .grilla{position:absolute; inset:0;
+    background:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px) 0 0/44px 44px,
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px) 0 0/44px 44px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
+            mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%)}
+  .fondo .luz{position:absolute; border-radius:50%; filter:blur(90px); opacity:.35}
+  .fondo .l1{width:520px; height:520px; top:-200px; right:-120px; background:var(--violeta)}
+  .fondo .l2{width:420px; height:420px; bottom:-220px; left:-140px; background:var(--lima); opacity:.12}
 
   .wrap{position:relative; z-index:1; max-width:1040px; margin:0 auto; padding:22px 16px 48px}
   header{display:flex; align-items:center; gap:10px; margin-bottom:10px}
-  .marca{font-family:var(--display); font-weight:800; font-size:clamp(26px,5vw,34px); line-height:1; margin:0}
-  .marca span:nth-child(1){color:var(--rojo)} .marca span:nth-child(2){color:var(--naranja)}
-  .marca span:nth-child(3){color:var(--sol)} .marca span:nth-child(4){color:var(--verde)}
-  .marca span:nth-child(5){color:var(--azul)} .marca span:nth-child(6){color:var(--violeta)}
-  .marca span:nth-child(7){color:var(--rosa)} .marca span:nth-child(8){color:var(--rojo)}
-  .marca span{display:inline-block}
-  .marca span:nth-child(odd){transform:rotate(-4deg)} .marca span:nth-child(even){transform:translateY(-2px) rotate(3deg)}
+  .marca{font-family:var(--display); font-weight:700; font-size:clamp(22px,4.4vw,28px); line-height:1; margin:0;
+    letter-spacing:-.04em; display:flex; align-items:center; gap:10px}
+  .marca::before{content:""; width:10px; height:10px; border-radius:3px; background:var(--lima);
+    box-shadow:0 0 14px var(--lima); transform:rotate(45deg)}
+  .marca em{font-style:normal; color:var(--lima)}
   header .acciones{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
-  header .rankBtn{--btn:var(--sol); --btn-borde:#d9a21c; --btn-ink:#5a3b00}
 
-  /* ---------- botones tipo caramelo ---------- */
+  /* ---------- botones ---------- */
   .boton{
-    border:0; border-radius:18px; padding:12px 22px; font-family:var(--display); font-weight:800; font-size:20px;
-    background:var(--btn); color:var(--btn-ink); box-shadow:0 5px 0 var(--btn-borde);
-    transition:transform .08s, box-shadow .08s; line-height:1.1;
+    border:1px solid transparent; border-radius:12px; padding:12px 22px; font-family:var(--display); font-weight:700; font-size:17px;
+    letter-spacing:-.01em; background:var(--btn); color:var(--btn-ink); line-height:1.1;
+    box-shadow:0 0 24px color-mix(in srgb, var(--btn) 28%, transparent);
+    transition:transform .12s, box-shadow .12s, filter .12s;
   }
-  .boton:active{transform:translateY(4px); box-shadow:0 1px 0 var(--btn-borde)}
-  .boton:disabled{opacity:.55; cursor:default}
-  .boton.verde{--btn:var(--verde); --btn-borde:#1f9e55}
-  .boton.azul{--btn:var(--azul); --btn-borde:#2468d1}
-  .boton.blanco{--btn:var(--surface); --btn-borde:var(--line); --btn-ink:var(--ink)}
-  .boton.chico{font-size:15px; padding:8px 14px; border-radius:13px}
-  .boton:focus-visible, .tecla:focus-visible, .link:focus-visible{outline:3px solid var(--violeta); outline-offset:3px}
+  .boton:hover{transform:translateY(-1px); box-shadow:0 0 32px color-mix(in srgb, var(--btn) 45%, transparent)}
+  .boton:active{transform:translateY(1px)}
+  .boton:disabled{opacity:.5; cursor:default}
+  .boton.verde{--btn:var(--lima)}
+  .boton.azul{--btn:var(--violeta); --btn-ink:#fff}
+  .boton.blanco{--btn:transparent; --btn-ink:var(--ink); border-color:var(--line); box-shadow:none; background:color-mix(in srgb, var(--surface) 70%, transparent)}
+  .boton.blanco:hover{border-color:var(--faint); box-shadow:none}
+  .boton.chico{font-size:14px; padding:8px 14px; border-radius:10px}
+  header .rankBtn{--btn:transparent; --btn-ink:var(--oro); border-color:color-mix(in srgb, var(--oro) 40%, transparent); box-shadow:none;
+    background:color-mix(in srgb, var(--oro) 8%, transparent)}
+  header .rankBtn:hover{box-shadow:0 0 20px color-mix(in srgb, var(--oro) 25%, transparent)}
+  .boton:focus-visible, .tecla:focus-visible, .link:focus-visible{outline:2px solid var(--lima); outline-offset:3px}
 
   /* ---------- entrada ---------- */
-  .entrada{display:grid; grid-template-columns:1fr minmax(0,440px); gap:28px; align-items:center; margin-top:18px}
-  .saludo h2{font-family:var(--display); font-weight:800; font-size:clamp(34px,6vw,56px); line-height:1.02; margin:0 0 12px}
-  .saludo p{font-size:clamp(16px,2.4vw,19px); color:var(--muted); margin:0; max-width:34ch}
-  .amigos{display:flex; align-items:flex-end; gap:4px; margin:18px 0 0}
-  .mascota{width:min(200px,38vw); display:block; animation:salta 2.6s ease-in-out infinite}
-  .mascota.rosa{animation-delay:-1.3s; margin-left:-14px}
-  @keyframes salta{50%{transform:translateY(-10px) rotate(-2deg)}}
+  .entrada{display:grid; grid-template-columns:1fr minmax(0,420px); gap:36px; align-items:center; margin-top:34px}
+  .etiqueta{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--lima); border:1px solid color-mix(in srgb, var(--lima) 30%, transparent);
+    background:color-mix(in srgb, var(--lima) 7%, transparent); border-radius:999px; padding:5px 12px; margin-bottom:18px}
+  .etiqueta::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--lima); box-shadow:0 0 8px var(--lima)}
+  .saludo h2{font-family:var(--display); font-weight:700; font-size:clamp(38px,6.6vw,68px); line-height:.98; letter-spacing:-.045em; margin:0 0 16px}
+  .saludo h2 .brillo{background:linear-gradient(90deg, var(--lima), var(--cian) 55%, var(--violeta));
+    -webkit-background-clip:text; background-clip:text; color:transparent}
+  .saludo p{font-size:clamp(16px,2.2vw,18px); color:var(--muted); margin:0; max-width:36ch}
+  .keycaps{display:flex; gap:12px; margin:30px 0 0}
+  .keycaps span{
+    width:clamp(54px,9vw,70px); aspect-ratio:1; border-radius:14px; display:grid; place-items:center;
+    font-family:var(--mono); font-weight:700; font-size:clamp(20px,3.4vw,26px); color:var(--k);
+    background:linear-gradient(180deg, #1c2130, #12151d); border:1px solid color-mix(in srgb, var(--k) 45%, var(--line));
+    box-shadow:0 6px 0 #07090d, 0 0 26px color-mix(in srgb, var(--k) 25%, transparent), inset 0 1px 0 rgba(255,255,255,.06);
+    animation:tecleo 3.6s ease-in-out infinite; animation-delay:var(--d);
+  }
+  @keyframes tecleo{0%,86%,100%{transform:none} 90%{transform:translateY(5px); box-shadow:0 1px 0 #07090d, 0 0 40px color-mix(in srgb, var(--k) 55%, transparent), inset 0 1px 0 rgba(255,255,255,.06)}}
 
   .tarjeta{
-    background:var(--surface); border-radius:28px; box-shadow:var(--shadow-card);
-    padding:24px 22px 22px; display:flex; flex-direction:column; gap:14px;
+    background:color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter:blur(12px);
+    border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow-card);
+    padding:22px; display:flex; flex-direction:column; gap:14px;
   }
-  .tarjeta h3{font-family:var(--display); font-weight:800; font-size:26px; margin:0; text-align:center; line-height:1.1}
-  .pestanas{display:grid; grid-template-columns:1fr 1fr; gap:6px; background:var(--surface-2); padding:5px; border-radius:16px}
-  .pestanas button{border:0; background:none; border-radius:12px; padding:9px; font-weight:600; font-size:15px; color:var(--muted)}
-  .pestanas button[aria-pressed="true"]{background:var(--surface); color:var(--ink); box-shadow:0 2px 0 var(--line)}
+  .tarjeta h3{font-family:var(--display); font-weight:700; font-size:22px; letter-spacing:-.02em; margin:0; line-height:1.15}
+  .pestanas{display:grid; grid-template-columns:1fr 1fr; gap:4px; background:var(--surface-2); padding:4px; border-radius:12px; border:1px solid var(--line)}
+  .pestanas button{border:0; background:none; border-radius:9px; padding:8px; font-weight:500; font-size:14px; color:var(--muted)}
+  .pestanas button[aria-pressed="true"]{background:var(--surface); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line)}
   .campo{display:flex; flex-direction:column; gap:6px}
-  .campo > span{font-weight:600; font-size:14px; color:var(--muted)}
+  .campo > span{font-family:var(--mono); font-weight:500; font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
   .campo input.apodo{
-    font-family:var(--display); font-weight:700; font-size:22px; padding:10px 16px;
-    border:3px solid var(--line); border-radius:16px; background:var(--surface-2); outline:none;
+    font-family:var(--display); font-weight:600; font-size:19px; padding:11px 14px;
+    border:1px solid var(--line); border-radius:12px; background:var(--surface-2); outline:none;
+    transition:border-color .15s, box-shadow .15s;
   }
-  .campo input.apodo:focus{border-color:var(--azul)}
-  .pin{position:relative; display:flex; gap:10px; justify-content:center}
+  .campo input.apodo::placeholder{color:var(--faint)}
+  .campo input.apodo:focus{border-color:var(--lima); box-shadow:0 0 0 3px color-mix(in srgb, var(--lima) 15%, transparent)}
+  .pin{position:relative; display:flex; gap:10px}
   .pin .caja{
-    width:58px; height:64px; border-radius:16px; border:3px solid var(--line); background:var(--surface-2);
-    display:grid; place-items:center; font-size:30px; color:var(--ink);
+    flex:1; height:56px; border-radius:12px; border:1px solid var(--line); background:var(--surface-2);
+    display:grid; place-items:center; font-size:22px; color:var(--lima);
   }
-  .pin .caja.llena{border-color:var(--verde); background:color-mix(in srgb, var(--verde) 12%, var(--surface))}
-  .pin .caja.cursor{border-color:var(--azul)}
+  .pin .caja.llena{border-color:color-mix(in srgb, var(--lima) 50%, var(--line))}
+  .pin .caja.cursor{border-color:var(--lima); box-shadow:0 0 0 3px color-mix(in srgb, var(--lima) 15%, transparent)}
   .pin input{position:absolute; inset:0; opacity:0; width:100%; height:100%; border:0; font-size:16px}
-  .teclado{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .teclado{display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
   .tecla{
-    border:0; border-radius:14px; padding:10px 0; font-family:var(--display); font-weight:800; font-size:22px;
-    background:var(--surface-2); box-shadow:0 4px 0 var(--line); color:var(--ink);
+    border:1px solid var(--line); border-radius:10px; padding:9px 0; font-family:var(--mono); font-weight:500; font-size:18px;
+    background:var(--surface-2); color:var(--ink); transition:border-color .1s, background .1s;
   }
-  .tecla:active{transform:translateY(3px); box-shadow:0 1px 0 var(--line)}
-  .tecla.borrar{font-size:18px}
+  .tecla:hover{border-color:var(--faint)}
+  .tecla:active{background:color-mix(in srgb, var(--lima) 14%, var(--surface-2)); border-color:var(--lima)}
+  .tecla.borrar{font-size:16px; color:var(--muted)}
   .aviso{
-    margin:0; border-radius:14px; padding:10px 14px; font-weight:500; font-size:14.5px; text-align:center;
-    background:color-mix(in srgb, var(--rojo) 14%, var(--surface)); color:color-mix(in srgb, var(--rojo) 75%, var(--ink));
+    margin:0; border-radius:10px; padding:10px 14px; font-weight:500; font-size:14px;
+    background:color-mix(in srgb, var(--rojo) 10%, transparent); color:var(--rojo);
+    border:1px solid color-mix(in srgb, var(--rojo) 30%, transparent);
   }
   .nota{margin:0; text-align:center; font-size:13px; color:var(--faint)}
-  .link{background:none; border:0; color:var(--azul); font-weight:600; text-decoration:underline; text-underline-offset:3px; padding:4px}
+  .link{background:none; border:0; color:var(--muted); font-weight:500; text-decoration:underline; text-underline-offset:3px; padding:4px}
+  .link:hover{color:var(--ink)}
 
   /* ---------- juegos ---------- */
-  .hola{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin:14px 0 22px}
-  .hola h2{font-family:var(--display); font-weight:800; font-size:clamp(30px,5vw,46px); line-height:1.05; margin:0}
+  .hola{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin:26px 0 24px}
+  .hola h2{font-family:var(--display); font-weight:700; font-size:clamp(30px,5vw,48px); line-height:1.02; letter-spacing:-.04em; margin:0}
   .medalla{
-    display:inline-flex; align-items:center; gap:8px; background:var(--surface); border-radius:999px;
-    padding:7px 16px 7px 10px; box-shadow:0 4px 0 var(--line); font-weight:600; font-size:15px;
+    display:inline-flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:999px;
+    padding:7px 16px 7px 12px; font-weight:500; font-size:14px; color:var(--muted); cursor:pointer; font-family:inherit;
   }
-  .medalla b{font-family:var(--display); font-size:20px; color:var(--naranja)}
-  .grid{display:grid; gap:18px; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr))}
+  .medalla:hover{border-color:var(--faint)}
+  .medalla b{font-family:var(--mono); font-size:16px; color:var(--lima)}
+  .grid{display:grid; gap:16px; grid-template-columns:repeat(auto-fill, minmax(270px, 1fr))}
   .juego{
-    background:var(--surface); border-radius:26px; box-shadow:var(--shadow-card); overflow:hidden;
-    color:inherit; text-decoration:none; display:flex; flex-direction:column; transition:transform .15s;
+    background:var(--surface); border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow-card); overflow:hidden;
+    color:inherit; text-decoration:none; display:flex; flex-direction:column; transition:transform .18s, border-color .18s, box-shadow .18s;
   }
-  a.juego:hover{transform:translateY(-4px) rotate(-.5deg)}
-  a.juego:focus-visible{outline:4px solid var(--violeta); outline-offset:4px}
-  .juego .portada{height:140px; display:grid; place-items:center; background:var(--c)}
-  .juego .teclas{display:flex; gap:8px}
+  a.juego:hover{transform:translateY(-4px); border-color:color-mix(in srgb, var(--lima) 50%, var(--line));
+    box-shadow:var(--shadow-card), 0 0 40px color-mix(in srgb, var(--lima) 12%, transparent)}
+  a.juego:focus-visible{outline:2px solid var(--lima); outline-offset:4px}
+  .juego .portada{height:150px; display:grid; place-items:center; background:var(--c); position:relative}
+  .juego .portada::after{content:""; position:absolute; inset:0;
+    background:linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px) 0 0/22px 22px,
+      linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px) 0 0/22px 22px}
+  .juego .teclas{display:flex; gap:10px; position:relative; z-index:1}
   .juego .teclas span{
-    width:46px; height:48px; border-radius:12px; display:grid; place-items:center; background:#fff;
-    font-family:var(--display); font-weight:800; font-size:24px; color:var(--k); box-shadow:0 5px 0 rgba(0,0,0,.18);
+    width:50px; height:50px; border-radius:11px; display:grid; place-items:center; background:#12151d;
+    border:1px solid color-mix(in srgb, var(--k) 50%, transparent);
+    font-family:var(--mono); font-weight:700; font-size:21px; color:var(--k);
+    box-shadow:0 5px 0 #05060a, 0 0 22px color-mix(in srgb, var(--k) 35%, transparent);
   }
   .juego .teclas span:nth-child(2){transform:translateY(-8px)}
-  .juego .cuerpo{padding:16px 20px 20px; display:flex; flex-direction:column; gap:8px; flex:1}
-  .juego h3{font-family:var(--display); font-weight:800; font-size:26px; margin:0; line-height:1.05}
-  .juego p{margin:0; color:var(--muted); font-size:15px}
-  .juego .boton{align-self:flex-start; margin-top:auto}
-  .juego.pronto{background:color-mix(in srgb, var(--surface) 55%, transparent); box-shadow:none; border:3px dashed color-mix(in srgb, var(--ink) 18%, transparent)}
-  .juego.pronto .portada{background:none; font-size:52px}
+  .juego .cuerpo{padding:18px 20px 20px; display:flex; flex-direction:column; gap:8px; flex:1}
+  .juego h3{font-family:var(--display); font-weight:700; font-size:23px; letter-spacing:-.03em; margin:0; line-height:1.1}
+  .juego p{margin:0; color:var(--muted); font-size:14.5px}
+  .juego .boton{align-self:flex-start; margin-top:10px}
+  .juego.pronto{background:transparent; box-shadow:none; border:1px dashed var(--line)}
+  .juego.pronto .portada{background:none; font-family:var(--mono); font-size:15px; color:var(--faint); letter-spacing:.1em}
+  .juego.pronto .portada::after{display:none}
   .juego.pronto h3{color:var(--muted)}
 
   /* ---------- ranking ---------- */
-  .rank-cab{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:10px 0 16px}
-  .rank-cab h2{font-family:var(--display); font-weight:800; font-size:clamp(26px,4.6vw,40px); margin:0; line-height:1.05}
-  .periodo{max-width:360px; background:var(--surface); margin-bottom:22px}
-  .periodo button[aria-pressed="true"]{background:var(--violeta); color:#fff; box-shadow:0 3px 0 #7a4fe0}
+  .rank-cab{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin:18px 0 18px}
+  .rank-cab h2{font-family:var(--display); font-weight:700; font-size:clamp(26px,4.6vw,40px); letter-spacing:-.04em; margin:0; line-height:1.05}
+  .periodo{max-width:340px; margin-bottom:26px}
+  .periodo button[aria-pressed="true"]{background:var(--lima); color:#0a0c11; box-shadow:none; font-weight:600}
   .podio{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; align-items:end; max-width:620px; margin:0 auto 22px}
   .puesto{display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0}
-  .puesto .emoji{font-size:clamp(34px,7vw,50px); line-height:1}
-  .puesto .apodo{font-family:var(--display); font-weight:800; font-size:clamp(16px,3vw,21px); line-height:1.1;
+  .puesto .emoji{font-size:clamp(30px,6vw,42px); line-height:1}
+  .puesto .apodo{font-family:var(--display); font-weight:700; font-size:clamp(15px,2.8vw,19px); line-height:1.1; letter-spacing:-.02em;
     max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:center}
   .puesto .bloque{
-    width:100%; border-radius:18px 18px 8px 8px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-    padding-top:12px; color:#fff; font-family:var(--display); font-weight:800; box-shadow:0 6px 0 rgba(0,0,0,.14);
+    width:100%; border-radius:14px 14px 4px 4px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    padding-top:14px; font-family:var(--mono); font-weight:700; border:1px solid; border-bottom:0;
+    background:linear-gradient(180deg, color-mix(in srgb, var(--m) 22%, var(--surface)), var(--surface));
+    border-color:color-mix(in srgb, var(--m) 55%, transparent); color:var(--m);
+    box-shadow:0 -10px 40px -10px color-mix(in srgb, var(--m) 40%, transparent);
   }
-  .puesto .bloque .n{font-size:clamp(30px,6vw,44px); line-height:1}
-  .puesto .bloque .pts{font-size:clamp(14px,2.6vw,18px); opacity:.95}
-  .p1 .bloque{height:170px; background:linear-gradient(#ffd452,#f5a623)}
-  .p2 .bloque{height:130px; background:linear-gradient(#cfd8e3,#98a8ba)}
-  .p3 .bloque{height:100px; background:linear-gradient(#f0a868,#c97536)}
-  .puesto.yo .apodo{color:var(--violeta)}
+  .puesto .bloque .n{font-size:clamp(28px,5.6vw,40px); line-height:1}
+  .puesto .bloque .pts{font-size:clamp(12px,2.2vw,14px); color:var(--muted); margin-top:4px}
+  .p1 .bloque{height:170px; --m:var(--oro)}
+  .p2 .bloque{height:130px; --m:#c6d0e0}
+  .p3 .bloque{height:100px; --m:#ff9a5c}
+  .puesto.yo .apodo{color:var(--lima)}
   .puesto.vacio{visibility:hidden}
-  .lista{display:flex; flex-direction:column; gap:8px; max-width:620px; margin:0 auto}
+  .lista{display:flex; flex-direction:column; gap:6px; max-width:620px; margin:0 auto}
   .fila{
     display:grid; grid-template-columns:44px 1fr auto; gap:12px; align-items:center;
-    background:var(--surface); border-radius:16px; padding:10px 16px; box-shadow:0 4px 0 var(--line);
+    background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:10px 16px;
   }
-  .fila .pos{font-family:var(--display); font-weight:800; font-size:22px; color:var(--faint); text-align:center}
-  .fila .apodo{font-weight:600; font-size:17px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  .fila .apodo small{display:block; font-weight:400; font-size:12.5px; color:var(--faint)}
-  .fila .pts{font-family:var(--display); font-weight:800; font-size:22px; color:var(--naranja)}
-  .fila .pts small{font-size:13px; color:var(--faint); margin-left:3px}
-  .fila.yo{box-shadow:0 4px 0 var(--violeta); outline:3px solid var(--violeta)}
-  .vacio-txt{text-align:center; font-size:18px; color:var(--muted); background:var(--surface); border-radius:20px; padding:26px 16px; max-width:620px; margin:0 auto}
-  .como{max-width:620px; margin:22px auto 0; background:var(--surface); border-radius:18px; padding:12px 18px; box-shadow:0 4px 0 var(--line)}
-  .como summary{cursor:pointer; font-family:var(--display); font-weight:800; font-size:18px}
-  .como p, .como li{color:var(--muted); font-size:15px}
+  .fila .pos{font-family:var(--mono); font-weight:700; font-size:16px; color:var(--faint); text-align:center}
+  .fila .apodo{font-weight:600; font-size:16px; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .fila .apodo small{display:block; font-weight:400; font-size:12px; color:var(--faint)}
+  .fila .pts{font-family:var(--mono); font-weight:700; font-size:18px; color:var(--lima)}
+  .fila .pts small{font-size:12px; color:var(--faint); margin-left:4px; font-weight:500}
+  .fila.yo{border-color:var(--lima); box-shadow:0 0 24px color-mix(in srgb, var(--lima) 15%, transparent)}
+  .vacio-txt{text-align:center; font-size:16px; color:var(--muted); background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:26px 16px; max-width:620px; margin:0 auto}
+  .como{max-width:620px; margin:22px auto 0; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 18px}
+  .como summary{cursor:pointer; font-family:var(--display); font-weight:600; font-size:16px}
+  .como p, .como li{color:var(--muted); font-size:14.5px}
   .como ul{padding-left:20px; margin:8px 0}
-  .medalla{cursor:pointer; border:0; font:inherit; color:inherit}
 
-  footer{margin-top:40px; text-align:center; color:color-mix(in srgb, var(--ink) 55%, transparent); font-size:13px}
+  footer{margin-top:48px; text-align:center; color:var(--faint); font-family:var(--mono); font-size:11.5px; letter-spacing:.04em}
 
   @media (max-width:760px){
-    .entrada{grid-template-columns:1fr; gap:10px}
-    .saludo{text-align:center}
-    .saludo p{margin:0 auto}
-    .amigos{justify-content:center; margin-top:12px}
-    .mascota{width:min(150px,40vw)}
-    .sol{width:64px; height:64px; right:18px; top:18px}
+    .entrada{grid-template-columns:1fr; gap:26px; margin-top:18px}
+    .keycaps{margin-top:22px}
   }
   @media (prefers-reduced-motion: reduce){
-    .mascota, .nube{animation:none}
-    a.juego:hover{transform:none}
+    .keycaps span{animation:none}
+    a.juego:hover, .boton:hover{transform:none}
   }
 </style>
 </head>
 <body>
 <div class="fondo" aria-hidden="true">
-  <div class="sol"></div>
-  <div class="nube n1"></div><div class="nube n2"></div><div class="nube n3"></div>
+  <div class="grilla"></div><div class="luz l1"></div><div class="luz l2"></div>
 </div>
 
 <div class="wrap">
   <header>
-    <h1 class="marca" aria-label="¡A Jugar!"><span>¡</span><span>A</span> <span>J</span><span>u</span><span>g</span><span>a</span><span>r</span><span>!</span></h1>
+    <h1 class="marca">¡A <em>Jugar!</em></h1>
     <div class="acciones">
       <button class="boton chico rankBtn" id="rankBtn">🏆 Ranking</button>
       <button class="boton blanco chico" id="salirBtn" hidden>Salir</button>
@@ -240,42 +245,11 @@
   <!-- ===== entrada ===== -->
   <section class="entrada" id="entrada">
     <div class="saludo">
-      <h2>¡Hola! ¿Quién juega hoy?</h2>
-      <p>Entrá con tu apodo y tu clave secreta para sumar puntos con tu clase.</p>
-      <div class="amigos">
-      <svg class="mascota" viewBox="0 0 220 200" role="img" aria-label="Teclín, una tecla sonriente">
-          <ellipse cx="110" cy="188" rx="62" ry="9" fill="rgba(0,0,0,.12)"/>
-          <rect x="38" y="30" width="144" height="140" rx="30" fill="#2468d1"/>
-          <rect x="38" y="22" width="144" height="136" rx="30" fill="#3d8bfd"/>
-          <rect x="54" y="36" width="112" height="104" rx="22" fill="#6aa8ff"/>
-          <circle cx="88" cy="80" r="11" fill="#1d2b3a"/><circle cx="132" cy="80" r="11" fill="#1d2b3a"/>
-          <circle cx="92" cy="76" r="4" fill="#fff"/><circle cx="136" cy="76" r="4" fill="#fff"/>
-          <circle cx="72" cy="102" r="9" fill="#ff7eb6" opacity=".7"/><circle cx="148" cy="102" r="9" fill="#ff7eb6" opacity=".7"/>
-          <path d="M92 104 Q110 124 128 104" stroke="#1d2b3a" stroke-width="6" fill="none" stroke-linecap="round"/>
-          <path d="M38 96 Q14 84 20 60" stroke="#3d8bfd" stroke-width="12" fill="none" stroke-linecap="round"/>
-          <circle cx="20" cy="56" r="11" fill="#ffc93c"/>
-          <path d="M182 96 Q204 108 202 128" stroke="#3d8bfd" stroke-width="12" fill="none" stroke-linecap="round"/>
-          <text x="110" y="156" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="16" fill="#fff">F</text>
-        </svg>
-      <svg class="mascota rosa" viewBox="0 0 220 200" role="img" aria-label="Teclina, una tecla rosa sonriente">
-          <ellipse cx="110" cy="188" rx="62" ry="9" fill="rgba(0,0,0,.12)"/>
-          <rect x="38" y="30" width="144" height="140" rx="30" fill="#e0569a"/>
-          <rect x="38" y="22" width="144" height="136" rx="30" fill="#ff7eb6"/>
-          <rect x="54" y="36" width="112" height="104" rx="22" fill="#ffa8d0"/>
-          <path d="M110 22 L84 6 Q76 22 84 38 Z" fill="#9b6bff"/>
-          <path d="M110 22 L136 6 Q144 22 136 38 Z" fill="#9b6bff"/>
-          <circle cx="110" cy="22" r="9" fill="#b995ff"/>
-          <path d="M78 82 Q88 70 98 82" stroke="#1d2b3a" stroke-width="6" fill="none" stroke-linecap="round"/>
-          <circle cx="132" cy="80" r="11" fill="#1d2b3a"/><circle cx="136" cy="76" r="4" fill="#fff"/>
-          <path d="M121 70 l-4 -6 M132 67 l0 -7 M143 70 l4 -6" stroke="#1d2b3a" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="72" cy="104" r="9" fill="#ff5c9a" opacity=".55"/><circle cx="148" cy="104" r="9" fill="#ff5c9a" opacity=".55"/>
-          <path d="M94 104 Q110 128 126 104 Z" fill="#1d2b3a"/>
-          <path d="M101 112 Q110 122 119 112 Z" fill="#ff5c7a"/>
-          <path d="M182 96 Q206 84 200 60" stroke="#ff7eb6" stroke-width="12" fill="none" stroke-linecap="round"/>
-          <circle cx="200" cy="56" r="11" fill="#2ecc71"/>
-          <path d="M38 96 Q16 108 18 128" stroke="#ff7eb6" stroke-width="12" fill="none" stroke-linecap="round"/>
-          <text x="110" y="156" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="16" fill="#fff">J</text>
-        </svg>
+      <span class="etiqueta">Ranking semanal en vivo</span>
+      <h2>Entrá. Jugá.<br><span class="brillo">Subí al top.</span></h2>
+      <p>Entrá con tu apodo y tu clave para sumar puntos y pelear el primer puesto con tu clase.</p>
+      <div class="keycaps" aria-hidden="true">
+        <span style="--k:#b8ff3c; --d:0s">F</span><span style="--k:#2ee6c5; --d:.35s">J</span><span style="--k:#8b5cff; --d:.7s">K</span><span style="--k:#ff4d8d; --d:1.05s">L</span>
       </div>
     </div>
 
@@ -284,10 +258,10 @@
         <button id="tabEntrar" aria-pressed="true">Ya tengo apodo</button>
         <button id="tabNuevo" aria-pressed="false">Soy nuevo</button>
       </div>
-      <h3 id="tituloForm">¡Qué bueno verte!</h3>
+      <h3 id="tituloForm">Volviste. Seguí sumando.</h3>
       <label class="campo">
         <span>Tu apodo</span>
-        <input class="apodo" id="apodo" maxlength="16" autocomplete="nickname" spellcheck="false" placeholder="Ej: Rayo">
+        <input class="apodo" id="apodo" maxlength="16" autocomplete="nickname" spellcheck="false" placeholder="Ej: NightByte">
       </label>
       <div class="campo">
         <span id="lblPin">Tu clave secreta (4 números)</span>
@@ -303,8 +277,8 @@
         <span></span><button class="tecla" data-n="0">0</button><button class="tecla borrar" data-n="x" aria-label="Borrar">⌫</button>
       </div>
       <p class="aviso" id="aviso" hidden></p>
-      <button class="boton verde" id="entrarBtn">¡Entrar! 🚀</button>
-      <p class="nota" id="notaNuevo" hidden>No uses tu nombre de verdad: inventá un apodo divertido. ¡Y anotá tu clave para no olvidarla!</p>
+      <button class="boton verde" id="entrarBtn">Entrar →</button>
+      <p class="nota" id="notaNuevo" hidden>No uses tu nombre real: inventá un apodo. Y anotá tu clave para no olvidarla.</p>
       <p class="nota"><button class="link" id="invitadoBtn">Jugar sin cuenta</button></p>
     </div>
   </section>
@@ -316,21 +290,31 @@
       <button class="medalla" id="medalla" hidden></button>
     </div>
     <div class="grid">
-      <a class="juego" href="tecla-a-tecla.html" id="linkTecla" style="--c:linear-gradient(135deg,#3d8bfd,#9b6bff)">
+      <a class="juego" href="tecla-a-tecla.html" id="linkTecla" style="--c:radial-gradient(circle at 30% 20%, #2a1f5c, #12151d 70%)">
         <div class="portada" aria-hidden="true">
-          <div class="teclas"><span style="--k:#2ecc71">F</span><span style="--k:#ff9f43">J</span><span style="--k:#ff6b6b">K</span></div>
+          <div class="teclas"><span style="--k:#b8ff3c">F</span><span style="--k:#2ee6c5">J</span><span style="--k:#8b5cff">K</span></div>
         </div>
         <div class="cuerpo">
           <h3>Tecla a Tecla</h3>
-          <p>Escribí con los diez dedos como un campeón y atrapá las palabras que caen.</p>
-          <span class="boton azul chico">¡Jugar! ▶</span>
+          <p>Escribí con los diez dedos, ganá velocidad y destruí las palabras antes de que toquen el piso.</p>
+          <span class="boton verde chico">Jugar ▶</span>
+        </div>
+      </a>
+      <a class="juego" href="tablas.html" id="linkTablas" style="--c:radial-gradient(circle at 70% 20%, #3a1a4a, #12151d 70%)">
+        <div class="portada" aria-hidden="true">
+          <div class="teclas"><span style="--k:#8b5cff">7</span><span style="--k:#ff4d8d">×</span><span style="--k:#ffc53d">8</span></div>
+        </div>
+        <div class="cuerpo">
+          <h3>Factor X</h3>
+          <p>Las tablas del 1 al 9: cada una es un minijuego distinto. Juntá las 27 estrellas.</p>
+          <span class="boton verde chico">Jugar ▶</span>
         </div>
       </a>
       <div class="juego pronto">
-        <div class="portada" aria-hidden="true">🎁</div>
+        <div class="portada" aria-hidden="true">// PRÓXIMAMENTE</div>
         <div class="cuerpo">
-          <h3>¡Muy pronto!</h3>
-          <p>Estamos preparando más juegos. ¿Cuál te gustaría?</p>
+          <h3>Más juegos en camino</h3>
+          <p>Estamos armando nuevos desafíos. ¿Cuál te gustaría jugar?</p>
         </div>
       </div>
     </div>
@@ -340,7 +324,7 @@
   <section id="ranking" hidden>
     <div class="rank-cab">
       <button class="boton blanco chico" id="volverBtn">← Volver</button>
-      <h2>🏆 Ranking de todos los juegos</h2>
+      <h2>Ranking general</h2>
     </div>
     <div class="pestanas periodo" role="group" aria-label="Período">
       <button data-p="semana" aria-pressed="true">Esta semana</button>
@@ -358,7 +342,7 @@
     </details>
   </section>
 
-  <footer>Hecho con cariño. ¡A jugar!</footer>
+  <footer>¡A JUGAR! · RANKING SEMANAL · SE REINICIA CADA LUNES</footer>
 </div>
 
 <script>
@@ -375,7 +359,7 @@ const ERRORES = {
   apodo_invalido: 'El apodo tiene que tener entre 2 y 16 letras o números.',
   pin_invalido: 'La clave son 4 números.',
   no_existe: 'No encontramos ese apodo. Si sos nuevo, tocá “Soy nuevo”.',
-  apodo_ocupado: 'Ese apodo ya lo tiene otro chico. ¡Inventá otro!',
+  apodo_ocupado: 'Ese apodo ya está en uso. Probá con otro.',
   pin_mal: 'Esa clave no es. Probá de nuevo.',
   bloqueado: 'Muchos intentos. Esperá 10 minutos y volvé a probar.',
   red: 'No hay conexión. Revisá internet.',
@@ -412,9 +396,9 @@ function modo(esNuevo) {
   nuevo = esNuevo;
   $('tabEntrar').setAttribute('aria-pressed', String(!esNuevo));
   $('tabNuevo').setAttribute('aria-pressed', String(esNuevo));
-  $('tituloForm').textContent = esNuevo ? '¡Bienvenido a la clase!' : '¡Qué bueno verte!';
+  $('tituloForm').textContent = esNuevo ? 'Creá tu cuenta' : 'Volviste. Seguí sumando.';
   $('lblPin').textContent = esNuevo ? 'Inventá una clave secreta (4 números)' : 'Tu clave secreta (4 números)';
-  $('entrarBtn').textContent = esNuevo ? '¡Crear y entrar! ✨' : '¡Entrar! 🚀';
+  $('entrarBtn').textContent = esNuevo ? 'Crear cuenta y entrar →' : 'Entrar →';
   $('notaNuevo').hidden = !esNuevo;
   $('aviso').hidden = true;
 }
@@ -468,7 +452,7 @@ async function mostrarJuegos(invitado) {
   vista('juegos');
   $('salirBtn').hidden = false;
   $('salirBtn').textContent = s ? 'Salir' : 'Entrar';
-  $('holaTxt').textContent = s ? '¡Hola, ' + s.apodo + '! 👋' : '¡A jugar! 🎈';
+  $('holaTxt').textContent = s ? 'Hola, ' + s.apodo : '¡A jugar!';
   $('medalla').hidden = true;
   if (!s) return;
   try {   // su lugar en el ranking general de esta semana
@@ -476,7 +460,7 @@ async function mostrarJuegos(invitado) {
     const i = js.findIndex(j => j.apodo.toLowerCase() === s.apodo.toLowerCase());
     const m = $('medalla');
     m.innerHTML = i < 0
-      ? '⭐ ¡Jugá para entrar al ranking de la semana!'
+      ? 'Jugá una partida para entrar al ranking de la semana'
       : (['🥇', '🥈', '🥉'][i] || '🏅') + ' Esta semana vas <b>#' + (i + 1) + '</b> de ' + js.length +
         ' · ' + js[i].puntos + ' puntos';
     m.hidden = false;
@@ -484,7 +468,7 @@ async function mostrarJuegos(invitado) {
 }
 
 // ---------- ranking general ----------
-const JUEGOS = { tecla: 'Tecla a Tecla' };
+const JUEGOS = { tecla: 'Tecla a Tecla', tablas: 'Factor X' };
 let periodo = 'semana';
 async function rankingGeneral(p) {
   const r = await (await fetch(API + '/general?p=' + p)).json();
@@ -497,13 +481,13 @@ async function mostrarRanking() {
   if (actual !== 'ranking') vistaAnterior = actual;
   vista('ranking');
   const cuerpo = $('rankCuerpo');
-  cuerpo.innerHTML = '<p class="vacio-txt">Cargando… ⏳</p>';
+  cuerpo.innerHTML = '<p class="vacio-txt">Cargando…</p>';
   let js;
   try { js = await rankingGeneral(periodo); }
   catch (e) { cuerpo.innerHTML = '<p class="vacio-txt">No hay conexión. Revisá internet y probá de nuevo.</p>'; return; }
   if (!js.length) {
     cuerpo.innerHTML = '<p class="vacio-txt">' + (periodo === 'semana'
-      ? '¡Esta semana nadie jugó todavía! 🚀<br>El primero que juegue queda arriba de todo.'
+      ? 'Esta semana nadie jugó todavía.<br>El primero que juegue queda arriba de todo.'
       : 'Todavía nadie jugó. ¡Sé el primero!') + '</p>';
     return;
   }
@@ -533,7 +517,7 @@ document.querySelectorAll('.periodo button').forEach(b => b.addEventListener('cl
   mostrarRanking();
 }));
 
-if (location.search) $('linkTecla').href += location.search;   // mantiene ?api= al ir al juego
+if (location.search) { $('linkTecla').href += location.search; $('linkTablas').href += location.search; }   // mantiene ?api= al ir al juego
 const sesion = leer();
 if (sesion && sesion.token) {
   mostrarJuegos();

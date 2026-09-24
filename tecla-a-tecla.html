@@ -3,52 +3,36 @@
 <title>Tecla a Tecla</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Lexend:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
+  /* estética oscura tipo gamer: fondo casi negro, acentos neón */
   :root{
-    --bg:#e9edf2; --surface:#ffffff; --surface-2:#f2f6fa; --line:#d3dbe4;
-    --ink:#15202c; --muted:#5f6e7e; --faint:#98a6b4;
-    --key:#fbfcfe; --key-line:#cbd5e0; --key-ink:#2a3947; --key-shadow:rgba(21,32,44,.16);
-    --gold:#e2992a; --ok:#2f9e63; --bad:#d9433f;
-    --c-speed:#3d8f4b; --c-acc:#2f74c9;
-    --fg-lp:#e8566f; --fg-lr:#ef8f45; --fg-lm:#cfa42c; --fg-li:#4fa657;
-    --fg-ri:#25a89f; --fg-rm:#4a90e0; --fg-rr:#8878e6; --fg-rp:#bd5ccb;
-    --fg-th:#7c8b9a;
-    --on-finger:#ffffff;
-    --shadow-card:0 1px 2px rgba(21,32,44,.05), 0 8px 24px rgba(21,32,44,.07);
-    --display:'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
-    --body:'Lexend', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --bg:#0a0c11; --surface:#12151d; --surface-2:#0e1118; --line:#232a37;
+    --ink:#eef1f7; --muted:#98a2b6; --faint:#5f6a80;
+    --key:#1a1f2a; --key-line:#2c3444; --key-ink:#e3e8f2; --key-shadow:rgba(0,0,0,.6);
+    --gold:#ffc53d; --ok:#b8ff3c; --bad:#ff4d6d;
+    --c-speed:#b8ff3c; --c-acc:#8b5cff;
+    --fg-lp:#ff4d8d; --fg-lr:#ff8a3d; --fg-lm:#ffd23f; --fg-li:#9dff3c;
+    --fg-ri:#2ee6c5; --fg-rm:#3db8ff; --fg-rr:#8b6bff; --fg-rp:#d65cff;
+    --fg-th:#8a95a8; --on-finger:#0a0c11;
+    --accent:#b8ff3c; --accent-2:#8b5cff;
+    --shadow-card:0 0 0 1px rgba(255,255,255,.02), 0 14px 40px rgba(0,0,0,.45);
+    --display:'Space Grotesk', system-ui, sans-serif;
+    --body:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
     --kr:'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#0f151c; --surface:#18212b; --surface-2:#131b24; --line:#2c3846;
-      --ink:#e9eff6; --muted:#93a3b3; --faint:#6a7b8b;
-      --key:#232f3c; --key-line:#3a4756; --key-ink:#dbe5ef; --key-shadow:rgba(0,0,0,.5);
-      --gold:#f0b649; --ok:#48b97b; --bad:#ef6260;
-      --c-speed:#4aa85c; --c-acc:#4d8ad8;
-      --fg-lp:#f26a81; --fg-lr:#f5a05c; --fg-lm:#dfb641; --fg-li:#62bb6b;
-      --fg-ri:#35bdb3; --fg-rm:#5fa1ec; --fg-rr:#9a8bf0; --fg-rp:#cc72d8;
-      --fg-th:#8d9dac; --on-finger:#0f151c;
-      --shadow-card:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#0f151c; --surface:#18212b; --surface-2:#131b24; --line:#2c3846;
-    --ink:#e9eff6; --muted:#93a3b3; --faint:#6a7b8b;
-    --key:#232f3c; --key-line:#3a4756; --key-ink:#dbe5ef; --key-shadow:rgba(0,0,0,.5);
-    --gold:#f0b649; --ok:#48b97b; --bad:#ef6260;
-    --c-speed:#4aa85c; --c-acc:#4d8ad8;
-    --fg-lp:#f26a81; --fg-lr:#f5a05c; --fg-lm:#dfb641; --fg-li:#62bb6b;
-    --fg-ri:#35bdb3; --fg-rm:#5fa1ec; --fg-rr:#9a8bf0; --fg-rp:#cc72d8;
-    --fg-th:#8d9dac; --on-finger:#0f151c;
-    --shadow-card:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.35);
+    color-scheme:dark;
   }
 
   html,body{height:100%}
   [hidden]{display:none!important}
   body{
-    margin:0; background:var(--bg); color:var(--ink);
+    margin:0; color:var(--ink);
+    background:
+      radial-gradient(900px 500px at 85% -10%, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent 70%),
+      radial-gradient(700px 400px at -10% 110%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 70%),
+      var(--bg);
+    background-attachment:fixed;
     font-family:var(--body); font-size:15px; line-height:1.45;
     -webkit-font-smoothing:antialiased;
   }
@@ -58,26 +42,26 @@
     width:100%; box-sizing:border-box;
   }
   button{font:inherit; color:inherit; cursor:pointer}
-  :focus-visible{outline:2.5px solid var(--fg-rm); outline-offset:2px; border-radius:6px}
+  :focus-visible{outline:2.5px solid var(--accent); outline-offset:2px; border-radius:6px}
 
   /* ---------- header ---------- */
   header{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
   .brand{display:flex; align-items:baseline; gap:9px; margin-right:auto}
   .brand h1{
-    font-family:var(--display); font-weight:800; font-size:25px; margin:0;
-    letter-spacing:-.01em;
+    font-family:var(--display); font-weight:700; font-size:25px; margin:0;
+    letter-spacing:-.03em;
   }
   .brand .volver{align-self:center; display:grid; place-items:center; width:30px; height:30px; border-radius:9px;
     border:1px solid var(--line); background:var(--surface); color:var(--muted); text-decoration:none; font-weight:600}
   .brand .volver:hover{color:var(--ink); border-color:var(--faint)}
-  .brand .dot{width:9px; height:9px; border-radius:50%; background:var(--fg-li); flex:none; align-self:center}
-  .brand small{color:var(--faint); font-size:12px; letter-spacing:.06em; text-transform:uppercase}
+  .brand .dot{width:9px; height:9px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent); flex:none; align-self:center}
+  .brand small{color:var(--faint); font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase}
   .langs{display:flex; gap:4px; background:var(--surface); padding:4px; border-radius:11px; border:1px solid var(--line)}
   .langs button{
     border:0; background:none; padding:6px 11px; border-radius:8px;
     font-size:13.5px; font-weight:500; color:var(--muted);
   }
-  .langs button[aria-pressed="true"]{background:var(--ink); color:var(--surface)}
+  .langs button[aria-pressed="true"]{background:var(--accent); color:var(--on-finger)}
   .icon-btn{
     border:1px solid var(--line); background:var(--surface); border-radius:10px;
     width:38px; height:38px; display:grid; place-items:center; font-size:16px;
@@ -91,7 +75,7 @@
   }
   .prof-btn .cara{
     width:22px; height:22px; border-radius:50%; flex:none; display:grid; place-items:center;
-    background:var(--fg-ri); color:#fff; font-size:11px; font-weight:700;
+    background:var(--accent-2); color:#fff; font-size:11px; font-weight:700;
   }
   .prof-btn.vacio{color:var(--faint); font-weight:500}
   .prof-btn.vacio .cara{background:var(--line); color:var(--muted)}
@@ -103,11 +87,11 @@
     background:var(--surface-2); border-radius:11px; padding:9px 11px;
   }
   .prof-row .cara{width:28px; height:28px; border-radius:50%; flex:none; display:grid;
-    place-items:center; background:var(--fg-ri); color:#fff; font-size:13px; font-weight:700}
+    place-items:center; background:var(--accent-2); color:#fff; font-size:13px; font-weight:700}
   .prof-row .nom{flex:1; min-width:0; font-weight:600; font-size:14px;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left}
   .prof-row .sub{font-size:11.5px; color:var(--muted); font-weight:400}
-  .prof-row[aria-current="true"]{border-color:var(--ink); background:var(--surface)}
+  .prof-row[aria-current="true"]{border-color:var(--accent); background:var(--surface)}
   .prof-row .elegir{flex:1; display:flex; align-items:center; gap:10px; background:none; border:0; padding:0; min-width:0}
   .prof-row .x{border:0; background:none; color:var(--faint); font-size:15px; padding:2px 6px; border-radius:6px}
   .prof-row .x:hover{color:var(--bad)}
@@ -172,15 +156,16 @@
     display:flex; flex-direction:column; gap:2px; transition:border-color .15s, transform .15s;
   }
   .lesson:hover{border-color:var(--faint)}
-  .lesson .n{font-size:10.5px; letter-spacing:.09em; color:var(--faint); font-weight:600}
+  .lesson .n{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; color:var(--faint); font-weight:500}
   .lesson .t{font-size:13px; font-weight:500; white-space:nowrap}
   .lesson .s{font-size:10px; letter-spacing:.1em; color:var(--line); height:13px}
   .lesson .s b{color:var(--gold); font-weight:400}
   .lesson[aria-current="true"]{
-    background:var(--ink); border-color:var(--ink); color:var(--surface);
+    background:color-mix(in srgb, var(--accent) 12%, var(--surface)); border-color:var(--accent); color:var(--ink);
+    box-shadow:0 0 18px color-mix(in srgb, var(--accent) 18%, transparent);
   }
   .lesson[aria-current="true"] .n{color:var(--faint)}
-  .lesson[aria-current="true"] .s{color:#4a5867}
+  .lesson[aria-current="true"] .s{color:var(--faint)}
 
   /* ---------- stage ---------- */
   .stage{
@@ -195,7 +180,7 @@
 
   .line{
     font-size:clamp(22px, 5.2vw, 34px); line-height:1.75; letter-spacing:.02em;
-    display:flex; flex-wrap:wrap; align-items:flex-start;
+    display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:center;
     min-height:2.6em; user-select:none;
   }
   .line.kr{font-family:var(--kr); font-weight:500}
@@ -208,7 +193,7 @@
   .ch.done{color:var(--ok)}
   .ch.slip{color:var(--bad)}
   .ch.cur{
-    background:var(--ink); color:var(--surface); box-shadow:0 0 0 3px var(--surface), 0 0 0 5px var(--ink);
+    background:var(--accent); color:var(--on-finger); box-shadow:0 0 0 3px var(--surface), 0 0 0 5px var(--accent), 0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
     margin-inline:3px;
   }
   .ch.cur.err{background:var(--bad); box-shadow:0 0 0 3px var(--surface), 0 0 0 5px var(--bad); animation:shake .2s}
@@ -220,12 +205,12 @@
   @media (prefers-reduced-motion:reduce){.ch.cur.err{animation:none}}
 
   .meter{height:4px; background:var(--surface-2); border-radius:3px; overflow:hidden}
-  .meter i{display:block; height:100%; width:0; background:var(--fg-li); border-radius:3px; transition:width .12s linear}
+  .meter i{display:block; height:100%; width:0; background:linear-gradient(90deg, var(--accent-2), var(--accent)); box-shadow:0 0 10px var(--accent); border-radius:3px; transition:width .12s linear}
 
   .stats{display:flex; gap:22px; flex-wrap:wrap; align-items:baseline}
   .stat{display:flex; flex-direction:column; gap:0}
-  .stat b{font-family:var(--display); font-weight:700; font-size:21px; font-variant-numeric:tabular-nums; line-height:1.1}
-  .stat span{font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); font-weight:500}
+  .stat b{font-family:var(--mono); font-weight:700; font-size:21px; font-variant-numeric:tabular-nums; line-height:1.1}
+  .stat span{font-family:var(--mono); font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); font-weight:500}
   .stat.bad b{color:var(--bad)}
   .stat.running b{color:var(--fg-ri)}
   .veil .record{
@@ -336,7 +321,7 @@
     border:1px solid var(--line); flex:none}
   .modes button{border:0; background:none; padding:6px 12px; border-radius:7px;
     font-size:13px; font-weight:500; color:var(--muted); white-space:nowrap}
-  .modes button[aria-pressed="true"]{background:var(--ink); color:var(--surface)}
+  .modes button[aria-pressed="true"]{background:var(--accent); color:var(--on-finger); font-weight:600}
 
   .game{
     background:var(--surface); border:1px solid var(--line); border-radius:16px;
@@ -347,10 +332,10 @@
   .game-head{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
   .game-head h2{font-family:var(--display); font-weight:700; font-size:18px; margin:0}
   .game-head .filtro{padding:5px 11px; font-size:12.5px}
-  .game-head .filtro[aria-pressed="true"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+  .game-head .filtro[aria-pressed="true"]{background:var(--accent); color:var(--on-finger); border-color:var(--accent)}
   .hud{display:flex; align-items:center; gap:16px; margin-left:auto; flex-wrap:wrap}
-  .hud-stat{font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--faint); font-weight:500}
-  .hud-stat b{font-family:var(--display); font-size:17px; color:var(--ink);
+  .hud-stat{font-family:var(--mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); font-weight:500}
+  .hud-stat b{font-family:var(--mono); font-size:17px; color:var(--ink);
     letter-spacing:0; text-transform:none; font-variant-numeric:tabular-nums; margin-right:4px}
   .lives{font-size:15px; letter-spacing:2px; line-height:1}
   .lives i{font-style:normal; filter:grayscale(1); opacity:.28}
@@ -360,7 +345,9 @@
     position:relative; overflow:hidden; border-radius:12px;
     height:clamp(260px, 44vh, 480px);
     background:
-      linear-gradient(to bottom, transparent 62%, color-mix(in srgb, var(--bad) 7%, transparent) 100%),
+      linear-gradient(to bottom, transparent 62%, color-mix(in srgb, var(--bad) 9%, transparent) 100%),
+      linear-gradient(color-mix(in srgb, var(--line) 45%, transparent) 1px, transparent 1px) 0 0/100% 32px,
+      linear-gradient(90deg, color-mix(in srgb, var(--line) 45%, transparent) 1px, transparent 1px) 0 0/32px 100%,
       var(--surface-2);
     border:1px solid var(--line);
   }
@@ -377,11 +364,11 @@
     font-family:var(--display); font-weight:700; font-size:clamp(19px,3.6vw,26px);
     white-space:nowrap; padding:3px 10px; border-radius:9px;
     background:var(--surface); border:1px solid var(--line);
-    box-shadow:0 2px 7px rgba(21,32,44,.09); color:var(--ink);
+    box-shadow:0 4px 14px rgba(0,0,0,.4); color:var(--ink);
   }
   .fw.kr{font-family:var(--kr)}
   .fw .hit{color:var(--ok)}
-  .fw.lock{border-color:var(--fg-ri); box-shadow:0 0 0 3px color-mix(in srgb, var(--fg-ri) 20%, transparent)}
+  .fw.lock{border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent), 0 0 20px color-mix(in srgb, var(--accent) 30%, transparent)}
   .fw.bad{animation:fwBad .22s; border-color:var(--bad)}
   .fw.pop{animation:fwPop .22s forwards}
   @keyframes fwBad{25%{transform:translate(var(--x),var(--y)) rotate(-2deg)}75%{transform:translate(var(--x),var(--y)) rotate(2deg)}}
@@ -396,7 +383,7 @@
     align-items:center; justify-content:center; gap:9px; text-align:center; padding:16px;
     background:color-mix(in srgb, var(--surface) 88%, transparent); z-index:4;
   }
-  .start h3{font-family:var(--display); font-weight:800; font-size:23px; margin:0}
+  .start h3{font-family:var(--display); font-weight:700; letter-spacing:-.02em; font-size:23px; margin:0}
   .start p{margin:0; color:var(--muted); font-size:13.5px; max-width:40ch}
   .start .fell{
     display:flex; gap:6px; flex-wrap:wrap; justify-content:center; max-width:40ch;
@@ -410,7 +397,7 @@
   .start.grank{justify-content:flex-start; overflow:auto; background:var(--surface); gap:10px}
   .grank .tabs{display:flex; gap:4px; flex-wrap:wrap; justify-content:center}
   .grank .tabs button{padding:5px 11px; font-size:12.5px}
-  .grank .tabs button[aria-pressed="true"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
+  .grank .tabs button[aria-pressed="true"]{background:var(--accent); color:var(--on-finger); border-color:var(--accent)}
   .grank .lista{width:min(560px,100%); display:flex; flex-direction:column; gap:2px; text-align:left}
   .grank .rank-row{grid-template-columns:34px 1fr repeat(3,auto)}
   .grank .rank-row.yo{box-shadow:inset 3px 0 0 var(--fg-ri)}
@@ -423,10 +410,10 @@
     background:none; border-style:dashed; color:var(--muted); justify-content:center;
     min-width:104px; font-size:13px; font-weight:500;
   }
-  .lesson.add:hover{color:var(--ink); border-color:var(--ink)}
+  .lesson.add:hover{color:var(--accent); border-color:var(--accent)}
   .sheet-wrap{
     position:fixed; inset:0; z-index:50; padding:16px;
-    background:color-mix(in srgb, var(--ink) 45%, transparent);
+    background:rgba(0,0,0,.6); backdrop-filter:blur(4px);
     display:grid; place-items:center;
   }
   .sheet{
@@ -464,8 +451,8 @@
   .log-sum{display:flex; gap:18px; flex-wrap:wrap; padding:11px 13px;
     background:var(--surface-2); border:1px solid var(--line); border-radius:11px}
   .log-sum div{display:flex; flex-direction:column; gap:1px}
-  .log-sum b{font-family:var(--display); font-size:19px; font-variant-numeric:tabular-nums; line-height:1.1}
-  .log-sum span{font-size:10.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--faint)}
+  .log-sum b{font-family:var(--mono); font-size:19px; font-variant-numeric:tabular-nums; line-height:1.1}
+  .log-sum span{font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--faint)}
   .log{
     background:var(--surface); border:1px solid var(--line); border-radius:16px;
     box-shadow:var(--shadow-card); padding:16px 18px 18px;
@@ -608,14 +595,15 @@
     display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
     text-align:center; padding:18px; z-index:5;
   }
-  .veil h3{font-family:var(--display); font-weight:800; font-size:24px; margin:0}
+  .veil h3{font-family:var(--display); font-weight:700; letter-spacing:-.02em; font-size:24px; margin:0}
   .veil p{margin:0; color:var(--muted); font-size:13.5px; max-width:34ch}
   .stars{font-size:32px; letter-spacing:6px; color:var(--line); line-height:1}
   .stars b{color:var(--gold); font-weight:400}
   .veil .row{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:4px}
   .cta{
-    border:0; background:var(--ink); color:var(--surface); border-radius:10px;
+    border:0; background:var(--accent); color:var(--on-finger); border-radius:10px;
     padding:9px 18px; font-weight:600; font-size:14px;
+    box-shadow:0 0 20px color-mix(in srgb, var(--accent) 25%, transparent);
   }
   .resume{font-size:13.5px; color:var(--muted); display:flex; align-items:center; gap:7px}
   .resume kbd{
