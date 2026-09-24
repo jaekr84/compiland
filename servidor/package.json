@@ -1,0 +1,12 @@
+{
+  "name": "tecla-a-tecla-servidor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild index.mjs --bundle --minify --platform=node --target=node24 --format=esm --outfile=dist/index.mjs && cd dist && rm -f ../function.zip && zip -q -9 ../function.zip index.mjs",
+    "dev": "node --env-file=.env --watch local.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

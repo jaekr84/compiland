@@ -1,0 +1,7 @@
+# secretos y archivos generados del servidor
+servidor/.env
+servidor/node_modules/
+servidor/dist/
+servidor/function.zip
+.claude/
+.DS_Store
