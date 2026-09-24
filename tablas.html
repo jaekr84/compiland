@@ -126,6 +126,7 @@
   .det-cab h2{font-family:var(--display); font-weight:700; font-size:clamp(28px,4.6vw,42px); letter-spacing:-.04em; margin:2px 0 0; line-height:1.05}
   .det-cab .ghost{margin-left:auto}
   .det{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:16px; align-items:start}
+  .det.solo{grid-template-columns:minmax(0,640px)}
   .panel{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:var(--shadow-card)}
   .panel h3{font-family:var(--display); font-weight:700; font-size:18px; letter-spacing:-.02em; margin:0}
   .panel-cab{display:flex; align-items:center; gap:10px; margin-bottom:14px}
@@ -217,6 +218,137 @@
     text-shadow:0 0 14px color-mix(in srgb, var(--lima) 60%, transparent); animation:flota .75s forwards}
   @keyframes flota{from{opacity:1; transform:translate(-50%,0)} to{opacity:0; transform:translate(-50%,-56px)}}
 
+  /* entrada de números (teclado en pantalla) */
+  #entradaCaja{width:100%; display:flex; justify-content:center}
+  .entrada{display:flex; flex-direction:column; align-items:center; gap:10px; width:min(460px,100%)}
+  .visor{min-width:160px; height:58px; border-radius:14px; border:1px solid var(--line); background:var(--surface-2);
+    display:grid; place-items:center; font-family:var(--mono); font-weight:700; font-size:34px; color:var(--c);
+    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 25%, transparent)}
+  .visor span:empty::after{content:"_"; color:var(--faint); animation:parpadeo 1s steps(2) infinite}
+  @keyframes parpadeo{50%{opacity:0}}
+  .visor.ok{animation:visorOk .35s} .visor.mal{animation:visorMal .35s}
+  @keyframes visorOk{from{border-color:var(--lima); box-shadow:0 0 24px color-mix(in srgb, var(--lima) 45%, transparent)}}
+  @keyframes visorMal{from{border-color:var(--rojo); box-shadow:0 0 24px color-mix(in srgb, var(--rojo) 45%, transparent)}}
+  .numpad{display:grid; grid-template-columns:repeat(5,1fr) 1.2fr; gap:6px; width:100%}
+  .numpad button{border:1px solid var(--line); background:var(--surface-2); border-radius:10px; padding:10px 0;
+    font-family:var(--mono); font-weight:700; font-size:19px; box-shadow:0 3px 0 #05060a}
+  .numpad button:active{transform:translateY(2px); box-shadow:0 1px 0 #05060a; border-color:var(--c)}
+  .numpad .borrar{grid-column:6; grid-row:1 / 3; color:var(--muted)}
+  .consigna{margin:0; font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+  .pregunta.chica{font-size:clamp(36px,8vw,64px)}
+
+  /* ×2 Dobles */
+  /* mesa más clara que el fondo, y cartas claras con sombra: se tienen que poder seguir con la vista */
+  .mesa{position:relative; width:min(480px,100%); height:clamp(110px,26vw,150px); --vel:400ms; margin:14px 0}
+  .mesa::before{content:""; position:absolute; inset:-16px -18px; border-radius:22px;
+    background:radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--c) 22%, #1d2433), color-mix(in srgb, var(--c) 8%, #141923) 75%);
+    border:1px solid color-mix(in srgb, var(--c) 35%, var(--line)); box-shadow:inset 0 2px 18px rgba(0,0,0,.45)}
+  .carta{position:relative; border:0; padding:0; background:none; perspective:600px}
+  .naipe{position:absolute; top:0; width:30%; height:100%; left:calc(var(--s) * 35%);
+    transition:left var(--vel) ease-in-out, transform var(--vel) ease-in-out}
+  .naipe.arriba{transform:translateY(-16px) scale(1.04); z-index:2} .naipe.abajo{transform:translateY(16px) scale(.97)}
+  .carta > span{position:absolute; inset:0; display:grid; place-items:center; border-radius:14px; backface-visibility:hidden;
+    transition:transform .35s, box-shadow .2s; font-family:var(--mono); font-weight:700;
+    border:3px solid #f4f6fb; box-shadow:0 5px 0 rgba(0,0,0,.5), 0 14px 26px rgba(0,0,0,.6)}
+  .naipe.arriba > span{box-shadow:0 5px 0 rgba(0,0,0,.5), 0 26px 38px rgba(0,0,0,.7)}
+  .carta .dorso{
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.16) 0 6px, transparent 6px 12px),
+      linear-gradient(150deg, color-mix(in srgb, var(--c) 85%, #fff), color-mix(in srgb, var(--c) 65%, #000));
+    color:#0a0c11; font-size:30px}
+  .carta .dorso::after{content:""; position:absolute; inset:8px; border-radius:8px; border:2px solid rgba(255,255,255,.55)}
+  .carta .cara{transform:rotateY(180deg); background:#f4f6fb; color:#0a0c11; font-size:clamp(28px,6.4vw,42px)}
+  .listo{font-family:var(--display); font-weight:600; font-size:15px; padding:9px 18px; color:var(--ink);
+    border-color:color-mix(in srgb, var(--c) 50%, var(--line))}
+  .listo kbd{font-family:var(--mono); font-size:11px; color:var(--faint); border:1px solid var(--line); border-radius:5px; padding:0 5px; margin-left:6px}
+  .carta.vista .dorso{transform:rotateY(180deg)} .carta.vista .cara{transform:none}
+  .carta.par .cara{background:#e6ffc2; color:#2b5300; border-color:var(--lima); box-shadow:0 5px 0 rgba(0,0,0,.5), 0 0 30px color-mix(in srgb, var(--lima) 55%, transparent)}
+  .carta.mal .cara{background:#ffe1e7; color:#b1002b; border-color:var(--rojo)}
+  .carta:not(.vista):hover .dorso{filter:brightness(1.1)}
+
+  /* ×3 Saltos */
+  .cadena{display:flex; gap:5px; flex-wrap:wrap; justify-content:center}
+  .cadena i{font-style:normal; font-family:var(--mono); font-weight:700; font-size:14px; min-width:36px; text-align:center;
+    padding:4px 6px; border-radius:8px; border:1px dashed var(--line); color:var(--faint)}
+  .cadena i.hecho{border-style:solid; border-color:color-mix(in srgb, var(--c) 50%, transparent); color:var(--c)}
+  .cadena i.sig{border-color:var(--c); color:var(--ink)}
+  .grilla-num{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; width:min(480px,100%)}
+  .grilla-num.g5{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .celda{border:1px solid var(--line); background:var(--surface-2); border-radius:12px; aspect-ratio:1.4;
+    font-family:var(--mono); font-weight:700; font-size:clamp(18px,4.4vw,26px); box-shadow:0 4px 0 #05060a}
+  .celda:hover{border-color:color-mix(in srgb, var(--c) 60%, var(--line))}
+  .celda.hecho{background:color-mix(in srgb, var(--c) 14%, var(--surface-2)); border-color:var(--c); color:var(--c); box-shadow:none}
+  .celda.mal{border-color:var(--rojo); color:var(--rojo); animation:sacude .3s}
+
+  /* ×4 Lluvia */
+  .escenario.j4, .escenario.j6, .escenario.j8, .escenario.j9, .escenario.j10{gap:18px; justify-content:flex-start}
+  .cielo{position:relative; width:100%; height:clamp(220px,34vh,320px); border-radius:14px; overflow:hidden; border:1px solid var(--line);
+    background:linear-gradient(to bottom, transparent 60%, color-mix(in srgb, var(--rojo) 10%, transparent)),
+      linear-gradient(color-mix(in srgb, var(--line) 50%, transparent) 1px, transparent 1px) 0 0/100% 30px, var(--surface-2)}
+  .cielo .piso{position:absolute; left:0; right:0; bottom:0; height:3px; opacity:.6;
+    background:repeating-linear-gradient(90deg, var(--rojo) 0 9px, transparent 9px 17px)}
+  .gota{position:absolute; top:0; transform:translate(-50%,-110%); white-space:nowrap; padding:4px 11px; border-radius:9px;
+    font-family:var(--mono); font-weight:700; font-size:clamp(16px,3.4vw,21px); background:var(--surface);
+    border:1px solid color-mix(in srgb, var(--c) 45%, var(--line)); box-shadow:0 4px 14px rgba(0,0,0,.4)}
+  .gota.rota{animation:rota .25s forwards; border-color:var(--lima); color:var(--lima)}
+  @keyframes rota{to{opacity:0; scale:1.5}}
+
+  /* ×5 Verdad o Falso */
+  .mini-barra{width:min(420px,100%); height:6px; border-radius:99px; background:var(--surface-2); overflow:hidden}
+  .mini-barra i{display:block; height:100%; background:var(--c); transform-origin:left}
+  .vf-botones{display:grid; grid-template-columns:1fr 1fr; gap:12px; width:min(520px,100%)}
+  .vf-botones .opcion{font-family:var(--display); font-size:clamp(20px,4.4vw,26px)}
+  .vf-no{color:var(--rojo)} .vf-si{color:var(--lima)}
+
+  /* ×6 Duelo */
+  .duelo{display:flex; align-items:center; gap:14px}
+  .duelo .lado{display:flex; flex-direction:column; align-items:center; gap:2px; min-width:92px; padding:10px 14px;
+    border-radius:14px; background:var(--surface-2); border:1px solid var(--line)}
+  .duelo .lado span{font-family:var(--mono); font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+  .duelo .lado b{font-family:var(--mono); font-size:34px; line-height:1}
+  .duelo .vos b{color:var(--lima)} .duelo .bot b{color:var(--rojo)}
+  .duelo .vs{font-family:var(--display); font-weight:700; color:var(--faint)}
+  .bot-barra{position:relative; width:min(420px,100%); height:24px; border-radius:8px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+  .bot-barra i{position:absolute; inset:0; background:color-mix(in srgb, var(--rojo) 30%, transparent); transform-origin:left; transform:scaleX(0)}
+  .bot-barra span{position:relative; display:block; text-align:center; font-family:var(--mono); font-size:11px; line-height:22px; color:var(--muted)}
+
+  /* ×7 Camino */
+  .tablero{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; width:min(620px,100%)}
+  .casilla{position:relative; border:1px solid var(--line); background:var(--surface-2); border-radius:10px; aspect-ratio:1;
+    font-family:var(--mono); font-weight:700; font-size:clamp(13px,3.2vw,20px); padding:0}
+  .casilla.vecina{border-color:color-mix(in srgb, var(--c) 55%, var(--line)); background:color-mix(in srgb, var(--c) 6%, var(--surface-2))}
+  .casilla.pisada{background:color-mix(in srgb, var(--c) 18%, var(--surface-2)); border-color:var(--c); color:var(--c)}
+  .casilla.yo{background:var(--c); color:#0a0c11; border-color:var(--c); box-shadow:0 0 20px color-mix(in srgb, var(--c) 55%, transparent)}
+  .casilla.quemada{border-color:var(--rojo); color:var(--rojo); opacity:.55}
+  .casilla.meta-col::after{content:""; position:absolute; right:-5px; top:20%; bottom:20%; width:3px; border-radius:2px; background:var(--lima)}
+  .casilla.inicio::before{content:"▶"; position:absolute; left:-12px; top:50%; transform:translateY(-50%); font-size:9px; color:var(--c)}
+
+  /* ×8 Bomba */
+  .bomba{display:flex; flex-direction:column; align-items:center; gap:12px; width:min(560px,100%)}
+  .display{font-family:var(--mono); font-weight:700; font-size:40px; line-height:1; color:var(--rojo); padding:8px 18px;
+    background:#07080c; border:1px solid color-mix(in srgb, var(--rojo) 40%, var(--line)); border-radius:12px;
+    text-shadow:0 0 16px color-mix(in srgb, var(--rojo) 70%, transparent); font-variant-numeric:tabular-nums}
+  .display.apuro{animation:parpadeo .5s steps(2) infinite}
+  .cables{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px 10px; width:100%}
+  .cable{display:flex; flex-direction:column; align-items:center; gap:4px; font-family:var(--mono); font-size:12.5px; color:var(--faint)}
+  .cable i{display:block; width:10px; height:34px; border-radius:5px; background:var(--w); opacity:.5}
+  .cable.activo{color:var(--ink)} .cable.activo i{opacity:1; box-shadow:0 0 14px var(--w)}
+  .cable.cortado i{opacity:.25; background:linear-gradient(var(--w) 0 40%, transparent 40% 60%, var(--w) 60%)}
+  .cable.cortado{color:var(--lima)}
+  .escenario.boom{animation:boom .6s}
+  @keyframes boom{0%{background:#ff4d6d55} 100%{background:var(--surface)}}
+
+  /* ×9 Jefe final */
+  .arena{display:flex; flex-direction:column; align-items:center; gap:8px; width:min(460px,100%)}
+  .jefe-cuerpo{font-size:clamp(64px,14vw,96px); line-height:1; filter:drop-shadow(0 0 22px color-mix(in srgb, var(--c) 70%, transparent))}
+  .jefe-cuerpo.golpe{animation:golpe .3s} .jefe-cuerpo.ataca{animation:ataca .4s}
+  @keyframes golpe{30%{transform:translateX(10px) scale(.92); filter:brightness(3)}}
+  @keyframes ataca{40%{transform:scale(1.3) translateY(12px)}}
+  .vida{position:relative; width:100%; height:18px; border-radius:99px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden}
+  .vida i{position:absolute; inset:0; background:linear-gradient(90deg, var(--rojo), var(--c)); transform-origin:left; transition:transform .25s}
+  .vida span{position:relative; display:block; text-align:center; font-family:var(--mono); font-size:11px; line-height:16px; font-weight:700}
+  .critico{font-family:var(--display); font-weight:700; color:var(--oro)}
+
   .resultado{text-align:center; gap:16px}
   .r-estrellas{font-size:clamp(44px,9vw,64px); letter-spacing:10px; line-height:1; color:var(--line)}
   .r-estrellas b{display:inline-block; color:var(--oro); font-weight:400; text-shadow:0 0 22px color-mix(in srgb, var(--oro) 60%, transparent);
@@ -252,6 +384,9 @@
     .hud div{flex:1; min-width:0; padding:6px 10px}
     .escenario, .resultado{min-height:380px; padding:22px 14px}
     .r-datos{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .cables{grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px}
+    .tablero{gap:4px}
+    .casilla{border-radius:7px}
   }
   @media (prefers-reduced-motion: reduce){
     .tabla:hover, .boton:hover{transform:none}
@@ -293,7 +428,7 @@
       <div><div class="tipo" id="dTipo"></div><h2 id="dTitulo"></h2></div>
       <button class="ghost" id="dVolver">← Todas las tablas</button>
     </div>
-    <div class="det">
+    <div class="det" id="det">
       <div class="panel" id="panelTabla">
         <div class="panel-cab">
           <h3 id="dTablaTit">La tabla</h3>
@@ -323,7 +458,7 @@
       <div><div class="tipo" id="jTipo"></div><h2 id="jTitulo"></h2></div>
       <button class="ghost" id="sonidoBtn" aria-pressed="true" title="Sonido">🔊</button>
       <div class="hud">
-        <div><b id="hTiempo">30</b><span>Tiempo</span></div>
+        <div><b id="hTiempo">30</b><span id="hTiempoLbl">Tiempo</span></div>
         <div><b id="hAciertos">0</b><span>Aciertos</span></div>
         <div class="combo" id="hCombo"><b id="hMulti">×1</b><span>Combo</span></div>
         <div><b id="hPuntos">0</b><span>Puntos</span></div>
@@ -357,6 +492,7 @@
 <script>
 const $ = id => document.getElementById(id);
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const corazones = n => '♥'.repeat(Math.max(0, n)) || '—';
 
 // ---------- los 9 minijuegos (y el desafío final) ----------
 // listo: true cuando el minijuego ya está programado
@@ -368,49 +504,80 @@ const JUEGOS = {
        metas: ['8 aciertos', '14 aciertos y 80 % bien', '18 aciertos sin errores'],
        estrellas: p => p.aciertos >= 18 && !p.errores ? 3 : p.aciertos >= 14 && p.precision >= 80 ? 2 : p.aciertos >= 8 ? 1 : 0,
        truco: '<b>Cualquier número × 1 da el mismo número.</b> Es un espejo: 1 × 7 = 7.' },
-  2: { nombre: 'Dobles', tipo: 'Memoria', color: '#2ee6c5', listo: false,
-       corto: 'Dá vuelta las cartas y juntá cada cuenta con su resultado.',
-       desc: 'Un tablero de cartas boca abajo. Encontrá los pares: la cuenta 2 × 6 va con la carta 12.',
-       pasos: ['Dá vuelta dos cartas.', 'Si la cuenta y el resultado coinciden, quedan descubiertas.', 'Menos intentos = más puntos.'],
+  2: { nombre: 'Dobles', tipo: 'Atención · seguí la carta', color: '#2ee6c5', listo: true,
+       corto: 'Una cuenta, 3 cartas que se mezclan: seguí con la vista la del resultado.',
+       desc: 'Aparece una cuenta y 3 cartas: una tiene el resultado, pero tenés que descubrir cuál. Después se dan vuelta y se mezclan. Seguí la correcta con los ojos y tocala.',
+       pasos: ['Tenés 5 segundos para encontrar la carta con el resultado. Si ya la encontraste, tocá “¡Listo!”.', 'Se dan vuelta y se mezclan: no la pierdas de vista.', 'Tocala (o apretá 1, 2 o 3). Son 10 rondas, cada vez más rápidas.'],
+       marcador: ['1/10', 'Ronda'],
+       metas: ['5 de 10 bien', '8 de 10 bien', '10 de 10 bien'],
+       estrellas: p => p.aciertos >= 10 ? 3 : p.aciertos >= 8 ? 2 : p.aciertos >= 5 ? 1 : 0,
        truco: '<b>Multiplicar por 2 es sumar el número dos veces.</b> 2 × 8 = 8 + 8 = 16.' },
-  3: { nombre: 'Saltos', tipo: 'Ritmo', color: '#3db8ff', listo: false,
+  3: { nombre: 'Saltos', tipo: 'Ritmo', color: '#3db8ff', listo: true,
        corto: 'Tocá los múltiplos de 3 en orden en una grilla de números.',
        desc: 'Una grilla llena de números. Tocá 3, 6, 9, 12… en orden antes de que se acabe el tiempo. Cada nivel mezcla más.',
-       pasos: ['Encontrá el siguiente múltiplo de 3.', 'Tocalo antes de que la barra se vacíe.', 'Si tocás uno que no va, perdés tiempo.'],
+       pasos: ['Encontrá en la grilla el siguiente múltiplo de 3.', 'Al llegar a 30 aparece una grilla nueva, más grande.', 'Si tocás uno que no va, perdés 2 segundos.'],
+       segundos: 60,
+       metas: ['10 aciertos', '20 aciertos y 85 % bien', '30 aciertos con 1 error o menos'],
+       estrellas: p => p.aciertos >= 30 && p.errores <= 1 ? 3 : p.aciertos >= 20 && p.precision >= 85 ? 2 : p.aciertos >= 10 ? 1 : 0,
        truco: '<b>La tabla del 3 va de 3 en 3.</b> Si sumás las cifras de un resultado, siempre te da 3, 6 o 9.' },
-  4: { nombre: 'Lluvia', tipo: 'Caída', color: '#b8ff3c', listo: false,
+  4: { nombre: 'Lluvia', tipo: 'Caída', color: '#b8ff3c', listo: true,
        corto: 'Las cuentas caen: escribí el resultado antes de que toquen el piso.',
        desc: 'Como en Tecla a Tecla, pero con números: las cuentas caen cada vez más rápido. Escribí el resultado para romperlas.',
-       pasos: ['Escribí el resultado con el teclado.', 'La cuenta que coincide se rompe.', 'Si tres cuentas tocan el piso, se termina.'],
+       pasos: ['Escribí el resultado con el teclado o con los botones.', 'La cuenta que coincide se rompe.', 'Si tres cuentas tocan el piso, se termina.'],
+       marcador: [corazones(3), 'Vidas'],
+       metas: ['Rompé 10 cuentas', 'Rompé 20 cuentas', 'Rompé 30 cuentas'],
+       estrellas: p => p.aciertos >= 30 ? 3 : p.aciertos >= 20 ? 2 : p.aciertos >= 10 ? 1 : 0,
        truco: '<b>× 4 es el doble del doble.</b> 4 × 7: el doble de 7 es 14, y el doble de 14 es 28.' },
-  5: { nombre: 'Verdad o Falso', tipo: 'Reflejos', color: '#ffd23f', listo: false,
+  5: { nombre: 'Verdad o Falso', tipo: 'Reflejos', color: '#ffd23f', listo: true,
        corto: '¿5 × 7 = 35? Decidí en menos de 2 segundos si es cierto.',
        desc: 'Aparecen cuentas ya resueltas, algunas con trampa. Decidí rápido si están bien o mal.',
-       pasos: ['Leé la cuenta con su resultado.', '← Falso · Verdadero → (o tocá los botones).', 'Cada vez tenés menos tiempo para pensar.'],
+       pasos: ['Leé la cuenta con su resultado.', 'Flecha ← (o F) = falso · flecha → (o V) = verdadero.', 'Tenés 40 segundos, y cada vez menos tiempo por cuenta.'],
+       segundos: 40,
+       metas: ['12 aciertos', '20 aciertos y 85 % bien', '26 aciertos y 95 % bien'],
+       estrellas: p => p.aciertos >= 26 && p.precision >= 95 ? 3 : p.aciertos >= 20 && p.precision >= 85 ? 2 : p.aciertos >= 12 ? 1 : 0,
        truco: '<b>La tabla del 5 siempre termina en 0 o en 5.</b> Si no termina así, es falso.' },
-  6: { nombre: 'Duelo', tipo: '1 vs bot', color: '#ff8a3d', listo: false,
+  6: { nombre: 'Duelo', tipo: '1 vs bot', color: '#ff8a3d', listo: true,
        corto: 'Vos contra el bot: el primero en responder gana la ronda.',
-       desc: 'Un duelo al mejor de 9 rondas contra un bot que se pone más rápido cada vez que le ganás.',
+       desc: 'Un duelo contra un bot: el primero en ganar 5 rondas gana. El bot se pone más rápido cada vez que le ganás una.',
        pasos: ['Aparece la cuenta para los dos a la vez.', 'Escribí el resultado antes que el bot.', 'Ganá 5 rondas para ganar el duelo.'],
+       marcador: [1, 'Ronda'],
+       metas: ['Ganale al bot', 'Ganale perdiendo 1 ronda o menos', 'Ganale 5 a 0 sin errores'],
+       estrellas: p => !p.gano ? 0 : !p.errores ? 3 : p.perdidas <= 1 ? 2 : 1,
        truco: '<b>× 6 es × 5 más una vez más.</b> 6 × 7 = 35 + 7 = 42.' },
-  7: { nombre: 'Camino', tipo: 'Laberinto', color: '#ff4d8d', listo: false,
+  7: { nombre: 'Camino', tipo: 'Laberinto', color: '#ff4d8d', listo: true,
        corto: 'Cruzá el tablero pisando sólo los múltiplos de 7.',
        desc: 'Un tablero de casilleros con números. Para llegar al otro lado sólo podés pisar los que son resultados de la tabla del 7.',
-       pasos: ['Movete con las flechas o tocando casilleros vecinos.', 'Pisá sólo múltiplos de 7.', 'Si pisás otro, volvés al inicio.'],
+       pasos: ['Movete con las flechas o tocando los casilleros vecinos.', 'Pisá sólo múltiplos de 7 hasta llegar a la línea verde.', 'Si pisás otro, volvés al inicio. Son 3 tableros en 90 segundos.'],
+       segundos: 90,
+       metas: ['Cruzá 1 tablero', 'Cruzá los 3 tableros', 'Los 3 sin pisar trampas'],
+       estrellas: p => p.tableros === 3 && !p.errores ? 3 : p.tableros === 3 ? 2 : p.tableros >= 1 ? 1 : 0,
        truco: '<b>La del 7 es la más difícil: memorizá las “raras”.</b> 7 × 7 = 49 y 7 × 8 = 56 (5, 6, 7, 8).' },
-  8: { nombre: 'Bomba', tipo: 'Presión', color: '#ff4d6d', listo: false,
+  8: { nombre: 'Bomba', tipo: 'Presión', color: '#ff4d6d', listo: true,
        corto: 'Cada respuesta correcta corta un cable. El reloj no perdona.',
        desc: 'Una bomba con 10 cables y una cuenta regresiva. Cada respuesta correcta corta un cable; cada error adelanta el reloj.',
-       pasos: ['Respondé la cuenta del cable encendido.', 'Acierto: se corta el cable.', 'Error: el reloj pierde 3 segundos.'],
+       pasos: ['Respondé la cuenta del cable encendido.', 'Acierto: se corta el cable. Son los 10 de la tabla.', 'Error: el reloj pierde 3 segundos. Tenés 45.'],
+       segundos: 45,
+       metas: ['Desactivá la bomba', 'Desactivala con 2 errores o menos', 'Sin errores y con 15 s de sobra'],
+       estrellas: p => !p.gano ? 0 : !p.errores && p.sobra >= 15 ? 3 : p.errores <= 2 ? 2 : 1,
        truco: '<b>× 8 es doblar tres veces.</b> 8 × 6: 6 → 12 → 24 → 48.' },
-  9: { nombre: 'Jefe final', tipo: 'Boss', color: '#8b5cff', listo: false,
+  9: { nombre: 'Jefe final', tipo: 'Boss', color: '#8b5cff', listo: true,
        corto: 'Bajale la vida al jefe con respuestas correctas. Si fallás, te pega.',
        desc: 'Un jefe con una barra de vida. Cada respuesta correcta es un golpe; cada error, él te golpea a vos. Rápido = golpe crítico.',
-       pasos: ['Respondé para atacar.', 'Responder rápido hace golpes críticos.', 'Tenés 3 vidas.'],
+       pasos: ['Escribí el resultado para atacar.', 'Si respondés en menos de 2,5 s, el golpe es crítico (doble).', 'Si fallás o tardás más de 7 s, el jefe te pega. Tenés 3 vidas.'],
+       marcador: [corazones(3), 'Vidas'],
+       metas: ['Vencé al jefe', 'Vencelo perdiendo 1 vida o menos', 'Vencelo sin perder vidas'],
+       estrellas: p => !p.gano ? 0 : !p.perdidas ? 3 : p.perdidas <= 1 ? 2 : 1,
        truco: '<b>Truco de los dedos:</b> para 9 × 4 bajá el 4.º dedo. Quedan 3 a la izquierda y 6 a la derecha: 36.' },
 };
-const FINAL = { nombre: 'Desafío final', tipo: 'Todas mezcladas · supervivencia', color: '#ffc53d',
-  corto: 'Todas las tablas mezcladas hasta que falles. Se desbloquea con al menos 1 estrella en las 9 tablas.' };
+// el desafío final se maneja como la "tabla 10": se abre con 1 estrella en la del 9
+const FINAL = JUEGOS[10] = { nombre: 'Desafío final', tipo: 'Todas mezcladas · supervivencia', color: '#ffc53d', listo: true,
+  marcador: [corazones(3), 'Vidas'],
+  metas: ['15 aciertos', '30 aciertos', '50 aciertos'],
+  estrellas: p => p.aciertos >= 50 ? 3 : p.aciertos >= 30 ? 2 : p.aciertos >= 15 ? 1 : 0,
+  corto: 'Todas las tablas mezcladas hasta que falles. Se desbloquea con al menos 1 estrella en las 9 tablas.',
+  desc: 'Cuentas de todas las tablas, del 2 al 9, una atrás de otra. Cada vez tenés menos tiempo para responder. ¿Hasta dónde llegás?',
+  pasos: ['Escribí el resultado antes de que se vacíe la barra.', 'Si te equivocás o se acaba el tiempo, perdés una vida.', 'Tenés 3 vidas. Cada 5 aciertos seguidos, más puntos.'],
+  truco: '' };
 const METAS = ['Terminá el minijuego', 'Acertá el 80 % o más', 'Acertá todo y rápido'];
 
 // ---------- sesión y progreso ----------
@@ -434,13 +601,13 @@ if (location.search) $('volverInicio').href += location.search;   // mantiene ?a
 
 // ---------- pantalla de inicio ----------
 function pintarInicio() {
-  let tot = 0, dom = 0, pts = 0, todas = true;
+  let tot = 0, dom = 0, pts = prog(10).mejor;
+  const todas = abierta(10);
   let html = '';
   for (let n = 1; n <= 9; n++) {
     const j = JUEGOS[n], p = prog(n);
     tot += p.estrellas; pts += p.mejor;
     if (p.estrellas === 3) dom++;
-    if (p.estrellas === 0) todas = false;
     if (!abierta(n)) {
       html += '<button class="tabla bloqueada" aria-disabled="true" style="--c:' + j.color + '">' +
         '<span class="num">🔒</span>' +
@@ -457,10 +624,13 @@ function pintarInicio() {
       '<span class="mejor">' + (p.mejor ? 'Mejor <b>' + p.mejor + '</b>' : (j.listo ? 'Sin jugar' : 'Próximamente')) + '</span></div>' +
       '</button>';
   }
-  html += '<button class="tabla final' + (todas ? '' : ' bloqueada') + '" ' + (todas ? '' : 'aria-disabled="true" ') + 'style="--c:' + FINAL.color + '">' +
+  const pf = prog(10);
+  html += '<button class="tabla final' + (todas ? '' : ' bloqueada') + '" ' + (todas ? 'data-n="10" ' : 'aria-disabled="true" ') + 'style="--c:' + FINAL.color + '">' +
     '<span class="num">' + (todas ? '∞' : '🔒') + '</span>' +
     '<div class="cab"><div class="tipo">' + esc(FINAL.tipo) + '</div><h3>' + esc(FINAL.nombre) + '</h3></div>' +
-    '<p>' + esc(FINAL.corto) + '</p></button>';
+    '<p>' + esc(FINAL.corto) + '</p>' +
+    (todas ? '<div class="pie">' + estrellas(pf.estrellas) + '<span class="mejor">' + (pf.mejor ? 'Mejor <b>' + pf.mejor + '</b>' : 'Sin jugar') + '</span></div>' : '') +
+    '</button>';
   $('tablas').innerHTML = html;
   $('totEstrellas').innerHTML = tot + '<small>/27</small>';
   $('totDominadas').innerHTML = dom + '<small>/9</small>';
@@ -477,8 +647,11 @@ function pintarDetalle(n) {
   tablaActual = n;
   const j = JUEGOS[n], p = prog(n);
   $('detalle').style.setProperty('--c', j.color);
-  $('dNum').innerHTML = '<i>×</i>' + n;
-  $('dTipo').textContent = 'Tabla del ' + n + ' · ' + j.tipo;
+  const fin = n === 10;
+  $('dNum').innerHTML = fin ? '∞' : '<i>×</i>' + n;
+  $('dTipo').textContent = fin ? j.tipo : 'Tabla del ' + n + ' · ' + j.tipo;
+  $('panelTabla').hidden = fin;
+  $('det').classList.toggle('solo', fin);
   $('dTitulo').textContent = j.nombre;
   $('dTablaTit').textContent = 'La tabla del ' + n;
   let filas = '';
@@ -543,13 +716,14 @@ function bip(frec, dur = .09, tipo = 'sine', vol = .07) {
 }
 
 // ---------- motor común de los minijuegos ----------
-// Cada minijuego recibe `motor` y usa: escenario, espera, cuadro, reloj, acierto, error, opciones, fin.
-const partida = { activa: false, timers: [], raf: 0, onTecla: null, onElegir: null };
+// Cada minijuego recibe `motor` y lo usa para el reloj, los puntos, los errores, la entrada de números, etc.
+// partida.gen cambia en cada partida: así un cuadro o una espera de la partida anterior no sigue corriendo.
+const partida = { activa: false, gen: 0, timers: [], onTecla: null, onElegir: null };
 function limpiar() {
-  partida.activa = false; partida.onTecla = null; partida.onElegir = null;
+  partida.activa = false; partida.gen++; partida.onTecla = null; partida.onElegir = null;
   partida.timers.forEach(clearTimeout); partida.timers = [];
-  cancelAnimationFrame(partida.raf);
 }
+const azar = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
 const mezclar = a => { for (let i = a.length - 1; i > 0; i--) { const k = Math.floor(Math.random() * (i + 1)); [a[i], a[k]] = [a[k], a[i]]; } return a; };
 const multi = () => Math.min(4, 1 + Math.floor(partida.racha / 5));
 function hud() {
@@ -561,7 +735,31 @@ function hud() {
 const motor = {
   get escenario() { return $('escenario'); },
   espera(fn, ms) { partida.timers.push(setTimeout(fn, ms)); },
-  cuadro(fn) { partida.raf = requestAnimationFrame(fn); },
+  cuadro(fn) {
+    const g = partida.gen;
+    requestAnimationFrame(t => { if (partida.activa && partida.gen === g) fn(t); });
+  },
+  // cuenta regresiva de `dur` ms con la barra de arriba; t.sumar(-3000) quita tiempo
+  temporizador(dur, { alAcabar = () => motor.fin(), cadaCuadro } = {}) {
+    const t = { fin: performance.now() + dur, resta: () => t.fin - performance.now(), sumar(ms) { t.fin += ms; }, parar() { t.parado = true; } };
+    const tick = () => {
+      if (t.parado) return;
+      const r = t.resta();
+      motor.reloj(r / dur, Math.ceil(r / 1000));
+      if (cadaCuadro) cadaCuadro(r);
+      if (r <= 0) return alAcabar();
+      motor.cuadro(tick);
+    };
+    tick();
+    return t;
+  },
+  // para los juegos sin reloj: la primera casilla del HUD muestra otra cosa (vidas, ronda…)
+  marcador(valor, etiqueta) {
+    $('tiempo').hidden = true;
+    $('hTiempo').textContent = valor;
+    if (etiqueta) $('hTiempoLbl').textContent = etiqueta;
+  },
+  bono(pts) { partida.puntos += pts; hud(); },
   // barra de tiempo: frac de 1 a 0, y los segundos que quedan
   reloj(frac, seg) {
     $('tiempoBarra').style.transform = 'scaleX(' + Math.max(0, frac) + ')';
@@ -576,10 +774,44 @@ const motor = {
     bip(620 + Math.min(partida.racha, 12) * 45);
     return pts;
   },
-  error() {
+  // suave: sin sacudir la pantalla (por ejemplo, dar vuelta dos cartas que no son pareja)
+  error(suave) {
     partida.errores++; partida.racha = 0; hud();
-    bip(150, .2, 'square', .045);
+    bip(150, .2, 'square', suave ? .025 : .045);
+    if (suave) return;
     const e = $('escenario'); e.classList.remove('sacude'); void e.offsetWidth; e.classList.add('sacude');
+  },
+  // ¿lo que escribió es la respuesta c? 'ok', 'mal' (ya no puede ser) o null (todavía falta escribir)
+  comprobar(v, c) {
+    c = String(c);
+    return v === c ? 'ok' : c.startsWith(v) ? null : 'mal';
+  },
+  // entrada de números: teclado en pantalla + teclado de la compu.
+  // alCambiar(valor) devuelve 'ok' o 'mal' para vaciar la entrada (con un destello), o nada para seguir escribiendo.
+  entrada(caja, alCambiar) {
+    caja.innerHTML = '<div class="entrada"><div class="visor" aria-live="polite"><span></span></div><div class="numpad">' +
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(d => '<button data-d="' + d + '">' + d + '</button>').join('') +
+      '<button data-d="⌫" class="borrar" aria-label="Borrar">⌫</button></div></div>';
+    const visor = caja.querySelector('.visor'), txt = visor.querySelector('span');
+    let v = '';
+    const tipear = d => {
+      if (!partida.activa) return;
+      if (d === '⌫') v = v.slice(0, -1);
+      else if (v.length < 3) v += d;
+      txt.textContent = v;
+      const r = v ? alCambiar(v) : null;
+      if (r === 'ok' || r === 'mal') {
+        v = '';
+        visor.classList.remove('ok', 'mal'); void visor.offsetWidth; visor.classList.add(r);
+        motor.espera(() => { if (!v) txt.textContent = ''; }, 160);
+      }
+    };
+    caja.querySelector('.numpad').addEventListener('click', e => { const b = e.target.closest('button'); if (b) tipear(b.dataset.d); });
+    partida.onTecla = e => {
+      if (/^[0-9]$/.test(e.key)) { e.preventDefault(); tipear(e.key); }
+      else if (e.key === 'Backspace') { e.preventDefault(); tipear('⌫'); }
+    };
+    return { vaciar() { v = ''; txt.textContent = ''; } };
   },
   // "+20" que sube desde un elemento
   flota(texto, el) {
@@ -605,14 +837,22 @@ function jugar(n) {
   limpiar();
   const j = JUEGOS[n];
   $('juego').style.setProperty('--c', j.color);
-  $('jTipo').textContent = 'Tabla del ' + n + ' · ' + j.tipo;
+  $('jTipo').textContent = n === 10 ? j.tipo : 'Tabla del ' + n + ' · ' + j.tipo;
   $('jTitulo').textContent = j.nombre;
-  Object.assign(partida, { n, puntos: 0, aciertos: 0, errores: 0, racha: 0, mejorRacha: 0 });
+  Object.assign(partida, { n, puntos: 0, aciertos: 0, errores: 0, racha: 0, mejorRacha: 0, mensaje: '',
+    gano: false, perdidas: 0, tableros: 0, sobra: 0 });
   $('resultado').hidden = true; $('escenario').hidden = false; $('tiempo').hidden = false;
+  $('hTiempoLbl').textContent = 'Tiempo';
+  $('escenario').className = 'escenario';
   hud(); motor.reloj(1, j.segundos || 30);
+  if (j.marcador) motor.marcador(...j.marcador);
   let k = 3;
   const paso = () => {
-    if (k === 0) { partida.activa = true; partida.t0 = performance.now(); MINIJUEGOS[n](motor); return; }
+    if (k === 0) {
+      partida.activa = true; partida.t0 = performance.now();
+      $('escenario').innerHTML = ''; $('escenario').classList.add('j' + n);
+      MINIJUEGOS[n](motor); return;
+    }
     $('escenario').innerHTML = '<div class="cuenta" aria-live="polite">' + k + '</div>';
     bip(k === 1 ? 660 : 440, .12); k--;
     motor.espera(paso, 650);
@@ -628,20 +868,23 @@ function terminar() {
   const n = partida.n, j = JUEGOS[n], antes = prog(n);
   const total = partida.aciertos + partida.errores;
   partida.precision = total ? Math.round(partida.aciertos * 100 / total) : 0;
+  partida.ms = ms;
   const est = j.estrellas(partida);
-  const siguienteAntes = n < 9 && abierta(n + 1);
+  const siguienteAntes = n < 10 && abierta(n + 1);
   const record = partida.puntos > antes.mejor;
   progreso[n] = { estrellas: Math.max(antes.estrellas, est), mejor: Math.max(antes.mejor, partida.puntos) };
   guardarProgreso();
-  const desbloqueo = n < 9 && !siguienteAntes && abierta(n + 1);
+  const desbloqueo = n < 10 && !siguienteAntes && abierta(n + 1);
+  const nombreSig = n + 1 === 10 ? 'Desafío final' : 'Tabla del ' + (n + 1);
 
   $('escenario').hidden = true; $('tiempo').hidden = true; $('resultado').hidden = false;
   $('rEstrellas').innerHTML = '<b>★</b>'.repeat(est) + '★'.repeat(3 - est);
   $('rEstrellas').setAttribute('aria-label', est + ' de 3 estrellas');
   $('rTitulo').textContent = TITULOS[est];
   const metas = j.metas || METAS;
-  $('rSub').textContent = est < 3 ? 'Para ' + (est + 1) + (est ? ' estrellas' : ' estrella') + ': ' + metas[est].toLowerCase() + '.'
-                                  : '¡Tabla del ' + n + ' dominada!';
+  $('rSub').textContent = (partida.mensaje ? partida.mensaje + ' ' : '') +
+    (est < 3 ? 'Para ' + (est + 1) + (est ? ' estrellas' : ' estrella') + ': ' + metas[est].toLowerCase() + '.'
+             : n === 10 ? '¡Desafío superado!' : '¡Tabla del ' + n + ' dominada!');
   $('rAciertos').textContent = partida.aciertos;
   $('rPrecision').textContent = partida.precision + '%';
   $('rRacha').textContent = partida.mejorRacha;
@@ -649,10 +892,10 @@ function terminar() {
   $('rInsignias').innerHTML =
     (record && partida.puntos ? '<span class="insignia">🏆 Nuevo récord</span>' : '') +
     (est > antes.estrellas && antes.estrellas ? '<span class="insignia">⭐ Nueva estrella</span>' : '') +
-    (desbloqueo ? '<span class="insignia lima">🔓 Tabla del ' + (n + 1) + ' desbloqueada</span>' : '');
-  const sig = n < 9 && abierta(n + 1);
+    (desbloqueo ? '<span class="insignia lima">🔓 ' + nombreSig + (n + 1 === 10 ? ' desbloqueado' : ' desbloqueada') + '</span>' : '');
+  const sig = n < 10 && abierta(n + 1);
   $('rSiguiente').hidden = !sig;
-  $('rSiguiente').textContent = 'Tabla del ' + (n + 1) + ' →';
+  $('rSiguiente').textContent = nombreSig + ' →';
   bip(est ? 880 : 300, .25, 'triangle', .06);
 
   $('rServidor').textContent = '';
@@ -724,9 +967,469 @@ MINIJUEGOS[1] = m => {
   pregunta(); tick();
 };
 
+// ×2 · Dobles: una cuenta y 3 cartas. Se miran 5 segundos (o hasta tocar "¡Listo!"), se dan vuelta y se mezclan:
+// hay que seguir la correcta con la vista. 10 rondas (toda la tabla), cada una mezcla más y más rápido.
+MINIJUEGOS[2] = m => {
+  const RONDAS = 10, MIRAR = 5;
+  const ks = mezclar([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  let r = 0, fase = '', cartas = [];      // fase: mirar → mezclar → elegir → ver
+  m.escenario.innerHTML = '<p class="consigna" id="consigna"></p>' +
+    '<div class="pregunta chica" aria-live="polite"><span id="naCuenta"></span><span class="igual">=</span><span class="hueco" id="hueco">?</span></div>' +
+    '<div class="mesa" id="mesa"></div>' +
+    '<button class="ghost listo" id="listoBtn">¡Listo! <kbd>Enter</kbd></button>';
+  const lugar = b => b.style.getPropertyValue('--s');
+  function ronda() {
+    r++; m.marcador(r + '/' + RONDAS, 'Ronda');
+    const k = ks[r - 1], c = 2 * k;
+    const vals = mezclar([c, ...m.opciones(2, k).filter(v => v !== c).slice(0, 2)]);
+    $('naCuenta').textContent = '2 × ' + k;
+    $('hueco').textContent = '?'; $('hueco').className = 'hueco';
+    $('mesa').innerHTML = vals.map((v, i) => '<button class="carta naipe vista" data-v="' + v + '" style="--s:' + i + '">' +
+      '<span class="dorso"></span><span class="cara">' + v + '</span></button>').join('');
+    cartas = [...$('mesa').children];
+    fase = 'mirar'; $('listoBtn').hidden = false;
+    const esta = r;
+    let restan = MIRAR;
+    const tic = () => {
+      if (fase !== 'mirar' || esta !== r) return;
+      if (!restan) return darVuelta();
+      $('consigna').textContent = '¿Dónde está el resultado? Se dan vuelta en ' + restan + '…';
+      restan--;
+      m.espera(tic, 1000);
+    };
+    tic();
+  }
+  function darVuelta() {
+    if (fase !== 'mirar') return;
+    fase = 'mezclar'; $('listoBtn').hidden = true;
+    cartas.forEach(b => b.classList.remove('vista'));
+    $('consigna').textContent = '¡Seguilo con la vista!';
+    m.espera(() => barajar(2 + r, Math.max(240, 600 - r * 36)), 500);
+  }
+  // n cambios de lugar entre dos cartas, de `vel` ms cada uno
+  function barajar(n, vel) {
+    $('mesa').style.setProperty('--vel', vel + 'ms');
+    const paso = () => {
+      cartas.forEach(b => b.classList.remove('arriba', 'abajo'));
+      if (n-- <= 0) {
+        fase = 'elegir';
+        $('consigna').textContent = '¿Dónde está? Tocala (o apretá 1, 2 o 3)';
+        return;
+      }
+      const [a, b] = mezclar([...cartas]).slice(0, 2);
+      const sa = lugar(a);
+      a.style.setProperty('--s', lugar(b)); b.style.setProperty('--s', sa);
+      a.classList.add('arriba'); b.classList.add('abajo');   // una pasa por arriba y otra por abajo
+      bip(260 + n * 25, .04, 'triangle', .03);
+      m.espera(paso, vel + 50);
+    };
+    paso();
+  }
+  function elegir(b) {
+    if (fase !== 'elegir' || !partida.activa) return;
+    fase = 'ver';
+    const c = 2 * ks[r - 1];
+    b.classList.add('vista');
+    $('hueco').textContent = c;
+    if (+b.dataset.v === c) {
+      b.classList.add('par'); $('hueco').classList.add('bien');
+      m.flota('+' + m.acierto(30), b);
+    } else {
+      b.classList.add('mal'); $('hueco').classList.add('mal');
+      m.error();
+      cartas.find(x => +x.dataset.v === c).classList.add('vista', 'par');
+    }
+    m.espera(() => (r === RONDAS ? m.fin() : ronda()), 1300);
+  }
+  $('mesa').addEventListener('click', e => { const b = e.target.closest('.naipe'); if (b) elegir(b); });
+  $('listoBtn').addEventListener('click', darVuelta);
+  partida.onTecla = e => {
+    if ((e.key === 'Enter' || e.key === ' ') && fase === 'mirar') { e.preventDefault(); return darVuelta(); }
+    const i = '123'.indexOf(e.key);
+    if (i >= 0) { const b = cartas.find(x => lugar(x) === String(i)); if (b) elegir(b); }
+  };
+  ronda();
+};
+
+// ×3 · Saltos: tocar 3, 6, 9… 30 en orden. Cada ronda completa arma una grilla nueva y más grande.
+MINIJUEGOS[3] = m => {
+  const t = m.temporizador(60000);
+  let ronda = 0, sig = 1;
+  function tablero() {
+    ronda++; sig = 1;
+    const mult = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(i => 3 * i);
+    const otros = new Set();
+    while (otros.size < (ronda === 1 ? 6 : 10)) { const v = azar(1, 32); if (v % 3) otros.add(v); }
+    m.escenario.innerHTML = '<p class="consigna">Ronda ' + ronda + ' · tocá los múltiplos de 3 en orden</p>' +
+      '<div class="cadena" id="cadena">' + mult.map((v, i) => '<i' + (i ? '' : ' class="sig"') + '>' + (i ? '·' : '?') + '</i>').join('') + '</div>' +
+      '<div class="grilla-num' + (ronda > 1 ? ' g5' : '') + '">' +
+      mezclar([...mult, ...otros]).map(v => '<button class="celda" data-v="' + v + '">' + v + '</button>').join('') + '</div>';
+    m.escenario.querySelector('.grilla-num').addEventListener('click', e => {
+      const b = e.target.closest('.celda');
+      if (!b || !partida.activa || b.classList.contains('hecho')) return;
+      if (+b.dataset.v === 3 * sig) {
+        b.classList.add('hecho'); b.disabled = true;
+        const chips = $('cadena').children;
+        chips[sig - 1].className = 'hecho'; chips[sig - 1].textContent = 3 * sig;
+        m.flota('+' + m.acierto(), b);
+        if (++sig > 10) { m.bono(50); m.espera(tablero, 450); }
+        else { chips[sig - 1].className = 'sig'; chips[sig - 1].textContent = '?'; }
+      } else {
+        b.classList.remove('mal'); void b.offsetWidth; b.classList.add('mal');
+        m.error(); t.sumar(-2000); m.flota('−2 s', b);
+      }
+    });
+  }
+  tablero();
+};
+
+// ×4 · Lluvia: caen cuentas; escribir el resultado las rompe. 3 vidas, cada vez más rápido.
+MINIJUEGOS[4] = m => {
+  m.escenario.innerHTML = '<div class="cielo" id="cielo"><div class="piso"></div></div><div id="entradaCaja"></div>';
+  const cielo = $('cielo'), caen = [];
+  let vidas = 3, rotas = 0, proxima = 0, antes = performance.now();
+  m.marcador(corazones(vidas), 'Vidas');
+  function nueva() {
+    const usados = new Set(caen.map(g => g.k));
+    let k; do k = azar(1, 10); while (usados.has(k));
+    const el = document.createElement('div');
+    el.className = 'gota'; el.textContent = '4 × ' + k;
+    el.style.left = azar(12, 88) + '%';
+    cielo.appendChild(el);
+    caen.push({ k, el, y: 0 });
+  }
+  const quitar = g => caen.splice(caen.indexOf(g), 1);
+  m.entrada($('entradaCaja'), v => {
+    const g = caen.find(g => String(4 * g.k) === v);
+    if (g) {
+      quitar(g); g.el.classList.add('rota'); setTimeout(() => g.el.remove(), 260);
+      m.flota('+' + m.acierto(), g.el); rotas++;
+      if (rotas >= 40) m.espera(() => m.fin(), 300);
+      return 'ok';
+    }
+    if (!caen.some(g => String(4 * g.k).startsWith(v))) { if (caen.length) m.error(); return 'mal'; }
+  });
+  const tick = ahora => {
+    const dt = Math.min(.05, (ahora - antes) / 1000); antes = ahora;
+    // píxeles por segundo: arranca tranquilo (~13 s en caer) y acelera de a poco, con un tope (~4 s)
+    const alto = cielo.clientHeight, vel = Math.min(75, 22 + rotas * 1.8);
+    if (ahora >= proxima && caen.length < 5) { nueva(); proxima = ahora + Math.max(1500, 3200 - rotas * 60); }
+    for (const g of [...caen]) {
+      g.y += vel * dt;
+      g.el.style.transform = 'translate(-50%, ' + g.y + 'px)';
+      if (g.y > alto - 6) {
+        quitar(g); g.el.remove();
+        vidas--; m.error(); m.marcador(corazones(vidas));
+        if (!vidas) { partida.mensaje = 'Tocaron el piso tres cuentas.'; return m.fin(); }
+      }
+    }
+    m.cuadro(tick);
+  };
+  m.cuadro(tick);
+};
+
+// ×5 · Verdad o Falso: cuentas resueltas, algunas con trampa. Cada vez menos tiempo para decidir.
+MINIJUEGOS[5] = m => {
+  m.temporizador(40000);
+  let verdad, c, k, t1, limite, bloqueado;
+  function pregunta() {
+    k = azar(1, 10); c = 5 * k; verdad = Math.random() < .5;
+    const r = verdad ? c : mezclar([5 * (k + 1), 5 * (k - 1), c + 1, c - 1, c + 2, c - 3]).find(v => v > 0 && v !== c);
+    limite = Math.max(1300, 3200 - partida.aciertos * 75);
+    t1 = performance.now(); bloqueado = false;
+    m.escenario.innerHTML =
+      '<div class="pregunta chica" aria-live="polite"><span>5 × ' + k + '</span><span class="igual">=</span><span class="hueco" id="hueco">' + r + '</span></div>' +
+      '<div class="mini-barra"><i id="vfBarra"></i></div>' +
+      '<div class="vf-botones"><button class="opcion vf-no" data-r="0"><kbd>←</kbd>✗ Falso</button>' +
+      '<button class="opcion vf-si" data-r="1"><kbd>→</kbd>✓ Verdadero</button></div>';
+  }
+  function responder(dijo, b) {
+    if (bloqueado || !partida.activa) return;
+    bloqueado = true;
+    const h = $('hueco');
+    if (dijo === verdad) {
+      h.classList.add('bien'); if (b) b.classList.add('bien');
+      m.flota('+' + m.acierto(), b || h);
+      m.espera(pregunta, 250);
+    } else {
+      h.classList.add('mal'); if (b) b.classList.add('mal');
+      if (!verdad) h.textContent = c;      // muestra el resultado correcto
+      m.error();
+      m.espera(pregunta, 800);
+    }
+  }
+  partida.onElegir = b => responder(b.dataset.r === '1', b);
+  partida.onTecla = e => {
+    if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'f') responder(false, m.escenario.querySelector('.vf-no'));
+    if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'v') responder(true, m.escenario.querySelector('.vf-si'));
+  };
+  const tick = ahora => {
+    const f = 1 - (ahora - t1) / limite;
+    const barra = $('vfBarra'); if (barra) barra.style.transform = 'scaleX(' + Math.max(0, f) + ')';
+    if (f <= 0 && !bloqueado) responder(!verdad, null);   // se acabó el tiempo: cuenta como error
+    m.cuadro(tick);
+  };
+  pregunta(); m.cuadro(tick);
+};
+
+// ×6 · Duelo: al mejor de 9 rondas contra un bot que se acelera cada vez que le ganás.
+MINIJUEGOS[6] = m => {
+  m.escenario.innerHTML =
+    '<div class="duelo"><div class="lado vos"><span>Vos</span><b id="duVos">0</b></div><span class="vs">VS</span>' +
+    '<div class="lado bot"><span>Bot 🤖</span><b id="duBot">0</b></div></div>' +
+    '<div class="pregunta chica" aria-live="polite"><span id="duCuenta"></span><span class="igual">=</span><span class="hueco" id="hueco">?</span></div>' +
+    '<div class="bot-barra"><i id="botBarra"></i><span>el bot está pensando…</span></div><div id="entradaCaja"></div>';
+  let vos = 0, bot = 0, ronda = 0, c, t1, botMs, enJuego = false, ultimo = 0;
+  const ent = m.entrada($('entradaCaja'), v => {
+    if (!enJuego) return 'mal';
+    const r = m.comprobar(v, c);
+    if (r === 'ok') { enJuego = false; vos++; m.flota('+' + m.acierto(40), $('hueco')); cerrar(true); }
+    if (r === 'mal') m.error();
+    return r;
+  });
+  function nuevaRonda() {
+    ronda++; m.marcador(ronda, 'Ronda');
+    let k; do k = azar(2, 10); while (k === ultimo); ultimo = k;
+    c = 6 * k;
+    $('duCuenta').textContent = '6 × ' + k;
+    $('hueco').textContent = '?'; $('hueco').className = 'hueco';
+    botMs = Math.max(1900, 5000 - vos * 450) + azar(-300, 300);
+    t1 = performance.now(); enJuego = true; ent.vaciar();
+  }
+  function cerrar(gane) {
+    $('duVos').textContent = vos; $('duBot').textContent = bot;
+    $('hueco').textContent = c; $('hueco').classList.add(gane ? 'bien' : 'mal');
+    if (vos === 5 || bot === 5) {
+      partida.gano = vos === 5; partida.perdidas = bot;
+      partida.mensaje = partida.gano ? '¡Le ganaste al bot ' + vos + ' a ' + bot + '!' : 'El bot ganó ' + bot + ' a ' + vos + '.';
+      if (partida.gano) m.bono(150);
+      return m.espera(() => m.fin(), 900);
+    }
+    m.espera(nuevaRonda, gane ? 700 : 1200);
+  }
+  const tick = ahora => {
+    const f = enJuego ? (ahora - t1) / botMs : 0;
+    $('botBarra').style.transform = 'scaleX(' + Math.min(1, f) + ')';
+    if (enJuego && f >= 1) { enJuego = false; bot++; m.error(); bip(220, .3, 'sawtooth', .04); cerrar(false); }
+    m.cuadro(tick);
+  };
+  nuevaRonda(); m.cuadro(tick);
+};
+
+// ×7 · Camino: cruzar el tablero de izquierda a derecha pisando sólo múltiplos de 7.
+MINIJUEGOS[7] = m => {
+  const C = 7, F = 5;
+  const t = m.temporizador(90000);
+  partida.tableros = 0;
+  let celdas, pos, inicio, pisadas;
+  // números trampa: parecidos a los de la tabla del 7 pero que no son múltiplos
+  const trampas = [];
+  for (let v = 2; v <= 72; v++) if (v % 7) trampas.push(v);
+  function armar() {
+    // camino al azar que siempre avanza hacia la derecha (a veces sube o baja): nunca se traba
+    let f = azar(0, F - 1), c = 0;
+    const camino = [[f, c]], vis = new Set([f + ',' + c]);
+    while (c < C - 1) {
+      const op = [[f, c + 1], [f, c + 1], [f - 1, c], [f + 1, c]].filter(([a, b]) => a >= 0 && a < F && !vis.has(a + ',' + b));
+      [f, c] = op[azar(0, op.length - 1)];
+      camino.push([f, c]); vis.add(f + ',' + c);
+    }
+    celdas = [];
+    for (let a = 0; a < F; a++) for (let b = 0; b < C; b++) {
+      const v = vis.has(a + ',' + b) ? 7 * azar(1, 10) : (Math.random() < .6 ? 7 * azar(1, 10) + mezclar([-2, -1, 1, 2])[0] : trampas[azar(0, trampas.length - 1)]);
+      celdas.push({ f: a, c: b, v: Math.max(1, v) });
+    }
+    inicio = camino[0]; pos = inicio; pisadas = new Set([inicio.join(',')]);
+    m.escenario.innerHTML = '<p class="consigna">Tablero ' + (partida.tableros + 1) + ' de 3 · pisá sólo múltiplos de 7 hasta la línea verde</p>' +
+      '<div class="tablero" id="tablero">' + celdas.map((x, i) =>
+        '<button class="casilla' + (x.c === C - 1 ? ' meta-col' : '') + (x.c === 0 && x.f === inicio[0] ? ' inicio' : '') +
+        '" data-i="' + i + '">' + x.v + '</button>').join('') + '</div>';
+    $('tablero').addEventListener('click', e => { const b = e.target.closest('.casilla'); if (b) mover(celdas[b.dataset.i]); });
+    pintar();
+  }
+  const vecina = x => Math.abs(x.f - pos[0]) + Math.abs(x.c - pos[1]) === 1;
+  function pintar() {
+    $('tablero').querySelectorAll('.casilla').forEach((b, i) => {
+      const x = celdas[i], id = x.f + ',' + x.c;
+      b.classList.toggle('yo', x.f === pos[0] && x.c === pos[1]);
+      b.classList.toggle('pisada', pisadas.has(id));
+      b.classList.toggle('vecina', vecina(x) && !b.classList.contains('quemada'));
+    });
+  }
+  function mover(x) {
+    if (!partida.activa || !vecina(x)) return;
+    const b = $('tablero').children[celdas.indexOf(x)];
+    if (b.classList.contains('quemada')) return;
+    if (x.v % 7) {
+      b.classList.add('quemada'); m.error(); m.flota('✗ ' + x.v, b);
+      pos = inicio; pisadas = new Set([inicio.join(',')]);
+      return pintar();
+    }
+    const id = x.f + ',' + x.c;
+    if (!pisadas.has(id)) { pisadas.add(id); m.flota('+' + m.acierto(5), b); }
+    pos = [x.f, x.c];
+    pintar();
+    if (x.c === C - 1) {
+      partida.tableros++; m.bono(40);
+      if (partida.tableros === 3) { m.bono(Math.ceil(t.resta() / 1000) * 3); partida.mensaje = '¡Cruzaste los 3 tableros!'; return m.espera(() => m.fin(), 500); }
+      m.espera(armar, 500);
+    }
+  }
+  partida.onTecla = e => {
+    const d = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[e.key];
+    if (!d) return;
+    e.preventDefault();
+    const x = celdas.find(x => x.f === pos[0] + d[0] && x.c === pos[1] + d[1]);
+    if (x) mover(x);
+  };
+  armar();
+};
+
+// ×8 · Bomba: 10 cables, uno por cada cuenta de la tabla del 8. Cada error le quita 3 segundos al reloj.
+MINIJUEGOS[8] = m => {
+  const COLORES = ['#ff4d6d', '#ffc53d', '#3db8ff', '#b8ff3c', '#d65cff', '#ff8a3d', '#2ee6c5', '#f5f5f5', '#8b6bff', '#ff4d8d'];
+  const ks = mezclar([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  let i = 0;
+  m.escenario.innerHTML = '<div class="bomba"><div class="display" id="bDisplay">00:45</div><div class="cables" id="cables">' +
+    ks.map((k, j) => '<div class="cable" style="--w:' + COLORES[j] + '"><i></i><span>8 × ' + k + '</span></div>').join('') + '</div></div>' +
+    '<div class="pregunta chica" aria-live="polite"><span id="bCuenta"></span><span class="igual">=</span><span class="hueco" id="hueco">?</span></div>' +
+    '<div id="entradaCaja"></div>';
+  const cables = $('cables').children;
+  const mostrar = () => {
+    cables[i].classList.add('activo');
+    $('bCuenta').textContent = '8 × ' + ks[i];
+    $('hueco').textContent = '?';
+  };
+  let listo = false;                      // explotó o se desactivó: ya no se puede escribir
+  const t = m.temporizador(45000, {
+    alAcabar: () => {
+      listo = true;
+      m.escenario.classList.add('boom'); bip(90, .6, 'sawtooth', .07);
+      partida.mensaje = '💥 La bomba explotó.';
+      m.espera(() => m.fin(), 700);
+    },
+    cadaCuadro: r => {
+      const seg = Math.max(0, Math.ceil(r / 1000));
+      $('bDisplay').textContent = '00:' + String(seg).padStart(2, '0');
+      $('bDisplay').classList.toggle('apuro', seg <= 10);
+    },
+  });
+  m.entrada($('entradaCaja'), v => {
+    if (listo) return 'mal';
+    const r = m.comprobar(v, 8 * ks[i]);
+    if (r === 'ok') {
+      cables[i].classList.remove('activo'); cables[i].classList.add('cortado');
+      cables[i].querySelector('span').textContent = '✂ ' + 8 * ks[i];
+      m.flota('+' + m.acierto(15), cables[i]); bip(1200, .05, 'square', .03);
+      if (++i === 10) {
+        listo = true; t.parar();
+        partida.gano = true; partida.sobra = Math.ceil(t.resta() / 1000);
+        m.bono(partida.sobra * 5);
+        partida.mensaje = '✂️ ¡Bomba desactivada con ' + partida.sobra + ' s de sobra!';
+        m.espera(() => m.fin(), 500);
+      } else mostrar();
+    }
+    if (r === 'mal') { m.error(); t.sumar(-3000); m.flota('−3 s', $('bDisplay')); }
+    return r;
+  });
+  mostrar();
+};
+
+// ×9 · Jefe final: cada respuesta correcta le pega al jefe (rápida = crítico). Si fallás o tardás, te pega él.
+MINIJUEGOS[9] = m => {
+  const VIDA = 150, PACIENCIA = 7000;
+  let hp = VIDA, vidas = 3, c, t1, ultimo = 0, ganado = false;
+  m.marcador(corazones(vidas), 'Vidas');
+  m.escenario.innerHTML = '<div class="arena"><div class="jefe-cuerpo" id="jefe" aria-hidden="true">👾</div>' +
+    '<div class="vida"><i id="jefeVida"></i><span id="jefeHp">' + VIDA + ' / ' + VIDA + '</span></div></div>' +
+    '<div class="mini-barra" title="Ataque del jefe"><i id="ataque"></i></div>' +
+    '<div class="pregunta chica" aria-live="polite"><span id="jCuenta"></span><span class="igual">=</span><span class="hueco" id="hueco">?</span></div>' +
+    '<div id="entradaCaja"></div>';
+  const anim = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  function nueva() {
+    let k; do k = azar(1, 10); while (k === ultimo); ultimo = k;
+    c = 9 * k; t1 = performance.now();
+    $('jCuenta').textContent = '9 × ' + k;
+  }
+  function meGolpea() {
+    vidas--; m.error(); m.marcador(corazones(vidas));
+    anim($('jefe'), 'ataca'); bip(110, .3, 'sawtooth', .06);
+    if (!vidas) { partida.gano = false; partida.mensaje = 'El jefe te ganó con ' + hp + ' de vida.'; return m.fin(); }
+    nueva();
+  }
+  const ent = m.entrada($('entradaCaja'), v => {
+    if (ganado) return 'mal';
+    const r = m.comprobar(v, c);
+    if (r === 'ok') {
+      const critico = performance.now() - t1 < 2500;
+      const dano = critico ? 20 : 10;
+      hp = Math.max(0, hp - dano);
+      $('jefeVida').style.transform = 'scaleX(' + hp / VIDA + ')';
+      $('jefeHp').textContent = hp + ' / ' + VIDA;
+      anim($('jefe'), 'golpe');
+      m.flota((critico ? '¡CRÍTICO! ' : '') + '+' + m.acierto(critico ? 20 : 10), $('jefe'));
+      if (!hp) {
+        partida.gano = true; partida.perdidas = 3 - vidas; m.bono(vidas * 50);
+        partida.mensaje = '👾 ¡Venciste al jefe!';
+        ganado = true;
+        m.espera(() => m.fin(), 500);
+      } else nueva();
+    }
+    if (r === 'mal') meGolpea();
+    return r;
+  });
+  const tick = ahora => {
+    const f = 1 - (ahora - t1) / PACIENCIA;
+    $('ataque').style.transform = 'scaleX(' + Math.max(0, f) + ')';
+    if (f <= 0 && hp) { ent.vaciar(); meGolpea(); }
+    if (partida.activa) m.cuadro(tick);
+  };
+  nueva(); m.cuadro(tick);
+};
+
+// Desafío final: todas las tablas del 2 al 9 mezcladas, 3 vidas y cada vez menos tiempo.
+MINIJUEGOS[10] = m => {
+  let vidas = 3, c, t1, limite, ultima = '';
+  m.marcador(corazones(vidas), 'Vidas');
+  m.escenario.innerHTML = '<p class="consigna" id="fNivel"></p>' +
+    '<div class="pregunta" aria-live="polite"><span id="fCuenta"></span><span class="igual">=</span><span class="hueco" id="hueco">?</span></div>' +
+    '<div class="mini-barra"><i id="fBarra"></i></div><div id="entradaCaja"></div>';
+  function nueva() {
+    let a, b; do { a = azar(2, 9); b = azar(2, 10); } while (a + 'x' + b === ultima);
+    ultima = a + 'x' + b;
+    if (Math.random() < .5) [a, b] = [b, a];
+    c = a * b; t1 = performance.now();
+    limite = Math.max(3000, 8000 - partida.aciertos * 120);
+    $('fCuenta').textContent = a + ' × ' + b;
+    $('hueco').textContent = '?'; $('hueco').className = 'hueco';
+    $('fNivel').textContent = 'Cuenta ' + (partida.aciertos + 1) + ' · ' + (limite / 1000).toFixed(1) + ' s para responder';
+  }
+  function pierde() {
+    t1 = Infinity;                        // pausa la barra mientras muestra el resultado
+    vidas--; m.error(); m.marcador(corazones(vidas));
+    $('hueco').textContent = c; $('hueco').classList.add('mal');
+    if (!vidas) { partida.mensaje = 'Llegaste a ' + partida.aciertos + ' aciertos.'; return m.espera(() => m.fin(), 900); }
+    m.espera(nueva, 900);
+  }
+  const ent = m.entrada($('entradaCaja'), v => {
+    if (t1 === Infinity) return 'mal';
+    const r = m.comprobar(v, c);
+    if (r === 'ok') { m.flota('+' + m.acierto(), $('hueco')); nueva(); }
+    if (r === 'mal') pierde();
+    return r;
+  });
+  const tick = ahora => {
+    const f = t1 === Infinity ? 0 : 1 - (ahora - t1) / limite;
+    $('fBarra').style.transform = 'scaleX(' + Math.max(0, f) + ')';
+    if (f <= 0 && t1 !== Infinity) { ent.vaciar(); pierde(); }
+    m.cuadro(tick);
+  };
+  nueva(); m.cuadro(tick);
+};
+
 // ---------- navegación: #tabla-N (detalle) y #jugar-N (partida) ----------
 function ruta() {
-  let m = location.hash.match(/^#(tabla|jugar)-([1-9])$/);
+  let m = location.hash.match(/^#(tabla|jugar)-([1-9]|10)$/);
   if (m && (!abierta(+m[2]) || (m[1] === 'jugar' && !JUEGOS[+m[2]].listo))) {
     history.replaceState(null, '', location.pathname + location.search); m = null;
   }
