@@ -9,7 +9,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Special+Elite&display=swap">
-<link rel="stylesheet" href="motor.css">
+<link rel="stylesheet" href="motor.css?v=2">
+<!-- Three.js para el barrio en 3D (barrio3d.js lo pide recién al abrir el barrio) -->
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 <style>
   /* misma estética que el resto del sitio, con un toque policial: ámbar de linterna y tipografía de máquina de escribir */
   :root{
@@ -66,19 +68,6 @@
   .chip.invitado{color:var(--faint); font-weight:500}
   .chip.invitado .cara{background:var(--line); color:var(--muted)}
 
-  /* ---------- la historia ---------- */
-  .historia{display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:24px; align-items:center; margin:30px 0 26px}
-  .etiqueta{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px; letter-spacing:.08em;
-    text-transform:uppercase; color:var(--rojo); border:1px solid color-mix(in srgb, var(--rojo) 40%, transparent);
-    background:color-mix(in srgb, var(--rojo) 8%, transparent); border-radius:999px; padding:5px 12px; margin-bottom:16px}
-  .etiqueta::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--rojo); box-shadow:0 0 10px var(--rojo);
-    animation:alarma 1.2s ease-in-out infinite}
-  @keyframes alarma{50%{opacity:.25}}
-  .historia h2{font-family:var(--display); font-weight:700; font-size:clamp(34px,5.8vw,58px); line-height:.98; letter-spacing:-.045em; margin:0 0 14px}
-  .historia h2 .brillo{background:linear-gradient(90deg, var(--oro), #ff8a3d 60%, var(--rosa));
-    -webkit-background-clip:text; background-clip:text; color:transparent}
-  .historia p{margin:0 0 10px; color:var(--muted); max-width:52ch}
-  .historia p b{color:var(--ink); font-weight:600}
   .resumen{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px}
   .dato{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 16px; min-width:118px}
   .dato b{display:block; font-family:var(--mono); font-size:24px; line-height:1.1; font-variant-numeric:tabular-nums}
@@ -97,47 +86,123 @@
   .buscado b{display:block; font-family:var(--maquina); font-weight:400; font-size:22px; letter-spacing:.04em}
   .buscado small{display:block; font-family:var(--maquina); font-size:12.5px; opacity:.75; margin-top:2px}
 
-  /* ---------- casos ---------- */
-  .titulo-sec{display:flex; align-items:baseline; gap:12px; margin:34px 0 14px}
-  .titulo-sec h2{font-family:var(--display); font-weight:700; font-size:24px; letter-spacing:-.03em; margin:0}
-  .titulo-sec span{font-family:var(--mono); font-size:12px; color:var(--faint)}
-  .casos{display:grid; gap:14px; grid-template-columns:repeat(3, minmax(0,1fr))}
-  .caso{
-    --c:var(--oro);
-    position:relative; text-align:left; border:1px solid var(--line); border-radius:6px 16px 16px 16px; overflow:hidden;
-    background:linear-gradient(170deg, color-mix(in srgb, var(--c) 10%, var(--surface)) 0%, var(--surface) 60%);
-    padding:0; display:flex; flex-direction:column; transition:transform .18s, border-color .18s, box-shadow .18s;
-  }
-  .caso:hover{transform:translateY(-3px); border-color:color-mix(in srgb, var(--c) 55%, var(--line));
-    box-shadow:var(--shadow-card), 0 0 36px color-mix(in srgb, var(--c) 14%, transparent)}
-  .caso .dibujo{height:150px; display:grid; place-items:center; position:relative;
-    background:radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--c) 16%, #161a24), #0d1016 72%);
-    border-bottom:1px dashed color-mix(in srgb, var(--c) 30%, var(--line))}
-  .caso .dibujo svg{height:118px; width:auto; max-width:90%}
-  .caso .num{position:absolute; top:10px; left:12px; font-family:var(--maquina); font-size:14px; color:var(--c); letter-spacing:.05em}
-  .caso .cuerpo{padding:14px 16px 14px; display:flex; flex-direction:column; gap:6px; flex:1}
-  .caso .tema{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--c)}
-  .caso h3{font-family:var(--display); font-weight:700; font-size:21px; letter-spacing:-.03em; margin:0; line-height:1.1}
-  .caso p{margin:0; color:var(--muted); font-size:13.5px; line-height:1.4}
-  .caso .pie{display:flex; align-items:center; gap:10px; margin-top:auto; padding-top:10px; border-top:1px solid var(--line)}
   .lupas{display:inline-flex; gap:3px; color:#2c3342; line-height:0}
   .lupas b{display:inline-flex; gap:3px; color:var(--oro); filter:drop-shadow(0 0 5px color-mix(in srgb, var(--oro) 55%, transparent))}
   .lupas svg{width:17px; height:17px}
-  .caso .estado{margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--faint)}
   .sello{position:absolute; top:14px; right:10px; font-family:var(--maquina); font-size:14px; letter-spacing:.06em; color:var(--lima);
     border:2px solid var(--lima); border-radius:5px; padding:1px 8px; transform:rotate(8deg); opacity:.9;
     text-shadow:0 0 10px color-mix(in srgb, var(--lima) 50%, transparent)}
-  .caso.final{grid-column:1 / -1; flex-direction:row}
-  .caso.final .dibujo{width:240px; height:auto; min-height:170px; border-bottom:0; border-right:1px dashed color-mix(in srgb, var(--c) 30%, var(--line)); flex:none}
-  /* casos bloqueados: expediente clasificado */
-  .caso.bloqueado{cursor:not-allowed; background:var(--surface-2); border-style:dashed}
-  .caso.bloqueado:hover{transform:none; box-shadow:none; border-color:var(--line)}
-  .caso.bloqueado .dibujo{background:#0c0e13}
-  .caso.bloqueado .dibujo svg{opacity:.12; filter:grayscale(1)}
-  .caso.bloqueado .dibujo::after{content:"CLASIFICADO"; position:absolute; font-family:var(--maquina); font-size:22px; letter-spacing:.12em;
-    color:var(--rojo); border:3px solid var(--rojo); padding:2px 12px; transform:rotate(-8deg); opacity:.75}
-  .caso.bloqueado h3, .caso.bloqueado .tema, .caso.bloqueado .num{color:var(--faint)}
-  .tachado{display:inline-block; background:#2a303d; color:transparent; border-radius:3px; user-select:none}
+
+  /* ---------- el barrio: el mundo visto desde arriba ---------- */
+  .barrio{margin-top:18px}
+  .mundo{position:relative; border-radius:20px; overflow:hidden; border:1px solid var(--line);
+    box-shadow:var(--shadow-card), 0 0 60px color-mix(in srgb, var(--oro) 8%, transparent); background:#58ad62}
+  #mapa, .mapa3d{display:block; width:100%; touch-action:none; outline:none; cursor:pointer}
+  /* carteles sobre la gente en el barrio 3D */
+  .b-etiquetas{position:absolute; inset:0; pointer-events:none; overflow:hidden}
+  .b3-globo{position:absolute; left:0; top:0; width:26px; height:26px; margin:-30px 0 0 -13px; border-radius:50%; display:grid; place-items:center;
+    font-family:var(--display); font-weight:800; font-size:16px; color:#12151d; box-shadow:0 4px 10px rgba(0,0,0,.3);
+    animation:flota 1.2s ease-in-out infinite}
+  .b3-globo::after{content:""; position:absolute; bottom:-5px; left:50%; margin-left:-5px; border:5px solid transparent; border-bottom:0; border-top-color:inherit}
+  .b3-globo.oro{background:var(--oro); border-color:var(--oro)} .b3-globo.lima{background:var(--lima); border-color:var(--lima)}
+  .b3-globo.rojo{background:var(--rojo); border-color:var(--rojo); color:#fff}
+  @keyframes flota{50%{margin-top:-35px}}
+  .b3-aviso{position:absolute; left:0; top:0; translate:-50% -100%; white-space:nowrap; font-size:12px; font-weight:600; color:var(--oro);
+    background:rgba(18,21,29,.88); border-radius:999px; padding:3px 10px; margin-top:-8px}
+  .b3-flecha{position:absolute; left:0; top:0; width:36px; height:36px; margin:-18px 0 0 -18px; border-radius:50%; background:rgba(18,21,29,.85);
+    display:grid; place-items:center; animation:late 1s ease-in-out infinite}
+  .b3-flecha i{width:0; height:0; border:9px solid transparent; border-left:14px solid var(--oro); margin-left:8px}
+  @keyframes late{50%{opacity:.6}}
+  .b-hud{position:absolute; top:12px; left:12px; right:12px; display:flex; gap:10px; align-items:flex-start; pointer-events:none}
+  .b-hud > *{pointer-events:auto}
+  .b-objetivo{background:rgba(14,17,24,.82); backdrop-filter:blur(8px); border:1px solid rgba(255,197,61,.35); color:var(--ink);
+    border-radius:12px; padding:8px 14px; font-size:14px; max-width:min(440px, 70%); line-height:1.35}
+  .b-objetivo b{color:var(--oro); font-family:var(--mono); font-size:11.5px; letter-spacing:.06em; text-transform:uppercase; margin-right:6px}
+  .b-libreta-btn{margin-left:auto; display:flex; align-items:center; gap:8px; background:rgba(14,17,24,.82); backdrop-filter:blur(8px);
+    border:1px solid var(--line); border-radius:12px; padding:8px 13px; font-weight:600; font-size:14px; white-space:nowrap}
+  .b-libreta-btn:hover{border-color:var(--oro)}
+  .b-libreta-btn span{font-family:var(--mono); font-size:12px; color:var(--oro)}
+  .b-libreta-btn kbd{font-family:var(--mono); font-size:10.5px; color:var(--faint); border:1px solid var(--line); border-radius:4px; padding:0 4px}
+
+  /* cuadro de diálogo: abajo, como en los juegos de rol */
+  .b-dialogo{position:absolute; left:12px; right:12px; bottom:12px; display:flex; gap:12px; align-items:flex-start; cursor:pointer;
+    background:linear-gradient(180deg, rgba(22,26,36,.96), rgba(14,17,24,.97)); border:2px solid var(--oro); border-radius:16px;
+    padding:12px 16px 14px 12px; box-shadow:0 14px 40px rgba(0,0,0,.5); animation:subeDialogo .2s ease-out; max-width:760px; margin:0 auto}
+  @keyframes subeDialogo{from{opacity:0; transform:translateY(12px)}}
+  .b-dialogo canvas{width:64px; height:64px; flex:none; border-radius:12px; background:radial-gradient(circle at 50% 40%, #2a3142, #161a24)}
+  .b-dialogo .cuerpo{flex:1; min-width:0}
+  .b-dialogo .quien{display:inline-block; font-family:var(--display); font-weight:700; font-size:15px; color:#0a0c11; background:var(--oro);
+    border-radius:7px; padding:1px 9px; margin-bottom:5px}
+  .b-dialogo .texto{margin:0; font-size:17px; line-height:1.45; min-height:2.9em}
+  .b-dialogo .sigue{position:absolute; right:14px; bottom:8px; color:var(--oro); font-size:13px; animation:sigue 1s ease-in-out infinite}
+  @keyframes sigue{50%{transform:translateY(3px)}}
+  .b-dialogo.narrador{border-color:#3db8ff} .b-dialogo.narrador .quien{background:#3db8ff}
+  .b-dialogo.malo{border-color:var(--rojo)} .b-dialogo.malo .quien{background:var(--rojo); color:#fff}
+
+  /* el expediente del caso, encima del mapa */
+  .b-expediente{position:absolute; inset:0; overflow:auto; padding:22px 14px; background:rgba(8,10,16,.62); backdrop-filter:blur(3px);
+    animation:aparece .2s ease-out}
+  @keyframes aparece{from{opacity:0}}
+  .b-expediente .expediente{max-width:680px; margin:10px auto 0}
+  .exp-cab{display:grid; grid-template-columns:200px minmax(0,1fr); gap:16px; align-items:start; margin-bottom:14px}
+  .exp-cab .tema{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:color-mix(in srgb, var(--c) 70%, #2a2218)}
+  .exp-cab h2{font-family:var(--display); font-weight:700; font-size:28px; letter-spacing:-.03em; margin:0 0 8px; line-height:1.05}
+  .exp-cab .aprende{border-top:0; padding-top:0; margin-top:0}
+  .b-expediente .pasos li span{color:#2a2218; background:color-mix(in srgb, var(--c) 30%, transparent); border-color:color-mix(in srgb, var(--c) 60%, transparent)}
+  .b-expediente .pasos li{font-family:var(--body); font-size:14px}
+  .b-expediente .meta{background:rgba(42,34,24,.06); border-color:rgba(42,34,24,.15)}
+  .b-expediente .meta span{color:#4a3f30}
+  .b-expediente .meta.ok{border-color:#c99a1e}
+  .b-expediente .lupas{color:rgba(42,34,24,.25)}
+  .b-expediente .lupas b{color:#c99a1e; filter:none}
+  .b-expediente .jugar-fila .mejor{color:#6a5d48} .b-expediente .jugar-fila .mejor b{color:#2a2218}
+  .b-expediente .ghost{background:transparent; color:#2a2218; border-color:rgba(42,34,24,.3)}
+
+  /* controles táctiles */
+  .b-tactil{display:none}
+  @media (pointer: coarse){
+    .b-tactil{display:block}
+    .b-palanca{position:absolute; left:16px; bottom:16px; width:118px; height:118px; border-radius:50%; touch-action:none;
+      background:rgba(14,17,24,.42); border:2px solid rgba(255,255,255,.25); backdrop-filter:blur(4px)}
+    .b-palanca i{position:absolute; left:50%; top:50%; width:48px; height:48px; margin:-24px 0 0 -24px; border-radius:50%;
+      background:rgba(255,255,255,.85); box-shadow:0 4px 12px rgba(0,0,0,.35)}
+    .b-accion{position:absolute; right:18px; bottom:28px; width:78px; height:78px; border-radius:50%; border:0;
+      background:var(--oro); color:#0a0c11; font-family:var(--display); font-weight:700; font-size:15px; box-shadow:0 6px 0 #a87d14, 0 10px 24px rgba(0,0,0,.4)}
+    .b-accion:active{transform:translateY(3px); box-shadow:0 3px 0 #a87d14}
+    .mundo:has(.b-dialogo:not([hidden])) .b-tactil, .mundo:has(.b-expediente:not([hidden])) .b-tactil{display:none}
+    .b-libreta-btn kbd{display:none}
+  }
+  .b-ayuda{margin:10px 0 0; text-align:center; font-family:var(--mono); font-size:12px; color:var(--faint)}
+  .b-ayuda kbd{font-family:var(--mono); border:1px solid var(--line); border-radius:4px; padding:0 5px; color:var(--muted)}
+  @media (pointer: coarse){ .b-ayuda{display:none} }
+
+  /* la libreta del detective */
+  .b-libreta{position:fixed; inset:0; z-index:20; background:rgba(6,8,12,.72); backdrop-filter:blur(4px); overflow:auto; padding:24px 14px;
+    animation:aparece .2s ease-out}
+  .lib-panel{max-width:860px; margin:0 auto; background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:20px;
+    box-shadow:var(--shadow-card)}
+  .lib-cab{display:flex; align-items:center; gap:12px; margin-bottom:14px}
+  .lib-cab h2{font-family:var(--display); font-weight:700; font-size:24px; letter-spacing:-.03em; margin:0}
+  .lib-cab .ghost{margin-left:auto}
+  .lib-grid{display:grid; grid-template-columns:220px minmax(0,1fr); gap:20px; align-items:start; margin-top:18px}
+  .lib-grid .pistas{grid-template-columns:repeat(2, minmax(0,1fr))}
+  .lib-tit{font-family:var(--display); font-weight:700; font-size:17px; margin:0 0 10px}
+  .lib-casos{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px}
+  .lib-caso{display:flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:8px 10px}
+  .lib-caso .num{font-family:var(--maquina); color:var(--c); font-size:14px; width:42px; flex:none}
+  .lib-caso .nom{flex:1; min-width:0}
+  .lib-caso .nom b{display:block; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .lib-caso .nom small{font-size:11.5px; color:var(--faint)}
+  .lib-caso .lupas svg{width:14px; height:14px}
+  .lib-caso.cerrado{opacity:.55}
+  .lib-caso .candado{width:52px; text-align:center}
+  @media (max-width:700px){
+    .exp-cab, .lib-grid{grid-template-columns:1fr}
+    .exp-cab .escena{max-width:240px}
+    .lib-grid .pistas, .lib-casos{grid-template-columns:1fr}
+    .b-dialogo .texto{font-size:15.5px}
+    .b-objetivo{font-size:13px}
+  }
 
   /* ---------- pistas ---------- */
   .pistas{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px}
@@ -147,19 +212,12 @@
   .pista i{font-style:normal; display:block; font-size:11.5px; opacity:.6; margin-bottom:3px}
   .pista.oculta{background:var(--surface); color:var(--faint); border:1px dashed var(--line); box-shadow:none; transform:none}
 
-  /* ---------- expediente de un caso ---------- */
-  .detalle{margin-top:24px}
-  .det-cab{display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:20px}
-  .det-cab .num{font-family:var(--maquina); font-size:16px; color:var(--c); letter-spacing:.05em}
-  .det-cab h2{font-family:var(--display); font-weight:700; font-size:clamp(30px,5vw,46px); letter-spacing:-.04em; margin:0; line-height:1}
-  .det-cab .ghost{margin-left:auto}
-  .det{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); gap:16px; align-items:start}
   .expediente{background:var(--papel); color:var(--papel-ink); border-radius:6px 18px 18px 18px; padding:20px 20px 22px;
     box-shadow:0 22px 50px rgba(0,0,0,.5); position:relative}
   .expediente .solapa{position:absolute; top:-14px; left:0; background:var(--papel); border-radius:8px 8px 0 0; padding:3px 16px 0;
     font-family:var(--maquina); font-size:13px; letter-spacing:.06em}
-  .expediente .escena{display:grid; place-items:center; background:#14171f; border-radius:8px; padding:16px; margin-bottom:16px}
-  .expediente .escena svg{width:min(300px,100%); height:auto}
+  .expediente .escena{display:grid; place-items:center; background:#14171f; border-radius:8px; padding:10px}
+  .expediente .escena svg{width:100%; height:auto}
   .expediente h3{font-family:var(--maquina); font-weight:400; font-size:17px; letter-spacing:.04em; margin:0 0 6px}
   .expediente p{font-family:var(--maquina); font-size:15px; line-height:1.55; margin:0 0 12px}
   .expediente .aprende{border-top:1px dashed rgba(42,34,24,.35); padding-top:12px; margin-top:4px}
@@ -406,66 +464,29 @@
     <span class="chip invitado" id="chip"><span class="cara" id="chipCara">·</span><span class="nom" id="chipNom">Invitado</span></span>
   </header>
 
-  <!-- ===== tablero de casos ===== -->
-  <section id="inicio">
-    <div class="historia">
-      <div>
-        <span class="etiqueta">Alerta en el barrio</span>
-        <h2>Algo se está comiendo<br><span class="brillo">el barrio. De a pedacitos.</span></h2>
-        <p>Media pizza. Un cuarto de torta. Tres octavos de chocolate. Todas las noches desaparecen <b>partes</b> de cosas, y el único rastro es la marca de una mordida.</p>
-        <p>Nadie lo vio. Le dicen <b>El Mordisco</b>. Vos sos el detective: resolvé los 9 casos, juntá las pistas y descubrí quién es.</p>
-        <div class="resumen">
-          <div class="dato"><b id="totResueltos">0<small>/9</small></b><span>Casos resueltos</span></div>
-          <div class="dato oro"><b id="totLupas">0<small>/27</small></b><span>Lupas</span></div>
-          <div class="dato"><b id="totPistas">0<small>/9</small></b><span>Pistas</span></div>
-        </div>
+  <!-- ===== el barrio (lo arma barrio.js) ===== -->
+  <section class="barrio" id="barrio">
+    <div class="mundo" id="mundo">
+      <div class="b-etiquetas" id="bEtiquetas"></div>
+      <canvas id="mapa" tabindex="0" aria-label="El barrio visto desde arriba. Caminá con las flechas y hablá con los vecinos con Espacio."></canvas>
+      <div class="b-hud">
+        <p class="b-objetivo" id="bObjetivo" aria-live="polite" hidden></p>
+        <button class="b-libreta-btn" id="bLibretaBtn" title="Libreta del detective (L)">📒 Libreta <span id="bLibretaCuenta">0/9</span> <kbd>L</kbd></button>
       </div>
-      <div class="buscado" aria-label="Cartel de Se busca: El Mordisco">
-        <h3>SE BUSCA</h3>
-        <div class="foto" id="fotoMordisco"></div>
-        <b>EL MORDISCO</b>
-        <small id="recompensa">Identidad: desconocida</small>
+      <div class="b-dialogo" id="bDialogo" role="dialog" aria-live="polite" hidden>
+        <canvas aria-hidden="true"></canvas>
+        <div class="cuerpo"><span class="quien"></span><p class="texto"></p></div>
+        <span class="sigue" aria-hidden="true">▼</span>
+      </div>
+      <div class="b-expediente" id="bExpediente" hidden></div>
+      <div class="b-tactil">
+        <div class="b-palanca" id="bPalanca" aria-label="Palanca para caminar"><i></i></div>
+        <button class="b-accion" id="bAccion">Hablar</button>
       </div>
     </div>
-
-    <div class="titulo-sec"><h2>Casos</h2><span>Se abren de a uno: resolvé uno para abrir el siguiente</span></div>
-    <div class="casos" id="casos"></div>
-
-    <div class="titulo-sec"><h2>Pistas</h2><span>Cada caso resuelto deja una pista sobre El Mordisco</span></div>
-    <div class="pistas" id="pistas"></div>
+    <p class="b-ayuda"><kbd>←↑↓→</kbd> o <kbd>WASD</kbd> caminar · <kbd>Espacio</kbd> hablar · <kbd>L</kbd> libreta · también podés tocar el piso para ir hasta ahí</p>
   </section>
-
-  <!-- ===== expediente de un caso ===== -->
-  <section class="detalle" id="detalle" hidden>
-    <div class="det-cab">
-      <div><div class="num" id="dNum"></div><h2 id="dTitulo"></h2></div>
-      <button class="ghost" id="dVolver">← Todos los casos</button>
-    </div>
-    <div class="det">
-      <article class="expediente">
-        <span class="solapa" id="dSolapa"></span>
-        <span class="sello" id="dSello" hidden>RESUELTO</span>
-        <div class="escena" id="dEscena"></div>
-        <h3>Lo que pasó</h3>
-        <p id="dEscenaTxt"></p>
-        <div class="aprende">
-          <b>Lo que vas a aprender</b>
-          <p id="dAprende"></p>
-        </div>
-      </article>
-      <div class="panel">
-        <h3>Cómo se investiga</h3>
-        <ol class="pasos" id="dPasos"></ol>
-        <div class="metas" id="dMetas"></div>
-        <div class="jugar-fila">
-          <button class="boton" id="jugarBtn" disabled>Investigar ▶</button>
-          <span class="mejor" id="dMejor"></span>
-        </div>
-        <p class="aviso" id="dAviso">Este caso todavía está en investigación: muy pronto se va a poder jugar.</p>
-        <p class="pista-caso" id="dPista"></p>
-      </div>
-    </div>
-  </section>
+  <div class="b-libreta" id="bLibreta" hidden></div>
 
   <!-- ===== partida (la arma motor.js) ===== -->
   <section class="juego" id="juego" hidden></section>
@@ -473,7 +494,8 @@
   <footer>DESAPARICIONES MISTERIOSAS · LOS PUNTOS SUMAN AL RANKING GENERAL</footer>
 </div>
 
-<script src="motor.js"></script>
+<script src="motor.js?v=2"></script>
+<script src="barrio.js?v=3"></script>
 <script>
 
 // ---------- dibujos ----------
@@ -697,7 +719,7 @@ let progreso = {};
 try { progreso = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) {}
 const prog = n => progreso[n] || { lupas: 0, mejor: 0 };
 // se abren de a uno: el caso n se abre con al menos 1 lupa en el n-1
-const abierto = n => n === 1 || prog(n - 1).lupas > 0;
+const abierto = n => n === 1 || esAdmin || prog(n - 1).lupas > 0;
 // lupas: las ganadas en dorado, las que faltan apagadas
 const LUPA = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5" fill="none" stroke="currentColor" stroke-width="3"/>' +
   '<path d="M15 15 L21 21" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/></svg>';
@@ -708,90 +730,9 @@ const tachar = t => '<span class="tachado">' + esc(t) + '</span>';
 if (sesion && sesion.apodo) {
   $('chip').classList.remove('invitado');
   $('chipCara').textContent = sesion.apodo[0].toUpperCase();
-  $('chipNom').textContent = sesion.apodo;
+  $('chipNom').textContent = sesion.apodo + (esAdmin ? ' · admin' : '');
 }
 if (location.search) $('volverInicio').href += location.search;   // mantiene ?api=
-
-// ---------- tablero de casos ----------
-function pintarInicio() {
-  let resueltos = 0, total = 0;
-  let html = '';
-  for (let n = 1; n <= 9; n++) {
-    const c = CASOS[n], p = prog(n), num = 'CASO ' + String(n).padStart(2, '0');
-    total += p.lupas;
-    if (p.lupas) resueltos++;
-    if (!abierto(n)) {
-      html += '<button class="caso bloqueado" aria-disabled="true" style="--c:' + c.color + '">' +
-        '<div class="dibujo">' + c.dibujo() + '<span class="num">' + num + '</span></div>' +
-        '<div class="cuerpo"><div class="tema">' + tachar(c.tema) + '</div><h3>' + tachar(c.titulo) + '</h3>' +
-        '<p>Resolvé el caso ' + (n - 1) + ' para abrir este expediente.</p>' +
-        '<div class="pie">' + lupas(0) + '<span class="estado">Clasificado</span></div></div></button>';
-      continue;
-    }
-    html += '<button class="caso" data-n="' + n + '" style="--c:' + c.color + '">' +
-      '<div class="dibujo">' + c.dibujo() + '<span class="num">' + num + '</span>' + (p.lupas ? '<span class="sello">RESUELTO</span>' : '') + '</div>' +
-      '<div class="cuerpo"><div class="tema">' + esc(c.tema) + '</div><h3>' + esc(c.titulo) + '</h3><p>' + esc(c.corto) + '</p>' +
-      '<div class="pie">' + lupas(p.lupas) + '<span class="estado">' +
-      (p.mejor ? 'Mejor <b>' + p.mejor + '</b>' : c.listo ? 'Sin resolver' : 'En investigación') + '</span></div></div></button>';
-  }
-  const fin = abierto(10), pf = prog(10);
-  html += '<button class="caso final' + (fin ? '' : ' bloqueado') + '" ' + (fin ? 'data-n="10" ' : 'aria-disabled="true" ') + 'style="--c:' + FINAL.color + '">' +
-    '<div class="dibujo">' + FINAL.dibujo() + '<span class="num">CASO FINAL</span>' + (pf.lupas ? '<span class="sello">ATRAPADO</span>' : '') + '</div>' +
-    '<div class="cuerpo"><div class="tema">' + esc(FINAL.tema) + '</div><h3>' + esc(FINAL.titulo) + '</h3>' +
-    '<p>' + (fin ? esc(FINAL.corto) : 'Resolvé los 9 casos para enfrentar a El Mordisco.') + '</p>' +
-    (fin ? '<div class="pie">' + lupas(pf.lupas) + '<span class="estado">' + (pf.mejor ? 'Mejor <b>' + pf.mejor + '</b>' : 'Sin resolver') + '</span></div>' : '') +
-    '</div></button>';
-  $('casos').innerHTML = html;
-
-  // pistas: se ven las de los casos resueltos
-  let pistas = '', vistas = 0;
-  for (let n = 1; n <= 9; n++) {
-    const ok = prog(n).lupas > 0;
-    if (ok) vistas++;
-    pistas += ok
-      ? '<div class="pista"><i>Pista ' + n + ' · ' + esc(CASOS[n].titulo) + '</i>' + esc(CASOS[n].pista) + '</div>'
-      : '<div class="pista oculta"><i>Pista ' + n + '</i>Resolvé el caso ' + n + ' para conseguirla.</div>';
-  }
-  $('pistas').innerHTML = pistas;
-  $('totResueltos').innerHTML = resueltos + '<small>/9</small>';
-  $('totLupas').innerHTML = total + '<small>/27</small>';
-  $('totPistas').innerHTML = vistas + '<small>/9</small>';
-  // el cartel: la identidad se revela al atraparlo
-  const atrapado = pf.lupas > 0;
-  $('fotoMordisco').innerHTML = mordisco(prog(6).lupas > 0);   // el antifaz aparece con la pista del caso 6
-  $('recompensa').textContent = atrapado ? '¡Atrapado! Era: ' + REVELADO.toLowerCase() : 'Identidad: desconocida';
-}
-$('casos').addEventListener('click', e => {
-  const b = e.target.closest('.caso[data-n]');
-  if (b) location.hash = 'caso-' + b.dataset.n;
-});
-
-// ---------- expediente ----------
-let casoActual = 1;
-function pintarDetalle(n) {
-  casoActual = n;
-  const c = CASOS[n], p = prog(n), fin = n === 10;
-  $('detalle').style.setProperty('--c', c.color);
-  $('dNum').textContent = fin ? 'CASO FINAL' : 'CASO ' + String(n).padStart(2, '0') + ' · ' + c.tema.toUpperCase();
-  $('dTitulo').textContent = c.titulo;
-  $('dSolapa').textContent = 'EXPEDIENTE ' + (fin ? 'FINAL' : String(n).padStart(2, '0'));
-  $('dSello').hidden = !p.lupas;
-  $('dSello').textContent = fin ? 'ATRAPADO' : 'RESUELTO';
-  $('dEscena').innerHTML = c.dibujo();
-  $('dEscenaTxt').textContent = c.escena;
-  $('dAprende').textContent = c.aprende;
-  $('dPasos').innerHTML = c.pasos.map((t, i) => '<li><span>' + (i + 1) + '</span>' + esc(t) + '</li>').join('');
-  $('dMetas').innerHTML = c.metas.map((t, i) =>
-    '<div class="meta' + (p.lupas > i ? ' ok' : '') + '">' + lupas(i + 1) + '<span>' + esc(t) + '</span></div>').join('');
-  $('dMejor').innerHTML = p.mejor ? 'Tu mejor: <b>' + p.mejor + '</b> pts' : '';
-  $('jugarBtn').disabled = !c.listo;
-  $('dAviso').hidden = c.listo;
-  $('dPista').innerHTML = p.lupas
-    ? '<b>Pista conseguida:</b> ' + esc(c.pista)
-    : '<b>Pista:</b> resolvé este caso para conseguir una pista sobre El Mordisco.';
-}
-$('dVolver').addEventListener('click', () => { location.hash = ''; });
-$('jugarBtn').addEventListener('click', () => { location.hash = 'jugar-' + casoActual; });
 
 // ---------- motor común (motor.js) ----------
 for (const n in CASOS) { CASOS[n].nombre = CASOS[n].titulo; CASOS[n].tipo = CASOS[n].tema; }
@@ -802,11 +743,11 @@ Motor.iniciar({
   guardar: (n, premio, mejor) => { progreso[n] = { lupas: premio, mejor }; guardarProgreso(); },
   abierto,
   nombre: n => n === 10 ? 'Caso final' : 'Caso ' + String(n).padStart(2, '0'),
-  rutaNivel: n => 'caso-' + n,
+  rutaNivel: n => 'barrio-' + n,                     // al salir de un caso se vuelve al barrio, frente a quien lo contó
   premio: { icono: LUPA, uno: 'lupa', varios: 'lupas', nuevo: '🔍 Nueva lupa' },
   titulos: ['Caso sin resolver', '¡Caso resuelto!', '¡Gran trabajo, detective!', '¡Detective estrella!'],
   textos: {
-    dominado: n => n === 10 ? '¡Atrapaste a El Mordisco!' : 'Conseguiste la pista del caso: mirala en el tablero.',
+    dominado: n => n === 10 ? '¡Atrapaste a El Mordisco!' : 'Conseguiste la pista del caso: mirala en tu libreta.',
     desbloqueado: n => n === 10 ? 'Caso final desbloqueado' : 'Caso ' + String(n).padStart(2, '0') + ' desbloqueado',
   },
 });
@@ -1771,18 +1712,17 @@ MINIJUEGOS[10] = m => {
   mover(); pregunta(); m.cuadro(tick);
 };
 
-// ---------- navegación: #caso-N (expediente) y #jugar-N (partida) ----------
+// ---------- navegación: el barrio (#barrio-N: parado frente a quien tiene el caso N) y #jugar-N (partida) ----------
 function ruta() {
-  let m = location.hash.match(/^#(caso|jugar)-([1-9]|10)$/);
+  let m = location.hash.match(/^#(barrio|caso|jugar)-([1-9]|10)$/);   // #caso-N es como era antes: lleva al barrio
   if (m && (!abierto(+m[2]) || (m[1] === 'jugar' && !CASOS[+m[2]].listo))) {
     history.replaceState(null, '', location.pathname + location.search); m = null;
   }
   Motor.limpiar();
-  const vista = m ? (m[1] === 'jugar' ? 'juego' : 'detalle') : 'inicio';
-  ['inicio', 'detalle', 'juego'].forEach(id => { $(id).hidden = id !== vista; });
-  if (vista === 'juego') Motor.jugar(+m[2]);
-  else if (vista === 'detalle') pintarDetalle(+m[2]);
-  else pintarInicio();
+  const juega = !!m && m[1] === 'jugar';
+  $('barrio').hidden = juega; $('juego').hidden = !juega;
+  if (juega) { Barrio.ocultar(); Motor.jugar(+m[2]); }
+  else Barrio.mostrar(m ? +m[2] : 0);
   window.scrollTo(0, 0);
 }
 window.addEventListener('hashchange', ruta);

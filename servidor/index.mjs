@@ -251,6 +251,29 @@ async function maestra(body) {
   return json({ ok: true });
 }
 
+// ---------- progreso de cada juego (estrellas, récords, cuentas difíciles…) ----------
+// Se guarda en el servidor para no perderlo al jugar en otra compu. Cada juego decide qué guarda
+// y cómo juntar lo de dos compus: acá sólo se guarda y se devuelve.
+const MAX_PROGRESO = 15000;                        // caracteres del JSON
+async function progreso(body) {
+  const j = await jugadorDeToken(body.token);
+  if (!j) return error('sesion', 401);
+  const app = body.app;
+  if (typeof app !== 'string' || !/^[a-z0-9]{1,16}$/.test(app)) return error('datos');
+  if (body.datos !== undefined) {                  // con datos: guardar
+    const d = body.datos;
+    if (!d || typeof d !== 'object' || Array.isArray(d)) return error('datos');
+    const texto = JSON.stringify(d);
+    if (texto.length > MAX_PROGRESO) return error('datos', 413);
+    await pool.query(
+      `INSERT INTO progreso (jugador_id, app, datos) VALUES ($1, $2, $3::jsonb)
+       ON CONFLICT (jugador_id, app) DO UPDATE SET datos = excluded.datos, t = now()`, [j.id, app, texto]);
+    return json({ ok: true });
+  }
+  const { rows } = await pool.query('SELECT datos FROM progreso WHERE jugador_id = $1 AND app = $2', [j.id, app]);
+  return json({ ok: true, datos: rows.length ? rows[0].datos : null });
+}
+
 // ---------- ¿la sesión sigue valiendo? (la portada lo pregunta al abrir) ----------
 async function yo(body) {
   const j = await jugadorDeToken(body.token);
@@ -274,6 +297,7 @@ export default {
         if (url.pathname === '/yo') return await yo(body);
         if (url.pathname === '/palabras') return await palabrasEditar(body);
         if (url.pathname === '/maestra') return await maestra(body);
+        if (url.pathname === '/progreso') return await progreso(body);
       }
       if (url.pathname === '/') return json({ ok: true, app: 'tecla-a-tecla' });
       return error('no_encontrado', 404);

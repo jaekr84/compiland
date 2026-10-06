@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
-<link rel="stylesheet" href="motor.css">
+<link rel="stylesheet" href="motor.css?v=2">
 <style>
   /* misma estética que el resto del sitio: oscuro, grilla sutil, acentos neón */
   :root{
@@ -80,6 +80,16 @@
   .dato.oro b{color:var(--oro)}
 
   /* ---------- grilla de tablas ---------- */
+  /* cuentas difíciles: lo que más le cuesta a cada uno, para repasar */
+  .repaso{display:flex; align-items:center; gap:14px 18px; flex-wrap:wrap; margin:0 0 16px; padding:16px 18px; border-radius:18px;
+    background:color-mix(in srgb, var(--rosa) 6%, var(--surface)); border:1px solid color-mix(in srgb, var(--rosa) 30%, var(--line))}
+  .repaso .txt{flex:1 1 240px; min-width:0}
+  .repaso h3{font-family:var(--display); font-weight:700; font-size:19px; letter-spacing:-.02em; margin:0 0 2px}
+  .repaso p{margin:0; color:var(--muted); font-size:13.5px}
+  .repaso .cuentas{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px}
+  .repaso .cuentas span{font-family:var(--mono); font-weight:700; font-size:14px; padding:4px 10px; border-radius:8px;
+    background:var(--surface-2); border:1px solid color-mix(in srgb, var(--rosa) 30%, var(--line)); color:#ffb3cb}
+  .repaso .boton{--c:var(--rosa)}
   .tablas{display:grid; gap:14px; grid-template-columns:repeat(3, 1fr)}
   .tabla{
     --c:var(--violeta);
@@ -329,6 +339,7 @@
         <div class="dato"><b id="totPuntos">0</b><span>Puntos</span></div>
       </div>
     </div>
+    <div class="repaso" id="repaso" hidden></div>
     <div class="tablas" id="tablas"></div>
   </section>
 
@@ -369,7 +380,7 @@
   <footer>FACTOR X · LOS PUNTOS SUMAN AL RANKING GENERAL</footer>
 </div>
 
-<script src="motor.js"></script>
+<script src="motor.js?v=2"></script>
 <script>
 
 // ---------- los 9 minijuegos (y el desafío final) ----------
@@ -456,6 +467,13 @@ const FINAL = JUEGOS[10] = { nombre: 'Desafío final', tipo: 'Todas mezcladas ·
   desc: 'Cuentas de todas las tablas, del 2 al 9, una atrás de otra. Cada vez tenés menos tiempo para responder. ¿Hasta dónde llegás?',
   pasos: ['Escribí el resultado antes de que se vacíe la barra.', 'Si te equivocás o se acaba el tiempo, perdés una vida.', 'Tenés 3 vidas. Cada 5 aciertos seguidos, más puntos.'],
   truco: '' };
+// Repaso: las cuentas que más le cuestan a cada uno, sin reloj. Es el "nivel 11" (no está en el camino de tablas).
+const REPASO = 11;
+JUEGOS[REPASO] = { nombre: 'Mis cuentas difíciles', tipo: 'Sin reloj', color: '#ff4d8d', listo: true,
+  marcador: ['1', 'Cuenta'],
+  metas: ['Terminá el repaso', 'Acertá el 80 % o más', 'Acertalas todas'],
+  estrellas: p => p.precision >= 100 ? 3 : p.precision >= 80 ? 2 : 1,
+  corto: '', desc: '', pasos: [], truco: '' };
 const METAS = ['Terminá el minijuego', 'Acertá el 80 % o más', 'Acertá todo y rápido'];
 
 // ---------- sesión y progreso ----------
@@ -464,15 +482,43 @@ const CLAVE = 'factorx.' + (sesion && sesion.apodo ? sesion.apodo.toLowerCase() 
 let progreso = {};
 try { progreso = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) {}
 const prog = n => progreso[n] || { estrellas: 0, mejor: 0 };
+
+// ---------- cuentas: cómo le va con cada una ----------
+// progreso.cuentas = { '7x8': { ok, mal, racha, ms, ms0 } }  (el número más chico primero: 7×8 y 8×7 son la misma)
+//   racha: aciertos seguidos · ms: tiempo promedio de los últimos aciertos · ms0: el primer tiempo medido (el "antes")
+const LENTA = 5000;                                 // más de 5 s para responder: todavía no sale de memoria
+const claveCuenta = (a, b) => Math.min(a, b) + 'x' + Math.max(a, b);
+const verCuenta = k => k.replace('x', ' × ');
+function anotarCuenta(a, b, ok, ms) {
+  const cs = progreso.cuentas = progreso.cuentas || {};
+  const c = cs[claveCuenta(a, b)] = cs[claveCuenta(a, b)] || { ok: 0, mal: 0, racha: 0 };
+  if (ok) {
+    c.ok++; c.racha++;
+    if (ms) {
+      ms = Math.round(Math.min(ms, 20000));
+      c.ms = c.ms ? Math.round(c.ms * .6 + ms * .4) : ms;
+      if (!c.ms0) c.ms0 = ms;
+    }
+  } else { c.mal++; c.racha = 0; }
+  guardarProgreso();
+}
+// difícil: la falló y todavía no la acertó 3 veces seguidas, o tarda mucho. Las peores primero.
+function dificiles() {
+  return Object.entries(progreso.cuentas || {})
+    .filter(([, c]) => (c.mal && c.racha < 3) || c.ms > LENTA)
+    .map(([k, c]) => ({ k, c, peso: c.mal / (c.ok + c.mal) + (c.ms > LENTA ? .3 : 0) - c.racha * .1 }))
+    .sort((x, y) => y.peso - x.peso);
+}
+
 // se desbloquean de a una: la tabla n se abre con al menos 1 estrella en la n-1
-const abierta = n => n === 1 || prog(n - 1).estrellas > 0;
+const abierta = n => n === REPASO ? dificiles().length > 0 : n === 1 || esAdmin || prog(n - 1).estrellas > 0;
 const estrellas = n => '<span class="estrellas" aria-label="' + n + ' de 3 estrellas">' +
   '<b>★</b>'.repeat(n) + '★'.repeat(3 - n) + '</span>';
 
 if (sesion && sesion.apodo) {
   $('chip').classList.remove('invitado');
   $('chipCara').textContent = sesion.apodo[0].toUpperCase();
-  $('chipNom').textContent = sesion.apodo;
+  $('chipNom').textContent = sesion.apodo + (esAdmin ? ' · admin' : '');
 }
 if (location.search) $('volverInicio').href += location.search;   // mantiene ?api=
 
@@ -509,6 +555,15 @@ function pintarInicio() {
     (todas ? '<div class="pie">' + estrellas(pf.estrellas) + '<span class="mejor">' + (pf.mejor ? 'Mejor <b>' + pf.mejor + '</b>' : 'Sin jugar') + '</span></div>' : '') +
     '</button>';
   $('tablas').innerHTML = html;
+  const dif = dificiles();
+  $('repaso').hidden = !dif.length;
+  if (dif.length) $('repaso').innerHTML =
+    '<div class="txt"><h3>Tus cuentas difíciles</h3>' +
+    '<p>Las que más te cuestan. Repasalas sin reloj: cuando las aciertes 3 veces seguidas, salen de la lista.</p>' +
+    '<div class="cuentas">' + dif.slice(0, 10).map(x => '<span>' + verCuenta(x.k) + '</span>').join('') +
+    (dif.length > 10 ? '<span>+' + (dif.length - 10) + '</span>' : '') + '</div></div>' +
+    '<button class="boton" id="repasoBtn">Repasar ▶</button>';
+  if (dif.length) $('repasoBtn').addEventListener('click', () => { location.hash = 'jugar-' + REPASO; });
   $('totEstrellas').innerHTML = tot + '<small>/27</small>';
   $('totDominadas').innerHTML = dom + '<small>/9</small>';
   $('totPuntos').textContent = pts;
@@ -554,14 +609,60 @@ $('jugarBtn').addEventListener('click', () => { location.hash = 'jugar-' + tabla
 
 const guardarProgreso = () => { try { localStorage.setItem(CLAVE, JSON.stringify(progreso)); } catch (e) {} };
 
+// lo de dos compus: de cada nivel, las estrellas y el récord más altos; de cada cuenta, la que tiene más intentos
+function unirProgreso(a, b) {
+  const r = {};
+  for (let n = 1; n <= REPASO; n++) {
+    const x = a[n] || {}, y = b[n] || {};
+    if (!a[n] && !b[n]) continue;
+    r[n] = { estrellas: Math.max(x.estrellas || 0, y.estrellas || 0), mejor: Math.max(x.mejor || 0, y.mejor || 0) };
+  }
+  const ca = a.cuentas || {}, cb = b.cuentas || {}, cu = {};
+  for (const k of new Set([...Object.keys(ca), ...Object.keys(cb)])) {
+    const x = ca[k], y = cb[k];
+    cu[k] = !x ? y : !y ? x : (y.ok + y.mal > x.ok + x.mal ? y : x);
+  }
+  if (Object.keys(cu).length) r.cuentas = cu;
+  return r;
+}
+
+// lo que va abajo de las estrellas: qué cuentas le costaron (o, después del repaso, cómo le fue con cada una)
+function pantallaFinal(p) {
+  if (p.n === REPASO) {
+    const chips = (p.repaso || []).map(k => {
+      const c = (progreso.cuentas || {})[k] || {}, mal = p.fallidas.has(k);
+      const mejora = !mal && c.ms0 && c.ms && c.ms < c.ms0 * .8
+        ? '<small>' + (c.ms0 / 1000).toFixed(1) + ' s → ' + (c.ms / 1000).toFixed(1) + ' s</small>' : '';
+      return '<span class="' + (mal ? 'mal' : 'bien') + '">' + verCuenta(k) + mejora + '</span>';
+    }).join('');
+    const quedan = dificiles().length;
+    return '<div class="cuentas">' + chips + '</div>' +
+      '<p>' + (quedan ? 'Te quedan <b>' + quedan + '</b> cuenta' + (quedan > 1 ? 's' : '') + ' difícil' + (quedan > 1 ? 'es' : '') + ' para repasar.'
+                      : '🎉 ¡No te queda ninguna cuenta difícil!') + '</p>';
+  }
+  if (!p.fallidas.size) return '';
+  return '<p>Te costaron:</p><div class="cuentas">' +
+    [...p.fallidas.values()].map(t => '<span class="mal">' + t + '</span>').join('') + '</div>' +
+    '<button class="ghost" data-ir="#jugar-' + REPASO + '">Repasarlas sin reloj ▶</button>';
+}
+
 // ---------- motor común (motor.js) ----------
 Motor.iniciar({
   app: 'tablas', clave: 'factorx', niveles: JUEGOS, ultimo: 10,
+  alCuenta: anotarCuenta,
+  extra: pantallaFinal,
+  // el progreso también se guarda en el servidor: así no se pierde al jugar en otra compu
+  sync: {
+    datos: () => progreso,
+    cargar: d => { progreso = d; guardarProgreso(); },
+    unir: unirProgreso,
+    alCambiar: () => { if (!$('inicio').hidden) pintarInicio(); else if (!$('detalle').hidden) pintarDetalle(tablaActual); },
+  },
   prog: n => ({ premio: prog(n).estrellas, mejor: prog(n).mejor }),
   guardar: (n, premio, mejor) => { progreso[n] = { estrellas: premio, mejor }; guardarProgreso(); },
   abierto: abierta,
-  nombre: n => n === 10 ? 'Desafío final' : 'Tabla del ' + n,
-  rutaNivel: n => 'tabla-' + n,
+  nombre: n => n === 10 ? 'Desafío final' : n === REPASO ? 'Repaso' : 'Tabla del ' + n,
+  rutaNivel: n => n === REPASO ? '' : 'tabla-' + n,
   premio: { icono: '★', uno: 'estrella', varios: 'estrellas', nuevo: '⭐ Nueva estrella' },
   titulos: ['Seguí practicando', '¡Bien!', '¡Muy bien!', '¡Perfecto!'],
   textos: {
@@ -578,7 +679,7 @@ MINIJUEGOS[1] = m => {
   let ultimo = 0, bloqueado = false, c = 0;
   function pregunta() {
     let k; do k = 1 + Math.floor(Math.random() * 10); while (k === ultimo);
-    ultimo = k; c = k; bloqueado = false;
+    ultimo = k; c = k; bloqueado = false; m.cuenta(1, k);
     const txt = Math.random() < .3 ? k + ' × 1' : '1 × ' + k;   // a veces al revés: el orden no importa
     m.escenario.innerHTML =
       '<div class="pregunta" aria-live="polite"><span>' + txt + '</span><span class="igual">=</span><span class="hueco" id="hueco">?</span></div>' +
@@ -750,6 +851,7 @@ MINIJUEGOS[4] = m => {
     const g = caen.find(g => String(4 * g.k) === v);
     if (g) {
       quitar(g); g.el.classList.add('rota'); setTimeout(() => g.el.remove(), 260);
+      m.registrar(4, g.k, true);
       m.flota('+' + m.acierto(), g.el); rotas++;
       if (rotas >= 40) m.espera(() => m.fin(), 300);
       return 'ok';
@@ -766,6 +868,7 @@ MINIJUEGOS[4] = m => {
       g.el.style.transform = 'translate(-50%, ' + g.y + 'px)';
       if (g.y > alto - 6) {
         quitar(g); g.el.remove();
+        m.registrar(4, g.k, false);
         vidas--; m.error(); m.marcador(corazones(vidas));
         if (!vidas) { partida.mensaje = 'Tocaron el piso tres cuentas.'; return m.fin(); }
       }
@@ -783,7 +886,7 @@ MINIJUEGOS[5] = m => {
     k = azar(1, 10); c = 5 * k; verdad = Math.random() < .5;
     const r = verdad ? c : mezclar([5 * (k + 1), 5 * (k - 1), c + 1, c - 1, c + 2, c - 3]).find(v => v > 0 && v !== c);
     limite = Math.max(1300, 3200 - partida.aciertos * 75);
-    t1 = performance.now(); bloqueado = false;
+    t1 = performance.now(); bloqueado = false; m.cuenta(5, k);
     m.escenario.innerHTML =
       '<div class="pregunta chica" aria-live="polite"><span>5 × ' + k + '</span><span class="igual">=</span><span class="hueco" id="hueco">' + r + '</span></div>' +
       '<div class="mini-barra"><i id="vfBarra"></i></div>' +
@@ -841,7 +944,7 @@ MINIJUEGOS[6] = m => {
     $('duCuenta').textContent = '6 × ' + k;
     $('hueco').textContent = '?'; $('hueco').className = 'hueco';
     botMs = Math.max(1900, 5000 - vos * 450) + azar(-300, 300);
-    t1 = performance.now(); enJuego = true; ent.vaciar();
+    t1 = performance.now(); enJuego = true; ent.vaciar(); m.cuenta(6, k);
   }
   function cerrar(gane) {
     $('duVos').textContent = vos; $('duBot').textContent = bot;
@@ -945,6 +1048,7 @@ MINIJUEGOS[8] = m => {
   const mostrar = () => {
     cables[i].classList.add('activo');
     $('bCuenta').textContent = '8 × ' + ks[i];
+    m.cuenta(8, ks[i]);
     $('hueco').textContent = '?';
   };
   let listo = false;                      // explotó o se desactivó: ya no se puede escribir
@@ -995,7 +1099,7 @@ MINIJUEGOS[9] = m => {
   const anim = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
   function nueva() {
     let k; do k = azar(1, 10); while (k === ultimo); ultimo = k;
-    c = 9 * k; t1 = performance.now();
+    c = 9 * k; t1 = performance.now(); m.cuenta(9, k);
     $('jCuenta').textContent = '9 × ' + k;
   }
   function meGolpea() {
@@ -1045,7 +1149,7 @@ MINIJUEGOS[10] = m => {
     let a, b; do { a = azar(2, 9); b = azar(2, 10); } while (a + 'x' + b === ultima);
     ultima = a + 'x' + b;
     if (Math.random() < .5) [a, b] = [b, a];
-    c = a * b; t1 = performance.now();
+    c = a * b; t1 = performance.now(); m.cuenta(a, b);
     limite = Math.max(3000, 8000 - partida.aciertos * 120);
     $('fCuenta').textContent = a + ' × ' + b;
     $('hueco').textContent = '?'; $('hueco').className = 'hueco';
@@ -1074,9 +1178,54 @@ MINIJUEGOS[10] = m => {
   nueva(); m.cuadro(tick);
 };
 
+// Repaso: las cuentas difíciles de cada uno, sin reloj. La que falla vuelve a aparecer un poco después.
+MINIJUEGOS[REPASO] = m => {
+  const elegidas = dificiles().slice(0, 8).map(x => x.k);
+  partida.repaso = elegidas;
+  const pares = elegidas.map(k => k.split('x').map(Number));
+  // 3 preguntas por cuenta (entre 6 y 12 en total), repartidas y mezcladas
+  const total = Math.max(6, Math.min(12, pares.length * 3));
+  let cola = [];
+  while (cola.length < total) cola.push(...mezclar(pares.slice()));
+  cola = cola.slice(0, Math.max(total, pares.length));
+  const MAX = cola.length + 4;                      // las falladas que vuelven, con un tope
+  let r = 0, a, b, c, esperando = false;
+  m.escenario.innerHTML = '<p class="consigna">Sin reloj: pensala tranquilo</p>' +
+    '<div class="pregunta" aria-live="polite"><span id="rpCuenta"></span><span class="igual">=</span><span class="hueco" id="hueco">?</span></div>' +
+    '<div id="entradaCaja"></div>';
+  function nueva() {
+    r++; m.marcador(r + '/' + cola.length, 'Cuenta');
+    [a, b] = cola[r - 1];
+    if (Math.random() < .5) [a, b] = [b, a];
+    c = a * b; esperando = false;
+    $('rpCuenta').textContent = a + ' × ' + b;
+    $('hueco').textContent = '?'; $('hueco').className = 'hueco';
+    m.cuenta(a, b);
+  }
+  const seguir = ms => m.espera(() => (r >= cola.length ? m.fin() : nueva()), ms);
+  m.entrada($('entradaCaja'), v => {
+    if (esperando) return 'mal';
+    const res = m.comprobar(v, c);
+    if (res === 'ok') {
+      m.flota('+' + m.acierto(5), $('hueco'));
+      $('hueco').textContent = c; $('hueco').classList.add('bien');
+      esperando = true; seguir(450);
+    }
+    if (res === 'mal') {
+      m.error(true);
+      $('hueco').textContent = c; $('hueco').classList.add('mal');   // se muestra la respuesta para aprenderla
+      if (cola.length < MAX) cola.splice(Math.min(cola.length, r + 2), 0, [a, b]);
+      esperando = true; seguir(1700);
+    }
+    return res;
+  });
+  nueva();
+};
+
 // ---------- navegación: #tabla-N (detalle) y #jugar-N (partida) ----------
 function ruta() {
-  let m = location.hash.match(/^#(tabla|jugar)-([1-9]|10)$/);
+  let m = location.hash.match(/^#(tabla|jugar)-([1-9]|10|11)$/);
+  if (m && m[1] === 'tabla' && +m[2] === REPASO) m = null;   // el repaso no tiene pantalla de detalle
   if (m && (!abierta(+m[2]) || (m[1] === 'jugar' && !JUEGOS[+m[2]].listo))) {
     history.replaceState(null, '', location.pathname + location.search); m = null;
   }

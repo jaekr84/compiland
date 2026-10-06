@@ -21,6 +21,35 @@ const API = (() => {
   return q && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(q) ? q
     : 'https://br-fancy-cherry-auqw065l-clase.compute.c-10.us-east-1.aws.neon.tech';
 })();
+// Los administradores tienen todos los niveles abiertos, para poder probar los juegos.
+const esAdmin = !!(sesion && sesion.admin);
+// por si lo nombraron (o dejó de ser) administrador desde que entró: se corrige la sesión y se recarga
+if (sesion && sesion.token) {
+  fetch(API + '/yo', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ token: sesion.token }) })
+    .then(r => r.json()).then(r => {
+      if (!r.ok || !!r.admin === esAdmin) return;
+      try { localStorage.setItem('aprender.sesion', JSON.stringify({ ...sesion, admin: !!r.admin })); } catch (e) { return; }
+      location.reload();
+    }).catch(() => {});
+}
+
+// ---------- progreso en el servidor: así no se pierde al jugar en otra compu ----------
+const postJSON = cuerpo => ({ method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(cuerpo) });
+const nube = {
+  // → los datos guardados, null si todavía no hay, o undefined si no se pudo preguntar (invitado, sin internet)
+  async bajar(app) {
+    if (!sesion || !sesion.token) return undefined;
+    try {
+      const r = await (await fetch(API + '/progreso', postJSON({ token: sesion.token, app }))).json();
+      return r.ok ? r.datos : undefined;
+    } catch (e) { return undefined; }
+  },
+  async subir(app, datos) {
+    if (!sesion || !sesion.token) return false;
+    try { return (await (await fetch(API + '/progreso', postJSON({ token: sesion.token, app, datos }))).json()).ok; }
+    catch (e) { return false; }
+  },
+};
 
 // ---------- sonido ----------
 let sonido = true, audio;
@@ -75,6 +104,13 @@ const motor = {
     if (etiqueta) $('hTiempoLbl').textContent = etiqueta;
   },
   bono(pts) { partida.puntos += pts; hud(); },
+  // la cuenta que se está preguntando (a × b): el próximo acierto o error se anota para ella
+  cuenta(a, b) { partida.cuenta = { a, b, t: performance.now(), fallo: false }; },
+  // anota cómo le fue con a × b (ms: cuánto tardó, sólo si la acertó de una)
+  registrar(a, b, ok, ms) {
+    if (!ok) partida.fallidas.set(Math.min(a, b) + 'x' + Math.max(a, b), a + ' × ' + b);
+    if (Motor.cfg.alCuenta) Motor.cfg.alCuenta(a, b, ok, ms);
+  },
   // barra de tiempo: frac de 1 a 0, y los segundos que quedan
   reloj(frac, seg) {
     $('tiempoBarra').style.transform = 'scaleX(' + Math.max(0, frac) + ')';
@@ -87,11 +123,16 @@ const motor = {
     const pts = base * multi();
     partida.puntos += pts; hud();
     bip(620 + Math.min(partida.racha, 12) * 45);
+    const c = partida.cuenta;
+    if (c && !c.fallo) motor.registrar(c.a, c.b, true, performance.now() - c.t);   // si antes falló, ya quedó anotada
+    partida.cuenta = null;
     return pts;
   },
   // suave: sin sacudir la pantalla
   error(suave) {
     partida.errores++; partida.racha = 0; hud();
+    const c = partida.cuenta;
+    if (c && !c.fallo) { c.fallo = true; motor.registrar(c.a, c.b, false); }   // un error por cuenta, aunque reintente
     bip(150, .2, 'square', suave ? .025 : .045);
     if (suave) return;
     const e = $('escenario'); e.classList.remove('sacude'); void e.offsetWidth; e.classList.add('sacude');
@@ -160,10 +201,17 @@ const motor = {
 //   rutaNivel(n) → hash de la pantalla del nivel ('tabla-3')
 //   premio     { icono: html de uno ganado, uno: 'estrella', varios: 'estrellas', nuevo: '⭐ Nueva estrella' }
 //   textos     { dominado(n), desbloqueado(n) } (opcionales)
+//   etiquetas  { aciertos, precision, racha }: otros nombres para esas casillas (opcional)
+//   precision(partida) → 0..100, si el juego la calcula distinto (opcional)
+//   alCuenta(a, b, ok, ms)   se llama con cada cuenta respondida (opcional, ver motor.cuenta)
+//   extra(partida) → html que va en la pantalla final; un botón con data-ir="#ruta" lleva ahí (opcional)
+//   sync { datos() → objeto, cargar(datos), unir(local, remoto) → objeto, alCambiar() }
+//        guarda el progreso en el servidor y lo junta con el de otras compus (opcional)
 const Motor = {
   cfg: null,
   iniciar(cfg) {
     Motor.cfg = cfg;
+    const et = Object.assign({ aciertos: 'Aciertos', precision: 'Precisión', racha: 'Mejor racha' }, cfg.etiquetas);
     $('juego').innerHTML =
       '<div class="j-cab">' +
         '<button class="ghost" id="jSalir" title="Salir (Esc)">✕ Salir</button>' +
@@ -171,7 +219,7 @@ const Motor = {
         '<button class="ghost" id="sonidoBtn" aria-pressed="true" title="Sonido">🔊</button>' +
         '<div class="hud">' +
           '<div><b id="hTiempo">30</b><span id="hTiempoLbl">Tiempo</span></div>' +
-          '<div><b id="hAciertos">0</b><span>Aciertos</span></div>' +
+          '<div><b id="hAciertos">0</b><span>' + et.aciertos + '</span></div>' +
           '<div class="combo" id="hCombo"><b id="hMulti">×1</b><span>Combo</span></div>' +
           '<div><b id="hPuntos">0</b><span>Puntos</span></div>' +
         '</div>' +
@@ -182,12 +230,13 @@ const Motor = {
         '<div class="r-estrellas" id="rEstrellas"></div>' +
         '<h3 id="rTitulo"></h3><p id="rSub"></p>' +
         '<div class="r-datos">' +
-          '<div><b id="rAciertos"></b><span>Aciertos</span></div>' +
-          '<div><b id="rPrecision"></b><span>Precisión</span></div>' +
-          '<div><b id="rRacha"></b><span>Mejor racha</span></div>' +
+          '<div><b id="rAciertos"></b><span>' + et.aciertos + '</span></div>' +
+          '<div><b id="rPrecision"></b><span>' + et.precision + '</span></div>' +
+          '<div><b id="rRacha"></b><span>' + et.racha + '</span></div>' +
           '<div><b id="rPuntos"></b><span>Puntos</span></div>' +
         '</div>' +
         '<div class="r-insignias" id="rInsignias"></div>' +
+        '<div class="r-extra" id="rExtra"></div>' +
         '<div class="r-botones">' +
           '<button class="boton" id="rOtra">Otra vez ↻</button>' +
           '<button class="ghost" id="rSiguiente" hidden></button>' +
@@ -211,6 +260,8 @@ const Motor = {
     $('rVolver').addEventListener('click', volver);
     $('jSalir').addEventListener('click', volver);
     $('rSiguiente').addEventListener('click', () => { location.hash = cfg.rutaNivel(partida.n + 1); });
+    $('rExtra').addEventListener('click', e => { const b = e.target.closest('[data-ir]'); if (b) location.hash = b.dataset.ir; });
+    if (cfg.sync) Motor.sincronizar();             // trae lo que se jugó en otra compu
     $('escenario').addEventListener('click', e => {
       const b = e.target.closest('.opcion');
       if (b && partida.onElegir) partida.onElegir(b);
@@ -235,7 +286,7 @@ const Motor = {
     $('jTitulo').textContent = j.nombre;
     $('rVolver').textContent = 'Volver';
     Object.assign(partida, { n, puntos: 0, aciertos: 0, errores: 0, racha: 0, mejorRacha: 0, mensaje: '',
-      gano: false, perdidas: 0, tableros: 0, sobra: 0 });
+      gano: false, perdidas: 0, tableros: 0, sobra: 0, cuenta: null, fallidas: new Map() });
     $('resultado').hidden = true; $('escenario').hidden = false; $('tiempo').hidden = false;
     $('hTiempoLbl').textContent = 'Tiempo';
     $('escenario').className = 'escenario';
@@ -262,7 +313,7 @@ const Motor = {
     Motor.limpiar();
     const n = partida.n, j = cfg.niveles[n], antes = cfg.prog(n);
     const total = partida.aciertos + partida.errores;
-    partida.precision = total ? Math.round(partida.aciertos * 100 / total) : 0;
+    partida.precision = cfg.precision ? cfg.precision(partida) : total ? Math.round(partida.aciertos * 100 / total) : 0;
     partida.ms = ms;
     const est = j.estrellas(partida);
     const hay = n < cfg.ultimo;
@@ -287,13 +338,19 @@ const Motor = {
       (record && partida.puntos ? '<span class="insignia">🏆 Nuevo récord</span>' : '') +
       (est > antes.premio && antes.premio ? '<span class="insignia">' + pr.nuevo + '</span>' : '') +
       (desbloqueo ? '<span class="insignia lima">🔓 ' + (textos.desbloqueado ? textos.desbloqueado(n + 1) : cfg.nombre(n + 1) + ' desbloqueado') + '</span>' : '');
+    $('rExtra').innerHTML = cfg.extra ? cfg.extra(partida) : '';
     const sig = hay && cfg.abierto(n + 1);
     $('rSiguiente').hidden = !sig;
     $('rSiguiente').textContent = cfg.nombre(n + 1) + ' →';
     bip(est ? 880 : 300, .25, 'triangle', .06);
 
-    $('rServidor').textContent = '';
-    Motor.enviar(partida.puntos, ms).then(e => {
+    $('rServidor').textContent = ''; $('rServidor').classList.remove('lugar');
+    if (cfg.sync) Motor.sincronizar();
+    Motor.enviar(partida.puntos, ms).then(async e => {
+      if (e === 'ok') {                             // con los puntos ya sumados: en qué puesto va
+        const lugar = await Motor.lugar();
+        if (lugar) { $('rServidor').textContent = lugar; $('rServidor').classList.add('lugar'); return; }
+      }
       $('rServidor').textContent = {
         ok: '✓ Puntos sumados al ranking general',
         invitado: 'Jugás como invitado: entrá con tu apodo para sumar al ranking',
@@ -301,6 +358,42 @@ const Motor = {
         error: 'No se pudieron guardar los puntos en el ranking (¿hay internet?)',
       }[e] || '';
     });
+  },
+
+  // "Esta semana vas 5.º de 23 · te faltan 40 puntos para pasar a Juli"
+  async lugar() {
+    try {
+      const r = await (await fetch(API + '/general?p=semana')).json();
+      if (!r.ok) return null;
+      const js = r.jugadores || [], yo = sesion.apodo.toLowerCase();
+      const i = js.findIndex(j => j.apodo.toLowerCase() === yo);
+      if (i < 0) return null;
+      if (i === 0) return '🥇 ¡Vas primero esta semana!' +
+        (js.length > 1 ? ' ' + js[1].apodo + ' está a ' + (js[0].puntos - js[1].puntos) + ' puntos.' : '');
+      const arriba = js[i - 1], falta = arriba.puntos - js[i].puntos + 1;
+      return (i < 3 ? ['', '🥈', '🥉'][i] + ' ' : '') + 'Esta semana vas ' + (i + 1) + '.º de ' + js.length +
+        ' · te ' + (falta === 1 ? 'falta 1 punto' : 'faltan ' + falta + ' puntos') + ' para pasar a ' + arriba.apodo;
+    } catch (e) { return null; }
+  },
+
+  // junta el progreso de esta compu con el del servidor y sube el resultado.
+  // Va de a una: si se pide otra mientras corre, se hace una más al terminar.
+  sincronizar() {
+    const sync = Motor.cfg.sync, app = Motor.cfg.app;
+    if (!sync || !sesion || !sesion.token) return Promise.resolve();
+    Motor._sync = (Motor._sync || Promise.resolve()).then(async () => {
+      const remoto = await nube.bajar(app);
+      if (remoto === undefined) return;             // sin internet: queda en esta compu y se sube la próxima
+      // se comparan con las claves ordenadas: Postgres las devuelve en otro orden
+      const canon = o => JSON.stringify(o, (k, v) => v && typeof v === 'object' && !Array.isArray(v)
+        ? Object.keys(v).sort().reduce((r, x) => (r[x] = v[x], r), {}) : v);
+      const antes = canon(sync.datos());
+      const unido = remoto ? sync.unir(sync.datos(), remoto) : sync.datos();
+      const txt = canon(unido);
+      if (txt !== antes) { sync.cargar(unido); if (sync.alCambiar) sync.alCambiar(); }
+      if (txt !== canon(remoto)) await nube.subir(app, unido);
+    });
+    return Motor._sync;
   },
 
   enviar(puntos, ms) {

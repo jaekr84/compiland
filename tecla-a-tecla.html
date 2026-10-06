@@ -248,28 +248,24 @@
     box-shadow:var(--shadow-card); position:relative;
     width:100%; max-width:1120px; margin-inline:auto; box-sizing:border-box;
   }
-  .kb.hands-on{padding-bottom:clamp(50px,8vw,78px)}
+  .kb.hands-on{padding-bottom:clamp(56px,9vw,88px)}
 
-  /* manos translúcidas apoyadas sobre las teclas */
-  .kb-overlay{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible}
-  .kb-overlay .palm{
-    fill:var(--ink); fill-opacity:.055; stroke:var(--ink); stroke-opacity:.15; stroke-width:1.4;
-    stroke-linejoin:round;
-  }
-  .kb-overlay .fgr{
-    fill:var(--fg); fill-opacity:.17; stroke:var(--fg); stroke-opacity:.32; stroke-width:1.2;
-    stroke-linejoin:round;
-    transition:fill-opacity .16s, stroke-opacity .16s;
-  }
-  .kb-overlay .fgr.on{fill-opacity:.42; stroke-opacity:.8}
-  .kb-overlay .nudillo{fill:var(--fg); fill-opacity:.22}
-  .kb-overlay .una{fill:var(--surface); fill-opacity:.3; stroke:var(--fg); stroke-opacity:.18; stroke-width:.8}
-  .kb-overlay .una.on{fill-opacity:.55}
-  .kb-overlay .tip{
-    fill:var(--fg); fill-opacity:.2; stroke:var(--fg); stroke-opacity:.32; stroke-width:1.5;
-    transition:fill-opacity .16s, stroke-opacity .16s, stroke-width .16s;
-  }
-  .kb-overlay .tip.on{fill-opacity:.3; stroke-opacity:1; stroke-width:2.5}
+  /* manos translúcidas apoyadas sobre las teclas: piel con volumen, uñas del color de cada dedo */
+  .kb-overlay{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible;
+    --piel-luz:#f1c6a3; --piel-sombra:#c78a64; --piel-linea:#7d4a2f}
+  .kb-overlay .manos{opacity:.2}             /* 80% transparente */
+  .kb-overlay .piel{stroke:var(--piel-linea); stroke-opacity:.4; stroke-width:1; stroke-linejoin:round}
+  .kb-overlay .palma{stroke:none}
+  .kb-overlay .tinte{fill:var(--fg); fill-opacity:0; transition:fill-opacity .16s}
+  .kb-overlay .tinte.on{fill-opacity:.5}
+  .kb-overlay .pliegue{fill:none; stroke:var(--piel-linea); stroke-opacity:.5; stroke-width:1; stroke-linecap:round}
+  .kb-overlay .una{fill:color-mix(in srgb, var(--fg) 55%, #ffe8da); stroke:color-mix(in srgb, var(--fg) 50%, #3a1d10); stroke-opacity:.45; stroke-width:.8}
+  .kb-overlay .brillo-una{fill:#fff; fill-opacity:.6}
+  .kb-overlay .nudillo{opacity:.6}
+  .kb-overlay .tendon{fill:none; stroke:var(--piel-luz); stroke-opacity:.55; stroke-width:2.2; stroke-linecap:round}
+  .kb-overlay .tip{fill:none; stroke:var(--fg); stroke-width:2.5; opacity:0; transition:opacity .16s;
+    filter:drop-shadow(0 0 5px var(--fg))}
+  .kb-overlay .tip.on{opacity:1}
   .kb-row{display:grid; grid-template-columns:repeat(30,1fr); gap:5px; height:clamp(30px,5.4vw,48px)}
   .key{
     grid-column:span 2; position:relative; border:1px solid var(--key-line);
@@ -307,6 +303,7 @@
     background:color-mix(in srgb, var(--fg) 24%, var(--surface-2));
     border-color:var(--fg); color:var(--ink);
   }
+  .key.trabada{background:color-mix(in srgb, var(--ink) 18%, var(--surface-2)); border-color:var(--ink)}
   .key.down{transform:translateY(2px); box-shadow:0 0 0 var(--key-shadow)}
   .key.wrong{background:var(--bad); border-color:var(--bad); color:#fff}
   @keyframes pulse{50%{box-shadow:0 0 0 7px color-mix(in srgb, var(--fg) 12%, transparent), 0 2px 0 var(--key-shadow)}}
@@ -1476,7 +1473,7 @@ const CURRICULA = {
 
 /* ============================== estado ============================== */
 const STORE='teclaatecla.v2', STORE_VIEJO='teclaatecla.v1';
-const PREFS=['sound','hands','guide','kbd','logRange'];   // del aparato, no del perfil
+const PREFS=['sound','hands','guide','kbd','logRange','lang'];   // del aparato, no del perfil
 const DEF=()=>({stars:{}, best:{}, gameBest:{}, log:[], custom:{}, textCase:'as', goal:10,
                 sound:true, hands:true, guide:true, logRange:30});
 let store={v:2, profiles:[], current:null, data:{}, prefs:{}, wipes:[]};
@@ -1512,7 +1509,7 @@ const perfilActual=()=>store.profiles.find(p=>p.id===store.current)||null;
 let lang='es', lessonIdx=0, layout=LAYOUTS.es, lesson=null;
 let chars_=[], steps=[], stepIdx=0, charStart=[], typedInChar=0;
 let errors=0, correct=0, streak=0, bestStreak=0, startedAt=0, finished=false, errorAt=-1;
-let timerId=0, elapsed=0;
+let timerId=0, elapsed=0, ultimoMal=false, finTimer=0;
 let guideOn=true, handsOn=true, kbOn=true;   // tecla siguiente iluminada / manos / teclado en pantalla
 
 const $=id=>document.getElementById(id);
@@ -1867,7 +1864,16 @@ function keyLabel(code, shift){
   return v===' '?t('space'):v;
 }
 
+// Shift del teclado en pantalla: se toca una vez y vale para la tecla siguiente
+let shiftPantalla=false;
+function trabarShift(on){
+  shiftPantalla=on;
+  el.kb.querySelectorAll('.key[data-code^="Shift"]').forEach(k=>k.classList.toggle('trabada', on));
+}
+// teclas donde Shift da lo mismo (espacio, muchas del coreano): ahí no se exige ni se castiga
+function shiftDaIgual(code){ const p=layout.keys[code]; return !!p && p[0]===p[1]; }
 function renderKeyboard(){
+  shiftPantalla=false;
   el.kb.innerHTML='';
   ROWS.forEach(row=>{
     const r=document.createElement('div'); r.className='kb-row';
@@ -1890,7 +1896,10 @@ function renderKeyboard(){
       }
       b.addEventListener('mousedown', ev=>{
         ev.preventDefault();
-        if(mode==='game') gameKey(code, false); else handleKey(code, false);
+        if(code==='ShiftLeft'||code==='ShiftRight'){ trabarShift(!shiftPantalla); return; }
+        if(code!=='Backspace' && !layout.keys[code]) return;   // tab, bloq, enter y los bordes del espacio
+        const sh=shiftPantalla; trabarShift(false);
+        if(mode==='game') gameKey(code, sh); else handleKey(code, sh);
       });
       r.appendChild(b);
     });
@@ -1915,25 +1924,54 @@ function mk(tag, attrs){
   for(const k in attrs) e.setAttribute(k, attrs[k]);
   return e;
 }
+const n1=v=>v.toFixed(1);
 function buildOverlay(){
   ov=mk('svg',{class:'kb-overlay','aria-hidden':'true', preserveAspectRatio:'none'});
   FGS={};
+  // piel: luz en el centro de cada dedo y sombra a los costados, para que se vea redondo
+  ov.innerHTML='<defs>'+
+    '<linearGradient id="mPielDedo" x1="0" y1="0" x2="1" y2="0">'+
+      '<stop offset="0" style="stop-color:var(--piel-sombra)"/><stop offset=".4" style="stop-color:var(--piel-luz)"/>'+
+      '<stop offset=".6" style="stop-color:var(--piel-luz)"/><stop offset="1" style="stop-color:var(--piel-sombra)"/></linearGradient>'+
+    '<radialGradient id="mPielPalma" cx=".5" cy=".22" r=".8">'+
+      '<stop offset="0" style="stop-color:var(--piel-luz)"/><stop offset="1" style="stop-color:var(--piel-sombra)"/></radialGradient>'+
+    '<radialGradient id="mNudillo"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>'+
+    // la mano se desvanece hacia la muñeca, antes del borde del teclado
+    '<linearGradient id="mFundido" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>'+
+    '<mask id="mMascara" maskUnits="userSpaceOnUse"><rect id="mMascaraRect" fill="url(#mFundido)"/></mask>'+
+    '<filter id="mSombra" x="-10%" y="-10%" width="120%" height="130%">'+
+      '<feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity=".55"/></filter>'+
+  '</defs>';
+  const manos=mk('g',{class:'manos', mask:'url(#mMascara)', filter:'url(#mSombra)'});
+  const aros=mk('g',{});                     // aro en la tecla que toca: va aparte para que no se desvanezca
   HANDS.forEach(h=>{
-    const g=mk('g',{});
-    h.palmEl=mk('path',{class:'palm'});
-    g.appendChild(h.palmEl);
+    const g=mk('g',{}), dedos=mk('g',{}), palma=mk('g',{});
     h.ids.concat([h.thumb]).forEach(id=>{
       const col='var(--fg-'+((id==='lt'||id==='rt')?'th':id)+')';
-      const dedo=mk('path',{class:'fgr', style:'--fg:'+col});
-      const nudillo=mk('circle',{class:'nudillo', style:'--fg:'+col});
-      const una=mk('ellipse',{class:'una', style:'--fg:'+col});
-      const tip=mk('circle',{class:'tip', style:'--fg:'+col, r:'6'});
-      g.appendChild(dedo); g.appendChild(nudillo); g.appendChild(una); g.appendChild(tip);
-      FGS[id]={line:dedo, nudillo:nudillo, una:una, tip:tip, lado:(h.side==='l'?-1:1),
+      const dg=mk('g',{style:'--fg:'+col});
+      const cuerpo=mk('path',{class:'piel', fill:'url(#mPielDedo)'});
+      const tinte=mk('path',{class:'tinte'});
+      const pliegues=mk('path',{class:'pliegue'});
+      const una=mk('ellipse',{class:'una'});
+      const brillo=mk('ellipse',{class:'brillo-una'});
+      [cuerpo,tinte,pliegues,una,brillo].forEach(x=>dg.appendChild(x));
+      dedos.appendChild(dg);
+      const tip=mk('circle',{class:'tip', style:'--fg:'+col});
+      aros.appendChild(tip);
+      FGS[id]={g:dg, cuerpo, tinte, pliegues, una, brillo, tip,
+               nudillo:mk('ellipse',{class:'nudillo', fill:'url(#mNudillo)'}), tendon:mk('path',{class:'tendon'}),
+               pulgar:(id==='lt'||id==='rt'),
                home:{x:0,y:0}, cur:{x:0,y:0}, target:{x:0,y:0}, kn:{x:0,y:0}, w:10, active:false};
     });
-    ov.appendChild(g);
+    // la palma va encima de la base de los dedos: así el borde de arriba se ve como la línea de los nudillos
+    h.palmEl=mk('path',{class:'piel palma', fill:'url(#mPielPalma)'});
+    palma.appendChild(h.palmEl);
+    h.ids.forEach(id=>{ palma.appendChild(FGS[id].tendon); palma.appendChild(FGS[id].nudillo); });
+    g.appendChild(dedos); g.appendChild(palma);
+    manos.appendChild(g);
   });
+  ov.appendChild(manos); ov.appendChild(aros);
 }
 function keyBox(code){
   if(!ov) return null;
@@ -1947,98 +1985,114 @@ function layoutHands(){
   if(!ov || !el.kb.querySelector('.key')) return;
   const b=ov.getBoundingClientRect();
   if(!b.width || !b.height) return;
-  ov.setAttribute('viewBox','0 0 '+b.width.toFixed(1)+' '+b.height.toFixed(1));
+  ov.setAttribute('viewBox','0 0 '+n1(b.width)+' '+n1(b.height));
   const f=keyBox('KeyF'), sp=keyBox('Space');
   if(!f || !sp) return;
   const kw=f.w, kh=f.h, palmH=kh*1.35, knY=b.height-palmH-4;
-  const ARCO={lp:.20, lr:.05, lm:0, li:.10, ri:.10, rm:0, rr:.05, rp:.20};   // nudillos en arco
+  // fundido: entera hasta un poco debajo de los nudillos, invisible en el borde del teclado
+  [ov.querySelector('#mMascara'), ov.querySelector('#mMascaraRect')].forEach(x=>{
+    x.setAttribute('x','-60'); x.setAttribute('y','-60');
+    x.setAttribute('width', n1(b.width+120)); x.setAttribute('height', n1(b.height+120));
+  });
+  const fu=ov.querySelector('#mFundido');
+  fu.setAttribute('y1', n1(knY+palmH*0.3)); fu.setAttribute('y2', n1(b.height-2));
+  const ARCO={lp:.24, lr:.07, lm:0, li:.06, ri:.06, rm:0, rr:.07, rp:.24};   // nudillos en arco: el del medio más arriba
   HANDS.forEach(h=>{
     const pts=h.ids.map(id=>keyBox(HOME_KEY[id]));
     if(pts.some(p=>!p)) return;
     const palmCx=pts.reduce((a,p)=>a+p.cx,0)/pts.length;
-    let minK=Infinity, maxK=-Infinity, yIzq=0, yDer=0, yMed=1e9;
     h.ids.forEach((id,i)=>{
       const p=pts[i], fg=FGS[id];
-      fg.w=kw*FW[id];
       fg.kn={x:p.cx+(palmCx-p.cx)*0.3, y:knY+palmH*(ARCO[id]||0)};
       fg.home={x:p.cx, y:p.cy+p.h*0.17};
-      if(fg.kn.x-fg.w/2 < minK){ minK=fg.kn.x-fg.w/2; yIzq=fg.kn.y; }
-      if(fg.kn.x+fg.w/2 > maxK){ maxK=fg.kn.x+fg.w/2; yDer=fg.kn.y; }
-      yMed=Math.min(yMed, fg.kn.y);
+      // proporción de dedo de verdad: largo ≈ 5 veces el ancho, sin pasar el ancho de una tecla
+      const largo=Math.hypot(fg.home.x-fg.kn.x, fg.home.y-fg.kn.y);
+      fg.w=Math.min(kw*0.9, Math.max(kw*FW[id], largo*0.2));
     });
-    const t=FGS[h.thumb], inner=(h.side==='l') ? maxK-kw*0.05 : minK+kw*0.05;
-    t.w=kw*FW[h.thumb];
-    t.kn={x:inner, y:knY+palmH*0.52};
-    // el pulgar se abre desde su propio nudillo hacia el centro del teclado,
-    // no a una distancia fija de la barra: las manos no están centradas en ella
-    const haciaAdentro=(h.side==='l')?1:-1;
-    const tx=Math.max(sp.cx-sp.w/2+12, Math.min(sp.cx+sp.w/2-12, t.kn.x+haciaAdentro*kw*0.85));
+    // los cuatro nudillos de izquierda a derecha (en la mano derecha el meñique queda a la derecha)
+    const ks=h.ids.map(id=>FGS[id]).sort((a,c)=>a.kn.x-c.kn.x);
+    const minK=ks[0].kn.x-ks[0].w*0.55, maxK=ks[3].kn.x+ks[3].w*0.55, span=maxK-minK;
+    const s=h.side==='l' ? 1 : -1;                  // hacia dónde queda el pulgar
+    const xT=s>0 ? maxK : minK;                      // costado del pulgar
+    const wrist={c:(minK+maxK)/2+s*span*0.04, w:span*0.8, y:knY+span*0.95}, yFin=b.height+80;
+    const wx0=wrist.c-wrist.w/2, wx1=wrist.c+wrist.w/2;
+    const bulto={x:xT+s*span*0.09, y:knY+span*0.3};   // donde nace el pulgar
+    // pulgar: nace adentro de la palma y apoya en la barra espaciadora, hacia el centro
+    const t=FGS[h.thumb];
+    t.kn={x:xT-s*span*0.07, y:knY+span*0.42};
+    const tx=Math.max(sp.cx-sp.w/2+14, Math.min(sp.cx+sp.w/2-14, xT+s*kw*0.6));
     t.home={x:tx, y:sp.cy};
-    // palma: nudillos en arco arriba, muñeca angosta abajo, bulto del pulgar adentro
-    const x0=minK-3, x1=maxK+3, yB=knY+palmH;
-    const pulgarDer = h.side==='l';
-    const anchoM=(x1-x0)*0.52;                       // la muñeca es más angosta que los nudillos
-    const cM=(x0+x1)/2 + (pulgarDer?-1:1)*(x1-x0)*0.05;
-    const wx0=cM-anchoM/2, wx1=cM+anchoM/2;
-    const bulto = pulgarDer ? x1+(x1-x0)*0.06 : x0-(x1-x0)*0.06;   // eminencia tenar
-    const n=v=>v.toFixed(1);
-    h.palmEl.setAttribute('d',
-      'M'+n(x0)+' '+n(yIzq)+
-      (pulgarDer
-        ? 'C'+n(x0-palmH*0.06)+' '+n(yIzq+palmH*0.34)+' '+n(wx0-palmH*0.10)+' '+n(yB-palmH*0.22)+' '+n(wx0)+' '+n(yB)
-        : 'C'+n(bulto)+' '+n(yIzq+palmH*0.30)+' '+n(wx0-palmH*0.10)+' '+n(yB-palmH*0.20)+' '+n(wx0)+' '+n(yB))+
-      'Q'+n(cM)+' '+n(yB+palmH*0.10)+' '+n(wx1)+' '+n(yB)+
-      (pulgarDer
-        ? 'C'+n(wx1+palmH*0.10)+' '+n(yB-palmH*0.20)+' '+n(bulto)+' '+n(yDer+palmH*0.30)+' '+n(x1)+' '+n(yDer)
-        : 'C'+n(wx1+palmH*0.10)+' '+n(yB-palmH*0.22)+' '+n(x1+palmH*0.06)+' '+n(yDer+palmH*0.34)+' '+n(x1)+' '+n(yDer))+
-      'Q'+n((x0+x1)/2)+' '+n(yMed-palmH*0.10)+' '+n(x0)+' '+n(yIzq)+
-      'Z');
+    t.w=Math.min(kw*1.05, Math.max(kw*FW[h.thumb]*1.1, Math.hypot(t.home.x-t.kn.x, t.home.y-t.kn.y)*0.3));   // el pulgar es corto y grueso
+    // contorno de la palma: arco de nudillos arriba, el costado del pulgar con su bulto, la muñeca abajo
+    const arriba=[{x:minK, y:ks[0].kn.y+ks[0].w*0.15}]
+      .concat(ks.map(k=>({x:k.kn.x, y:k.kn.y-k.w*0.12})))
+      .concat([{x:maxK, y:ks[3].kn.y+ks[3].w*0.15}]);
+    let d='M'+n1(arriba[0].x)+' '+n1(arriba[0].y);
+    for(let i=1;i<arriba.length-1;i++){
+      const m={x:(arriba[i].x+arriba[i+1].x)/2, y:(arriba[i].y+arriba[i+1].y)/2};
+      d+=' Q'+n1(arriba[i].x)+' '+n1(arriba[i].y)+' '+n1(m.x)+' '+n1(m.y);
+    }
+    const ladoPulgar=(xa, ya, xw)=>' C'+n1(xa+s*span*0.03)+' '+n1(ya+span*0.12)+' '+n1(bulto.x)+' '+n1(bulto.y-span*0.14)+' '+n1(bulto.x)+' '+n1(bulto.y)+
+      ' C'+n1(bulto.x)+' '+n1(bulto.y+span*0.2)+' '+n1(xw+s*span*0.04)+' '+n1(wrist.y-span*0.25)+' '+n1(xw)+' '+n1(wrist.y);
+    const ladoMenique=(xa, ya, xw)=>' C'+n1(xa-s*span*0.06)+' '+n1(ya+span*0.3)+' '+n1(xw-s*span*0.06)+' '+n1(wrist.y-span*0.35)+' '+n1(xw)+' '+n1(wrist.y);
+    const der=arriba[arriba.length-1], izq=arriba[0];
+    d+=' L'+n1(der.x)+' '+n1(der.y);
+    d+= s>0 ? ladoPulgar(der.x, der.y, wx1) : ladoMenique(der.x, der.y, wx1);
+    d+=' L'+n1(wx1)+' '+n1(yFin)+' L'+n1(wx0)+' '+n1(yFin)+' L'+n1(wx0)+' '+n1(wrist.y);
+    // de vuelta hacia arriba por el otro costado (las curvas se recorren al revés)
+    d+= s>0
+      ? ' C'+n1(wx0-s*span*0.06)+' '+n1(wrist.y-span*0.35)+' '+n1(izq.x-s*span*0.06)+' '+n1(izq.y+span*0.3)+' '+n1(izq.x)+' '+n1(izq.y)
+      : ' C'+n1(wx0+s*span*0.04)+' '+n1(wrist.y-span*0.25)+' '+n1(bulto.x)+' '+n1(bulto.y+span*0.2)+' '+n1(bulto.x)+' '+n1(bulto.y)+
+        ' C'+n1(bulto.x)+' '+n1(bulto.y-span*0.14)+' '+n1(izq.x+s*span*0.03)+' '+n1(izq.y+span*0.12)+' '+n1(izq.x)+' '+n1(izq.y);
+    h.palmEl.setAttribute('d', d+'Z');
+    // nudillos con un poco de luz y los tendones que bajan hacia la muñeca
+    ks.forEach(k=>{
+      k.nudillo.setAttribute('cx', n1(k.kn.x)); k.nudillo.setAttribute('cy', n1(k.kn.y+k.w*0.08));
+      k.nudillo.setAttribute('rx', n1(k.w*0.45)); k.nudillo.setAttribute('ry', n1(k.w*0.32));
+      const hx=k.kn.x+(wrist.c-k.kn.x)*0.25, fx=k.kn.x+(wrist.c-k.kn.x)*0.55;
+      k.tendon.setAttribute('d', 'M'+n1(k.kn.x)+' '+n1(k.kn.y+k.w*0.4)+' Q'+n1(hx)+' '+n1(knY+span*0.35)+' '+n1(fx)+' '+n1(knY+span*0.72));
+    });
   });
   for(const id in FGS){
     const fg=FGS[id];
-    fg.nudillo.setAttribute('cx', fg.kn.x.toFixed(1));
-    fg.nudillo.setAttribute('cy', fg.kn.y.toFixed(1));
-    fg.nudillo.setAttribute('r', (fg.w*0.5).toFixed(1));
-    fg.tip.setAttribute('r', (fg.w*0.42).toFixed(1));
+    fg.tip.setAttribute('r', n1(fg.w*0.58));
     if(!handsReady){ fg.target={x:fg.home.x, y:fg.home.y}; fg.cur={x:fg.home.x, y:fg.home.y}; }
   }
   handsReady=true;
   drawHands();
 }
-function dedoPath(kn, tip, w, lado){
-  const dx=tip.x-kn.x, dy=tip.y-kn.y;
-  const L=Math.hypot(dx,dy)||1;
-  const ux=dx/L, uy=dy/L;              // a lo largo del dedo
-  const px=-uy, py=ux;                 // a lo ancho
-  const wB=w*0.5, wT=w*0.40;           // se afina hacia la yema
-  const k=w*0.62;                      // redondeo de la yema
-  const cx=tip.x-ux*wT, cy=tip.y-uy*wT;
-  const b1x=kn.x+px*wB, b1y=kn.y+py*wB, b2x=kn.x-px*wB, b2y=kn.y-py*wB;
-  const t1x=cx+px*wT,  t1y=cy+py*wT,  t2x=cx-px*wT,  t2y=cy-py*wT;
-  const bend=L*0.05*lado;              // leve curva natural
-  const q1x=(b1x+t1x)/2+px*bend, q1y=(b1y+t1y)/2+py*bend;
-  const q2x=(b2x+t2x)/2+px*bend, q2y=(b2y+t2y)/2+py*bend;
-  const n=v=>v.toFixed(1);
-  return 'M'+n(b1x)+' '+n(b1y)+
-         'Q'+n(q1x)+' '+n(q1y)+' '+n(t1x)+' '+n(t1y)+
-         'C'+n(t1x+ux*k)+' '+n(t1y+uy*k)+' '+n(t2x+ux*k)+' '+n(t2y+uy*k)+' '+n(t2x)+' '+n(t2y)+
-         'Q'+n(q2x)+' '+n(q2y)+' '+n(b2x)+' '+n(b2y)+'Z';
+// un dedo dibujado derecho hacia arriba desde su nudillo (0,0): después se gira hacia la tecla
+function dedoLocal(L, hb, ht, pulgar){
+  const yT=-(L-ht);
+  const cuerpo='M'+n1(-hb)+' '+n1(hb)+
+    ' C'+n1(-hb)+' '+n1(-L*0.35)+' '+n1(-ht*1.08)+' '+n1(-L*0.66)+' '+n1(-ht)+' '+n1(yT)+
+    ' A'+n1(ht)+' '+n1(ht)+' 0 0 1 '+n1(ht)+' '+n1(yT)+
+    ' C'+n1(ht*1.08)+' '+n1(-L*0.66)+' '+n1(hb)+' '+n1(-L*0.35)+' '+n1(hb)+' '+n1(hb)+'Z';
+  // pliegues en las articulaciones: dos en los dedos, uno en el pulgar
+  let pl='';
+  (pulgar ? [0.6] : [0.5, 0.76]).forEach(fr=>{
+    const y=-L*fr, hw=hb+(ht-hb)*fr;
+    pl+='M'+n1(-hw*0.5)+' '+n1(y)+' Q0 '+n1(y+hw*0.25)+' '+n1(hw*0.5)+' '+n1(y)+
+        'M'+n1(-hw*0.36)+' '+n1(y+hw*0.32)+' Q0 '+n1(y+hw*0.52)+' '+n1(hw*0.36)+' '+n1(y+hw*0.32);
+  });
+  return {cuerpo, pliegues:pl};
 }
 function drawHands(){
   for(const id in FGS){
     const fg=FGS[id];
-    fg.line.setAttribute('d', dedoPath(fg.kn, fg.cur, fg.w, fg.lado||1));
-    const dx=fg.cur.x-fg.kn.x, dy=fg.cur.y-fg.kn.y, L=Math.hypot(dx,dy)||1;
-    const ux=dx/L, uy=dy/L, ang=Math.atan2(uy,ux)*180/Math.PI+90;
-    const ux2=fg.cur.x-ux*fg.w*0.42, uy2=fg.cur.y-uy*fg.w*0.42;
-    fg.una.setAttribute('cx','0'); fg.una.setAttribute('cy','0');
-    fg.una.setAttribute('rx',(fg.w*0.21).toFixed(1));
-    fg.una.setAttribute('ry',(fg.w*0.27).toFixed(1));
-    fg.una.setAttribute('transform','translate('+ux2.toFixed(1)+','+uy2.toFixed(1)+') rotate('+ang.toFixed(1)+')');
-    fg.tip.setAttribute('cx', fg.cur.x.toFixed(1));
-    fg.tip.setAttribute('cy', fg.cur.y.toFixed(1));
-    fg.line.classList.toggle('on', fg.active);
-    fg.una.classList.toggle('on', fg.active);
+    const dx=fg.cur.x-fg.kn.x, dy=fg.cur.y-fg.kn.y, dist=Math.hypot(dx,dy)||1;
+    const hb=fg.w/2, ht=fg.w*0.42, L=dist+ht*0.6;      // la yema apoya en la tecla y la punta pasa un poco
+    const ang=Math.atan2(dx,-dy)*180/Math.PI;
+    fg.g.setAttribute('transform','translate('+n1(fg.kn.x)+' '+n1(fg.kn.y)+') rotate('+n1(ang)+')');
+    const dd=dedoLocal(L, hb, ht, fg.pulgar);
+    fg.cuerpo.setAttribute('d', dd.cuerpo); fg.tinte.setAttribute('d', dd.cuerpo);
+    fg.pliegues.setAttribute('d', dd.pliegues);
+    fg.una.setAttribute('cx','0'); fg.una.setAttribute('cy', n1(-(L-ht*1.2)));
+    fg.una.setAttribute('rx', n1(ht*0.66)); fg.una.setAttribute('ry', n1(ht*0.98));
+    fg.brillo.setAttribute('cx', n1(-ht*0.22)); fg.brillo.setAttribute('cy', n1(-(L-ht*1.5)));
+    fg.brillo.setAttribute('rx', n1(ht*0.16)); fg.brillo.setAttribute('ry', n1(ht*0.42));
+    fg.tip.setAttribute('cx', n1(fg.cur.x)); fg.tip.setAttribute('cy', n1(fg.cur.y));
+    fg.tinte.classList.toggle('on', fg.active);
     fg.tip.classList.toggle('on', fg.active);
   }
 }
@@ -2145,7 +2199,9 @@ function fmtTime(ms){
   const s=Math.max(0, Math.round(ms/1000));
   return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
 }
-function recordKey(){ return lesson.custom ? lesson.id+'#'+(lesson.pos||0) : lesson.id; }
+function huella(txt){ let h=0; for(const c of txt) h=(h*31+c.codePointAt(0))>>>0; return h.toString(36); }
+// en Mi texto el récord es de esa oración: si se cambia el texto, no se compara con otra
+function recordKey(){ return lesson.custom ? lesson.id+'#'+huella(lesson.list[lesson.pos||0]||'') : lesson.id; }
 function stopTimer(){ if(timerId){ clearInterval(timerId); timerId=0; } }
 function startTimer(){
   stopTimer();
@@ -2180,7 +2236,8 @@ function newLine(resetLesson){
   chars_=buildChars(text, layout);
   steps=[]; charStart=[];
   chars_.forEach(c=>{ charStart.push(steps.length); c.steps.forEach(s=>steps.push(s)); });
-  stepIdx=0; errors=0; correct=0; streak=0; bestStreak=0; startedAt=0; finished=false; errorAt=-1;
+  stepIdx=0; errors=0; correct=0; streak=0; bestStreak=0; startedAt=0; finished=false; errorAt=-1; ultimoMal=false;
+  clearTimeout(finTimer); finTimer=0;
   stopTimer(); elapsed=0; pausaLeccion=0;
   el.time.textContent='0:00';
   el.time.parentNode.classList.remove('running');
@@ -2194,8 +2251,7 @@ function newLine(resetLesson){
 }
 
 function finish(){
-  finished=true;
-  elapsed=Date.now()-startedAt;
+  finTimer=0;
   stopTimer();
   el.time.parentNode.classList.remove('running');
   const total=correct+errors;
@@ -2282,6 +2338,7 @@ function flashKey(code, wrong){
 function handleKey(code, shift){
   if(finished) return;
   if(code==='Backspace'){
+    if(ultimoMal){ ultimoMal=false; errorAt=-1; paintLine(); return; }   // borra la tecla equivocada, no una buena
     if(stepIdx>0){ stepIdx--; correct=Math.max(0,correct-1); errorAt=-1; paintLine(); highlightNext(); renderStats(); }
     return;
   }
@@ -2289,16 +2346,19 @@ function handleKey(code, shift){
   if(!st) return;
   seguirLeccion();
   if(!startedAt){ startedAt=Date.now(); startTimer(); }
-  if(code===st.code && shift===!!st.shift){
+  if(code===st.code && (shift===!!st.shift || shiftDaIgual(code))){
     anotaTecla(st.code, !!st.shift, true);
     correct++; streak++; bestStreak=Math.max(bestStreak,streak);
-    stepIdx++; errorAt=-1;
+    stepIdx++; errorAt=-1; ultimoMal=false;
+    if(stepIdx>=steps.length){                 // la línea se cierra ya: nada de lo que pase en la animación la cambia
+      finished=true; elapsed=Date.now()-startedAt; stopTimer();
+    }
     flashKey(code,false); sndOk();
     paintLine(); highlightNext(); renderStats();
-    if(stepIdx>=steps.length) setTimeout(finish, 160);
+    if(finished) finTimer=setTimeout(finish, 160);
   } else {
     anotaTecla(st.code, !!st.shift, false);   // se anota contra la tecla que tocaba
-    errors++; streak=0; errorAt=stepIdx;
+    errors++; streak=0; errorAt=stepIdx; ultimoMal=true;
     flashKey(code,true); sndBad();
     paintLine(); renderStats();
     setTimeout(()=>{ if(errorAt===stepIdx){ errorAt=-1; paintLine(); } }, 260);
@@ -2331,6 +2391,14 @@ window.addEventListener('keydown', e=>{
   if(code==='Tab') return;                       // dejamos Tab para navegar
   if(code==='Enter' && !el.veil.hidden) return;  // Enter opera el botón del resumen
   if(code==='ShiftLeft'||code==='ShiftRight'||code==='CapsLock') return;
+  // tecla mantenida: el sistema la repite, pero cuenta una sola vez (Borrar sí se puede mantener)
+  if(e.repeat && code!=='Backspace'){ if(layout.keys[code]) e.preventDefault(); return; }
+  // Bloq Mayús invierte las letras igual que Shift
+  let shift=e.shiftKey;
+  if(e.getModifierState && e.getModifierState('CapsLock')){
+    const p=layout.keys[code];
+    if(p && p[0]!==p[1] && p[1]===p[0].toUpperCase()) shift=!shift;
+  }
   if(mode==='game'){
     if(!gPlaying){
       if(code==='Enter'||code==='Space'){
@@ -2340,13 +2408,13 @@ window.addEventListener('keydown', e=>{
       }
       return;
     }
-    if(layout.keys[code]){ e.preventDefault(); if(code!=='Space') gameKey(code, e.shiftKey); }
+    if(layout.keys[code]){ e.preventDefault(); if(code!=='Space') gameKey(code, shift); }
     return;
   }
   if(mode!=='learn') return;                     // en Progreso, Clase, etc. no hay línea que escribir
   if(code==='Backspace' || layout.keys[code]){
     e.preventDefault();
-    handleKey(code, e.shiftKey);
+    handleKey(code, shift);
   }
 });
 el.stage.addEventListener('mousedown', ()=>el.stage.focus());
@@ -2360,6 +2428,7 @@ document.addEventListener('click', e=>{
 document.querySelectorAll('.langs button').forEach(b=>{
   b.addEventListener('click',()=>{
     lang=b.dataset.lang; layout=LAYOUTS[lang]; lessonIdx=0;
+    save.lang=lang; persist();
     document.querySelectorAll('.langs button').forEach(x=>x.setAttribute('aria-pressed', String(x===b)));
     el.layoutName.textContent=layout.label;
     applyUI();
@@ -2799,7 +2868,7 @@ function missWord(w){
 }
 function gameKey(code, shift){
   if(!gPlaying) return;
-  const pega=(w,i)=>{ const st=w.steps[i]; return !!st && st.code===code && !!st.shift===shift; };
+  const pega=(w,i)=>{ const st=w.steps[i]; return !!st && st.code===code && (!!st.shift===shift || shiftDaIgual(code)); };
   const activas=gWords.filter(x=>x.idx>0);             // todas las que coinciden con lo tecleado
   let siguen=activas.filter(w=>pega(w, w.idx));
   if(!siguen.length){
@@ -2833,7 +2902,7 @@ function gameLoop(t){
   for(let i=gWords.length-1;i>=0;i--){
     const w=gWords[i];
     w.y += v*dt; place(w);
-    if(w.y + w.el.offsetHeight >= floorY){ missWord(w); continue; }
+    if(w.y + w.el.offsetHeight >= floorY){ missWord(w); if(!gPlaying) return; continue; }
     if(w.y<highest) highest=w.y;
     alto=Math.max(alto, w.el.offsetHeight);
   }
@@ -3810,9 +3879,10 @@ function applyUI(){
 
 /* ============================== arranque ============================== */
 function start(data){
-  if(data && data.lang && CURRICULA[data.lang]){
-    lang=data.lang; layout=LAYOUTS[lang];
-    lessonIdx=data.lessonIdx||0;
+  const lg=(data && data.lang) || save.lang;     // el idioma que quedó la última vez
+  if(lg && CURRICULA[lg]){
+    lang=lg; layout=LAYOUTS[lang];
+    lessonIdx=(data && data.lessonIdx)||0;
     document.querySelectorAll('.langs button').forEach(x=>x.setAttribute('aria-pressed', String(x.dataset.lang===lang)));
     el.layoutName.textContent=layout.label;
   }
