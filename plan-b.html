@@ -320,13 +320,14 @@
     <div class="mundo-cab"><h3>🗺️ Caminos por el barrio</h3><span>Mundo 2</span></div>
     <div class="niveles" id="niveles2"></div>
 
-    <div class="mundo-cab"><h3>🎒 Situaciones de todos los días</h3><span>Mundo 3 · Próximamente</span></div>
+    <div class="mundo-cab"><h3>🗼 El Faro Olvidado</h3><span>Mundo 3 · Aventura en 3D</span></div>
     <div class="niveles">
-      <div class="nivel pronto" style="--c:var(--faint)">
-        <span class="num">🚧</span>
-        <div class="cab"><div class="tipo">Próximamente</div><h3>¿Y ahora qué hago?</h3></div>
-        <p>“Me olvidé la cartuchera”, “no me alcanza la plata”… Elegí tres ideas que sí sirvan para resolverlo.</p>
-      </div>
+      <a class="nivel" id="linkFaro" href="faro.html" style="--c:#ffc53d; text-decoration:none; color:inherit">
+        <span class="num">🗼</span>
+        <div class="cab"><div class="tipo">Capítulo 1 · El río</div><h3>¿Cómo cruzo el río?</h3></div>
+        <p>El faro de la isla se apagó y el puente se rompió. Construí, pedí ayuda, explorá y razoná: cada manera de cruzar es un engranaje.</p>
+        <div class="pie"><span class="estrellas" id="faroEngranajes" style="color:var(--oro)">⚙ 0/4</span><span class="mejor" id="faroEstado">Sin jugar</span></div>
+      </a>
     </div>
   </section>
 
@@ -722,7 +723,7 @@ if (sesion && sesion.apodo) {
   $('chipCara').textContent = sesion.apodo[0].toUpperCase();
   $('chipNom').textContent = sesion.apodo + (esAdmin ? ' · admin' : '');
 }
-if (location.search) $('volverInicio').href += location.search;   // mantiene ?api=
+if (location.search) ['volverInicio', 'linkFaro'].forEach(id => { $(id).href += location.search; });   // mantiene ?api=
 
 // ---------- las cuentas ----------
 // una cuenta es una lista: [número, op, número, op, número], con op en '+', '-', '*'
@@ -797,6 +798,12 @@ function pintarInicio() {
   for (let n = MUNDO2; n <= ULTIMO; n++) html += tarjeta(n);
   $('niveles2').innerHTML = html;
   $('totEstrellas').innerHTML = tot + '<small>/' + ULTIMO * 3 + '</small>';
+  // el faro guarda su progreso aparte (faro.html): cuántas maneras de cruzar el río ya encontró
+  let faro = {};
+  try { faro = JSON.parse(localStorage.getItem('planb.faro.' + (sesion && sesion.apodo ? sesion.apodo.toLowerCase() : 'invitado'))) || {}; } catch (e) {}
+  const eng = Object.keys(faro.hechas || {}).length;
+  $('faroEngranajes').innerHTML = '<b>⚙</b> ' + eng + '/4';
+  $('faroEstado').innerHTML = faro.faro ? '<b>¡Faro encendido!</b>' : eng ? 'En camino' : 'Sin jugar';
   $('totManeras').textContent = man;
   $('totPuntos').textContent = pts;
 }

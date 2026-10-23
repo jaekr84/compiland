@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El Faro Olvidado</title>
+<meta name="description" content="Plan B · Mundo 3: el faro de la isla se apagó y el puente se rompió. ¿De cuántas maneras podés cruzar el río?">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='14' y='14' width='72' height='72' rx='16' fill='%230a0c11' stroke='%23ffc53d' stroke-width='6'/><path d='M42 76 L46 34 L54 34 L58 76 Z' fill='%23ffc53d'/><circle cx='50' cy='28' r='7' fill='%23ffc53d'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Playfair+Display:wght@700;900&display=swap">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
+<style>
+  /* misma estética que el resto del sitio, con colores de isla: arena, mar y la luz del faro */
+  :root{
+    --bg:#0a0c11; --surface:#12151d; --surface-2:#0e1118; --line:#232a37;
+    --ink:#eef1f7; --muted:#98a2b6; --faint:#5f6a80;
+    --lima:#b8ff3c; --violeta:#8b5cff; --rosa:#ff4d8d; --cian:#2ee6c5; --rojo:#ff4d6d; --oro:#ffc53d; --mar:#3db8ff;
+    --papel:#f3ecdc; --papel-ink:#2a2218;
+    --shadow-card:0 0 0 1px rgba(255,255,255,.02), 0 18px 50px rgba(0,0,0,.5);
+    --display:'Space Grotesk', system-ui, sans-serif;
+    --body:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0; min-height:100%}
+  body{font-family:var(--body); font-size:16px; line-height:1.5; color:var(--ink); background:var(--bg); overflow-x:hidden; -webkit-font-smoothing:antialiased}
+  button{font:inherit; color:inherit; cursor:pointer}
+  :focus-visible{outline:2px solid var(--oro); outline-offset:3px}
+
+  .wrap{max-width:1180px; margin:0 auto; padding:16px 16px 32px}
+  header{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:12px}
+  .volver{display:grid; place-items:center; width:36px; height:36px; border-radius:10px; flex:none;
+    border:1px solid var(--line); background:var(--surface); color:var(--muted); text-decoration:none; font-weight:600}
+  .volver:hover{color:var(--ink); border-color:var(--faint)}
+  .marca{display:flex; align-items:baseline; gap:10px; margin-right:auto; min-width:0}
+  .marca h1{font-family:var(--display); font-weight:700; font-size:24px; letter-spacing:-.04em; margin:0; line-height:1}
+  .marca h1 em{font-style:normal; color:var(--oro)}
+  .marca small{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+  .ghost{border:1px solid var(--line); background:var(--surface); border-radius:10px; padding:7px 12px; font-size:14px; font-weight:600; color:var(--muted)}
+  .ghost:hover{color:var(--ink); border-color:var(--faint)}
+  .engranajes{font-family:var(--mono); font-weight:700; color:var(--oro); border:1px solid color-mix(in srgb, var(--oro) 40%, var(--line));
+    background:color-mix(in srgb, var(--oro) 8%, var(--surface)); border-radius:10px; padding:6px 12px}
+
+  /* ---------- el escenario 3D ---------- */
+  .isla{position:relative; height:min(72vh, 680px); min-height:420px; border-radius:20px; overflow:hidden; border:1px solid var(--line);
+    background:linear-gradient(#bfe3f5, #e8f3df); box-shadow:var(--shadow-card); touch-action:none; user-select:none; -webkit-user-select:none}
+  .isla canvas{display:block; width:100%; height:100%}
+  .cargando{position:absolute; inset:0; display:grid; place-items:center; color:#2a3a4a; font-family:var(--display); font-weight:600}
+  /* lo que se puede hacer cerca de Ari */
+  .accion{position:absolute; left:50%; bottom:18px; transform:translateX(-50%); z-index:3; display:flex; gap:8px; flex-wrap:wrap; justify-content:center; width:calc(100% - 24px)}
+  .accion button{border:0; border-radius:14px; padding:11px 18px; font-family:var(--display); font-weight:700; font-size:16px;
+    background:var(--oro); color:#1a1405; box-shadow:0 6px 0 #7a5a10, 0 10px 30px rgba(0,0,0,.35)}
+  .accion button:active{transform:translateY(3px); box-shadow:0 3px 0 #7a5a10}
+  .accion kbd{font-family:var(--mono); font-size:11px; opacity:.6; border:1px solid currentColor; border-radius:5px; padding:0 5px; margin-left:6px}
+  .aviso{position:absolute; left:50%; top:14px; transform:translateX(-50%); z-index:3; max-width:min(560px, calc(100% - 24px));
+    background:rgba(14,17,24,.88); border:1px solid var(--line); border-radius:14px; padding:9px 16px; font-weight:600; font-size:15px; text-align:center;
+    backdrop-filter:blur(6px); box-shadow:0 10px 30px rgba(0,0,0,.35); animation:baja .3s}
+  @keyframes baja{from{opacity:0; transform:translate(-50%,-10px)}}
+  .ayuda{position:absolute; left:12px; bottom:12px; z-index:2; font-family:var(--mono); font-size:11px; color:#2a3a4a; opacity:.8; pointer-events:none}
+  .mochila{position:absolute; right:12px; top:12px; z-index:2; display:flex; gap:4px; flex-wrap:wrap; justify-content:flex-end; max-width:45%}
+  .mochila span{background:rgba(14,17,24,.82); border:1px solid var(--line); border-radius:9px; padding:3px 8px; font-size:13px}
+
+  /* ---------- ventanas (historia, charlas, balsa, presa, cuaderno, diario) ---------- */
+  .velo{position:absolute; inset:0; z-index:5; display:grid; place-items:center; padding:14px; background:rgba(6,8,12,.55); backdrop-filter:blur(3px)}
+  .ventana{width:min(640px, 100%); max-height:100%; overflow:auto; background:var(--surface); border:1px solid var(--line); border-radius:20px;
+    padding:22px; box-shadow:0 30px 80px rgba(0,0,0,.6); animation:aparece .25s}
+  @keyframes aparece{from{opacity:0; transform:scale(.96)}}
+  .ventana h2{font-family:var(--display); font-weight:700; font-size:clamp(22px,4vw,28px); letter-spacing:-.03em; margin:0 0 8px; line-height:1.1}
+  .ventana p{margin:0 0 12px; color:var(--muted)}
+  .ventana p b{color:var(--ink)}
+  .etiq{display:inline-block; font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--oro); margin-bottom:8px}
+  .botones{display:flex; gap:8px; flex-wrap:wrap; margin-top:16px}
+  .boton{border:0; border-radius:12px; padding:11px 20px; font-family:var(--display); font-weight:700; font-size:16px; background:var(--oro); color:#1a1405}
+  .boton:hover{filter:brightness(1.08)}
+  .boton:disabled{opacity:.4; cursor:default; filter:none}
+  .boton.gris{background:var(--surface-2); color:var(--ink); border:1px solid var(--line)}
+  /* charla */
+  .charla{display:flex; gap:14px; align-items:flex-start}
+  .charla .cara{flex:none; width:64px; height:64px; border-radius:18px; display:grid; place-items:center; font-size:38px; background:#2a2016; border:1px solid #5a4630}
+  .charla .dice{flex:1; background:var(--surface-2); border:1px solid var(--line); border-radius:4px 16px 16px 16px; padding:12px 14px; font-size:16px}
+  .charla .dice b{display:block; font-family:var(--display); font-size:13px; color:var(--oro); margin-bottom:2px}
+  .opciones{display:flex; flex-direction:column; gap:8px; margin-top:14px}
+  .opciones button{text-align:left; border:1px solid var(--line); background:var(--surface-2); border-radius:12px; padding:11px 14px; font-weight:600}
+  .opciones button:hover{border-color:var(--oro); background:color-mix(in srgb, var(--oro) 8%, var(--surface-2))}
+  .nota{font-size:13.5px; color:var(--oro); background:color-mix(in srgb, var(--oro) 8%, transparent); border:1px dashed color-mix(in srgb, var(--oro) 40%, var(--line));
+    border-radius:10px; padding:8px 12px; margin-top:12px}
+  /* la balsa */
+  .huecos{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:6px 0 14px}
+  .hueco{border:1px dashed var(--faint); border-radius:12px; padding:10px 12px; min-height:62px; background:var(--surface-2)}
+  .hueco small{display:block; font-family:var(--mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+  .hueco b{font-size:16px}
+  .hueco.lleno{border-style:solid; border-color:var(--oro)}
+  .hueco.elegido{box-shadow:0 0 0 2px var(--oro)}
+  .cosas{display:flex; gap:8px; flex-wrap:wrap}
+  .cosa{border:1px solid var(--line); background:var(--surface-2); border-radius:12px; padding:8px 12px; font-weight:600}
+  .cosa:hover{border-color:var(--oro)}
+  .cosa.usada{opacity:.35}
+  /* la presa */
+  .presa{display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:stretch}
+  .nivel{position:relative; width:74px; border-radius:12px; background:var(--surface-2); border:1px solid var(--line); overflow:hidden; min-height:220px}
+  .nivel .agua{position:absolute; left:0; right:0; bottom:0; background:linear-gradient(#5cc4ff, #1f6fb0); transition:height .6s}
+  .nivel .franja{position:absolute; left:0; right:0; background:color-mix(in srgb, var(--lima) 25%, transparent); border-top:1px dashed var(--lima); border-bottom:1px dashed var(--lima)}
+  .nivel .marcas{position:absolute; inset:0; display:flex; flex-direction:column-reverse; justify-content:space-between; padding:2px 6px; font-family:var(--mono); font-size:10px; color:var(--muted)}
+  .nivel .num{position:absolute; left:0; right:0; top:6px; text-align:center; font-family:var(--mono); font-weight:700; font-size:20px; color:var(--ink); text-shadow:0 1px 4px #000}
+  .compuertas{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
+  .compuerta{border:1px solid var(--line); background:var(--surface-2); border-radius:12px; padding:10px; text-align:center}
+  .compuerta b{display:block; font-family:var(--mono); font-size:22px}
+  .compuerta small{color:var(--faint); font-size:12px}
+  .compuerta.abierta{border-color:var(--mar); background:color-mix(in srgb, var(--mar) 14%, var(--surface-2))}
+  .compuerta.abierta small{color:var(--mar)}
+  .combos{font-family:var(--mono); font-size:13px; color:var(--lima); margin-top:10px}
+  /* el cuaderno de ideas: un mapa mental */
+  .cuaderno{background:#fbf6e9; color:#3a3022; border-radius:16px; padding:6px; background-image:repeating-linear-gradient(#fbf6e9 0 27px, #e3d9c2 27px 28px)}
+  .cuaderno svg{display:block; width:100%; height:auto}
+  .cuaderno text{font-family:var(--display)}
+  /* el diario del pueblo */
+  .diario{background:var(--papel); color:var(--papel-ink); border-radius:6px; padding:18px 20px; font-family:Georgia, 'Times New Roman', serif;
+    box-shadow:inset 0 0 40px rgba(120,90,40,.18)}
+  .diario .cabecera{text-align:center; border-bottom:3px double var(--papel-ink); padding-bottom:6px; margin-bottom:10px}
+  .diario .cabecera b{display:block; font-family:'Playfair Display', Georgia, serif; font-weight:900; font-size:clamp(26px,5vw,38px); letter-spacing:-.01em; line-height:1}
+  .diario .cabecera small{font-size:12px; letter-spacing:.12em; text-transform:uppercase}
+  .diario h3{font-family:'Playfair Display', Georgia, serif; font-size:clamp(20px,3.6vw,26px); margin:4px 0 8px; line-height:1.15}
+  .diario p{color:var(--papel-ink); margin:0 0 8px; font-size:15px}
+  .diario ul{margin:6px 0 0; padding-left:20px; font-size:14.5px}
+  .diario li{margin-bottom:4px}
+  .diario .vacia{opacity:.55; font-style:italic}
+
+  .pie-txt{margin-top:14px; color:var(--faint); font-size:13px; text-align:center}
+  @media (max-width:560px){
+    .marca small{display:none}
+    .isla{height:68vh; border-radius:16px}
+    .presa{grid-template-columns:1fr}
+    .nivel{min-height:120px; width:100%}
+    .huecos{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="volver" id="volver" href="plan-b.html" title="Volver a Plan B">←</a>
+    <div class="marca"><h1>El Faro <em>Olvidado</em></h1><small>Plan B · Capítulo 1: el río</small></div>
+    <span class="engranajes" id="engranajes" title="Engranajes para arreglar el faro">⚙ 0/4</span>
+    <button class="ghost" id="cuadernoBtn">📓 Cuaderno</button>
+    <button class="ghost" id="diarioBtn">📰 Diario</button>
+    <button class="ghost" id="sonidoBtn" aria-label="Sonido">🔊</button>
+  </header>
+
+  <div class="isla" id="isla">
+    <div class="cargando" id="cargando">Cargando la isla…</div>
+    <div class="aviso" id="aviso" hidden></div>
+    <div class="mochila" id="mochila"></div>
+    <div class="accion" id="accion"></div>
+    <div class="ayuda" id="ayuda">Tocá el piso para caminar · flechas o WASD</div>
+    <div class="velo" id="velo" hidden><div class="ventana" id="ventana"></div></div>
+  </div>
+  <p class="pie-txt">Cada manera de cruzar el río te da un engranaje para arreglar el faro. ¿Las encontrás todas?</p>
+</div>
+
+<script src="motor.js?v=2"></script>
+<script type="module">
+import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+// ======================= el estado del juego =======================
+// Las 4 maneras de cruzar el río. Cada una es un estilo distinto de resolver problemas.
+const MANERAS = {
+  balsa:  { ico: '🪵', estilo: 'Construir', titulo: 'Armar una balsa', pista: '¿Hay cosas en la orilla que floten?',
+            diario: 'juntó cosas de la orilla, armó una balsa y cruzó remando.' },
+  castor: { ico: '🦫', estilo: 'Pedir ayuda', titulo: 'Que Bruno el castor arregle el puente', pista: '¿Alguien de la isla sabrá de maderas?',
+            diario: 'charló con Bruno el castor, lo ayudó con su problema, y entre todos arreglaron el puente.' },
+  rocas:  { ico: '🪨', estilo: 'Explorar', titulo: 'Cruzar saltando por las piedras', pista: 'Río arriba, ¿habrá otro paso?',
+            diario: 'subió río arriba y cruzó saltando de piedra en piedra, sin pisar las resbalosas.' },
+  presa:  { ico: '⚙️', estilo: 'Razonar', titulo: 'Bajar el río con la vieja presa', pista: '¿Se podrá bajar el agua del río?',
+            diario: 'descifró las compuertas de la vieja presa y bajó el río justo lo necesario: los peces, felices.' },
+};
+const ORDEN = ['balsa', 'castor', 'rocas', 'presa'];
+const CLAVE = 'planb.faro.' + (sesion && sesion.apodo ? sesion.apodo.toLowerCase() : 'invitado');
+// guardado = { hechas: { balsa: true, … }, vistas: { balsa: true, … }, primera: 'castor', combos: ['3+5', …], balsa: ['barriles', …] }
+let guardado = { hechas: {}, vistas: {}, combos: [] };
+try { guardado = Object.assign(guardado, JSON.parse(localStorage.getItem(CLAVE)) || {}); } catch (e) {}
+const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(guardado)); } catch (e) {} };
+if (location.search) $('volver').href += location.search;   // mantiene ?api=
+
+// lo que pasa en esta vuelta (se reinicia al "probar otra manera")
+let estado;
+function estadoInicial() {
+  return { puente: false, vado: false, mochila: [], ramas: 0, misionCastor: false, castorEnojado: false,
+           enRoca: null, cruzando: false, presaCombo: null };
+}
+
+// ======================= sonido =======================
+try { sonido = localStorage.getItem('planb.sonido') !== '0'; } catch (e) {}
+const pintarSonido = () => { $('sonidoBtn').textContent = sonido ? '🔊' : '🔇'; };
+pintarSonido();
+$('sonidoBtn').addEventListener('click', () => {
+  sonido = !sonido; pintarSonido();
+  try { localStorage.setItem('planb.sonido', sonido ? '1' : '0'); } catch (e) {}
+});
+const tono = (notas, dur = .12) => notas.forEach((f, i) => setTimeout(() => bip(f, dur, 'triangle', .05), i * 110));
+
+// ======================= la escena =======================
+const isla = $('isla');
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+isla.prepend(renderer.domElement);
+$('cargando').remove();
+
+const escena = new THREE.Scene();
+escena.background = new THREE.Color('#bfe3f5');
+escena.fog = new THREE.Fog('#cfe9f5', 34, 70);
+const camara = new THREE.PerspectiveCamera(42, 1.6, .3, 160);
+
+const cielo = new THREE.HemisphereLight('#fff6e6', '#5f8f5a', 1.5);
+const sol = new THREE.DirectionalLight('#fff0d6', 2.6);
+sol.castShadow = true;
+sol.shadow.mapSize.set(2048, 2048);
+Object.assign(sol.shadow.camera, { left: -18, right: 18, top: 18, bottom: -18, near: 1, far: 80 });
+sol.shadow.bias = -.0006; sol.shadow.normalBias = .03;
+escena.add(cielo, sol, sol.target);
+
+const mats = new Map();
+const mat = (color, o = {}) => {
+  const k = color + JSON.stringify(o);
+  if (!mats.has(k)) mats.set(k, new THREE.MeshStandardMaterial(Object.assign({ color, roughness: .85, metalness: 0 }, o)));
+  return mats.get(k);
+};
+function malla(geo, material, x = 0, y = 0, z = 0, sombra = true) {
+  const m = new THREE.Mesh(geo, material);
+  m.position.set(x, y, z); m.castShadow = sombra; m.receiveShadow = true;
+  return m;
+}
+const caja = (w, h, d, material, x, y, z, radio = .05) =>
+  malla(new RoundedBoxGeometry(w, h, d, 2, Math.min(radio, w / 2, h / 2, d / 2) * .999), material, x, y, z);
+const azarFijo = (() => { let s = 4242; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
+function textura(w, h, pintar, rep) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  pintar(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  if (rep) t.repeat.set(rep[0], rep[1]);
+  return t;
+}
+
+// ---------- el terreno: el río corre de oeste (la montaña) a este (el mar), entre dos orillas ----------
+// El río ocupa z entre -3 y 3. Ari empieza en la orilla sur (z > 3, del lado de la cámara); el faro está al norte.
+const RIO = 3;
+const TX_PASTO = textura(256, 256, (c, w, h) => {
+  c.fillStyle = '#7cc062'; c.fillRect(0, 0, w, h);
+  for (let i = 0; i < 1500; i++) {
+    c.strokeStyle = ['#64a952', '#8ccf70', '#73b85c', '#9bd97c'][i % 4]; c.lineWidth = 1.2;
+    const x = azarFijo() * w, y = azarFijo() * h; c.beginPath(); c.moveTo(x, y); c.lineTo(x + (azarFijo() - .5) * 3, y - 3 - azarFijo() * 4); c.stroke();
+  }
+}, [30, 10]);
+const pasto = mat('#ffffff', { map: TX_PASTO, roughness: 1 });
+const tierra = mat('#9b7a52');
+escena.add(caja(100, 2, 30, pasto, 0, -1, RIO + 15, .02));
+escena.add(caja(100, 2, 30, pasto, 0, -1, -RIO - 15, .02));
+// los bordes del río: tierra
+escena.add(caja(100, 1.2, .5, tierra, 0, -.62, RIO + .1, .1));
+escena.add(caja(100, 1.2, .5, tierra, 0, -.62, -RIO - .1, .1));
+escena.add(caja(100, .3, 2 * RIO, mat('#6f5a40'), 0, -1.35, 0, .02));
+// el mar al este y la arena
+escena.add(caja(40, .2, 70, mat('#e9d6a4'), 62, -.15, 0, .02));
+const mar = malla(new THREE.PlaneGeometry(200, 200), mat('#2f8fd0', { roughness: .3, transparent: true, opacity: .9 }), 120, -.35, 0, false);
+mar.rotation.x = -Math.PI / 2; escena.add(mar);
+
+// el agua del río: una franja que se mueve. NIVEL_ALTO: no se puede cruzar; NIVEL_BAJO: aparece el vado.
+const NIVEL_ALTO = -.28, NIVEL_BAJO = -.78;
+const TX_AGUA = textura(256, 128, (c, w, h) => {
+  c.fillStyle = '#3c9ee0'; c.fillRect(0, 0, w, h);
+  for (let i = 0; i < 70; i++) {
+    c.strokeStyle = i % 3 ? 'rgba(255,255,255,.22)' : 'rgba(20,70,140,.25)'; c.lineWidth = 2;
+    const x = azarFijo() * w, y = azarFijo() * h; c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + 12, y - 3, x + 26, y); c.stroke();
+  }
+}, [16, 1.5]);
+const agua = malla(new THREE.PlaneGeometry(100, 2 * RIO), mat('#ffffff', { map: TX_AGUA, roughness: .25, transparent: true, opacity: .88 }), 0, NIVEL_ALTO, 0, false);
+agua.rotation.x = -Math.PI / 2; escena.add(agua);
+let nivelAgua = NIVEL_ALTO, nivelMeta = NIVEL_ALTO;
+
+// ---------- decorado ----------
+function arbol(x, z, s = 1) {
+  const g = new THREE.Group();
+  g.add(malla(new THREE.CylinderGeometry(.12 * s, .16 * s, 1.1 * s, 8), mat('#7a5534'), 0, .55 * s, 0));
+  const hojas = mat(['#3f8f4a', '#4f9d4f', '#367f44'][Math.floor(azarFijo() * 3)]);
+  g.add(malla(new THREE.SphereGeometry(.7 * s, 12, 10), hojas, 0, 1.4 * s, 0));
+  g.add(malla(new THREE.SphereGeometry(.5 * s, 12, 10), hojas, .35 * s, 1.85 * s, .1 * s));
+  g.position.set(x, 0, z); escena.add(g);
+}
+function palmera(x, z) {
+  const g = new THREE.Group();
+  for (let i = 0; i < 6; i++) g.add(malla(new THREE.CylinderGeometry(.13, .16, .5, 8), mat('#a07a4a'), Math.sin(i * .3) * .15, .25 + i * .45, 0));
+  for (let i = 0; i < 6; i++) {
+    const h = malla(new THREE.ConeGeometry(.22, 1.6, 4), mat('#3f9a4f'), 0, 0, 0);
+    h.position.set(Math.cos(i) * .6, 2.8, Math.sin(i) * .6); h.rotation.set(Math.PI / 2 + .5, 0, -i + Math.PI / 2); g.add(h);
+  }
+  g.position.set(x, 0, z); escena.add(g);
+}
+const LIBRE = (x, z) => Math.abs(z) > RIO + 1.2 && !(Math.abs(x) < 3 && Math.abs(z) < 9) && !(x > 4 && x < 15 && z > 3 && z < 9)
+  && !(x < -12 && x > -24 && z > 3 && z < 7) && !(x < -26 && x > -33 && z > 3 && z < 7) && !(x > -8 && x < -2 && z > 3 && z < 7);
+for (let i = 0; i < 70; i++) {
+  const x = -45 + azarFijo() * 85, z = (azarFijo() < .5 ? -1 : 1) * (RIO + 2 + azarFijo() * 24);
+  if (LIBRE(x, z) && !(x > -2 && x < 14 && z < -5 && z > -22)) (x > 30 ? palmera : arbol)(x, z, .8 + azarFijo() * .5);
+}
+for (let i = 0; i < 26; i++) {
+  const x = -45 + azarFijo() * 85, z = (azarFijo() < .5 ? -1 : 1) * (RIO + 1.5 + azarFijo() * 20);
+  if (LIBRE(x, z)) escena.add(malla(new THREE.DodecahedronGeometry(.25 + azarFijo() * .3), mat('#9aa0a8'), x, .1, z));
+}
+// la montaña río arriba
+const monte = malla(new THREE.ConeGeometry(16, 16, 9), mat('#6f8f6a'), -52, 7, -6);
+escena.add(monte, malla(new THREE.ConeGeometry(5, 4, 9), mat('#f2f4f6'), -52, 13.5, -6));
+// la colina y el faro apagado, al norte
+escena.add(malla(new THREE.SphereGeometry(7, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), pasto, 6, -1.5, -13.5));
+const faro = new THREE.Group();
+for (let i = 0; i < 6; i++) faro.add(malla(new THREE.CylinderGeometry(1 - i * .08, 1.05 - i * .08, 1, 18), mat(i % 2 ? '#f3f0ea' : '#d9473f'), 0, .5 + i, 0));
+faro.add(malla(new THREE.CylinderGeometry(.75, .75, .15, 18), mat('#30353f'), 0, 6.1, 0));
+const lampara = malla(new THREE.SphereGeometry(.5, 16, 12), mat('#6d7480', { roughness: .2 }), 0, 6.6, 0);
+faro.add(lampara, malla(new THREE.ConeGeometry(.8, .7, 18), mat('#30353f'), 0, 7.3, 0));
+faro.position.set(6, 5.3, -13.5); escena.add(faro);
+
+// ---------- el puente roto (x = 0) ----------
+const madera = mat('#a0743f'), maderaOscura = mat('#7a5530');
+for (const sx of [-1.2, 1.2]) for (const sz of [-1, 1]) {
+  escena.add(caja(.3, 1.6, .3, maderaOscura, sx, 0, sz * (RIO + .2)));
+}
+const puenteRoto = new THREE.Group();
+puenteRoto.add(caja(2.4, .18, 1.4, madera, 0, .02, RIO - .5), caja(2.4, .18, 1.4, madera, 0, .02, -RIO + .5));
+const astillas = caja(.9, .14, .5, madera, .5, -.6, .4); astillas.rotation.set(.4, .3, .5); puenteRoto.add(astillas);
+escena.add(puenteRoto);
+const puenteNuevo = new THREE.Group();
+for (let z = -RIO + .2; z <= RIO - .2; z += .42) {
+  const t = caja(2.4, .16, .36, mat(z % 1 < .5 ? '#8c6a3c' : '#a07a45'), 0, .02, z);
+  t.rotation.y = (azarFijo() - .5) * .08; puenteNuevo.add(t);
+}
+puenteNuevo.visible = false; escena.add(puenteNuevo);
+
+// ---------- el vado: piedras planas que aparecen cuando baja el río (x = 4) ----------
+const VADO_X = 4.5;
+const vado = new THREE.Group();
+for (let z = -RIO + .4; z < RIO; z += .75) {
+  const p = malla(new THREE.CylinderGeometry(.55, .62, .5, 9), mat('#a7a39a'), VADO_X + (azarFijo() - .5) * .3, -.9, z);
+  vado.add(p);
+}
+escena.add(vado);
+
+// ---------- las piedras río arriba (x entre -20 y -15) ----------
+// R = piedra seca, M = con musgo (resbala), . = agua. La fila 0 está pegada a la orilla sur; la 4, a la norte.
+const PIEDRAS = ['R.MR', 'RR.R', 'MRMR', 'RMRR', 'R.RM'];
+const COL_X = [-20, -18.6, -17.2, -15.8], FILA_Z = [2.25, 1.12, 0, -1.12, -2.25];
+const piedras = [];
+PIEDRAS.forEach((fila, r) => [...fila].forEach((ch, c) => {
+  if (ch === '.') return;
+  const g = new THREE.Group();
+  const roca = malla(new THREE.DodecahedronGeometry(.52, 0), mat(ch === 'M' ? '#7d8a6a' : '#9ea3a8'), 0, -.22, 0);
+  roca.scale.set(1, .55, 1); g.add(roca);
+  if (ch === 'M') for (let k = 0; k < 5; k++) g.add(malla(new THREE.SphereGeometry(.14, 8, 6), mat('#4f9a3a'), (azarFijo() - .5) * .6, .02, (azarFijo() - .5) * .6));
+  g.position.set(COL_X[c], 0, FILA_Z[r]);
+  g.userData = { roca: true, r, c, musgo: ch === 'M' };
+  escena.add(g); piedras.push(g);
+}));
+const piedraEn = (r, c) => piedras.find(p => p.userData.r === r && p.userData.c === c);
+const cartelPiedras = cartel('Paso de las piedras', '#2a3a4a'); cartelPiedras.position.set(-18, 1.6, 4.6); escena.add(cartelPiedras);
+
+// ---------- la vieja presa (x = -30) ----------
+const PRESA_X = -30;
+escena.add(caja(1.4, 2.2, 2 * RIO + 1, mat('#8d929a'), PRESA_X, -.2, 0, .08));
+const compuertasMalla = [];
+for (let k = 0; k < 4; k++) {
+  const cp = caja(.2, .8, 1, mat('#4a5262'), PRESA_X + .75, .2, -2.1 + k * 1.4);
+  compuertasMalla.push(cp); escena.add(cp);
+}
+const tablero = new THREE.Group();
+tablero.add(caja(.2, 1.1, .2, maderaOscura, 0, .55, 0), caja(1.2, .8, .2, mat('#5a6272'), 0, 1.35, 0));
+for (let k = 0; k < 4; k++) tablero.add(caja(.08, .35, .08, mat('#ffc53d'), -.42 + k * .28, 1.6, .12));
+tablero.position.set(PRESA_X + 1.5, 0, RIO + 1.4); escena.add(tablero);
+const cartelPresa = cartel('Presa vieja', '#2a3a4a'); cartelPresa.position.set(PRESA_X + 1.5, 2.3, RIO + 1.5); escena.add(cartelPresa);
+
+// ---------- el astillero: donde se arma la balsa (x = 10) ----------
+const ASTILLERO = new THREE.Vector3(10, 0, RIO + .9);
+escena.add(caja(2.2, .12, 1.4, madera, ASTILLERO.x, .06, ASTILLERO.z + .4));
+const cartelAst = cartel('Astillero', '#2a3a4a'); cartelAst.position.set(ASTILLERO.x + 1.4, 1.5, ASTILLERO.z + .9); escena.add(cartelAst);
+escena.add(caja(.12, 1.3, .12, maderaOscura, ASTILLERO.x + 1.4, .65, ASTILLERO.z + .95));
+
+// ---------- las cosas de la orilla ----------
+// tipo: para qué sirve en la balsa (flota, piso, atar, remar) o null si no sirve
+const COSAS = {
+  barriles:   { nombre: 'Barriles', ico: '🛢️', tipo: 'flota', x: 7, z: 5 },
+  troncos:    { nombre: 'Troncos', ico: '🪵', tipo: 'flota', x: 13.5, z: 7.2 },
+  tablas:     { nombre: 'Tablas', ico: '🟫', tipo: 'piso', x: 8.6, z: 7.6 },
+  puerta:     { nombre: 'Puerta vieja', ico: '🚪', tipo: 'piso', x: 15.5, z: 4.8 },
+  cuerda:     { nombre: 'Cuerda', ico: '🪢', tipo: 'atar', x: 11.8, z: 5.6 },
+  enredadera: { nombre: 'Enredadera', ico: '🌿', tipo: 'atar', x: 5.2, z: 7.8 },
+  remo:       { nombre: 'Remo', ico: '🛶', tipo: 'remar', x: 12.6, z: 9.2 },
+  palo:       { nombre: 'Palo largo', ico: '🦯', tipo: 'remar', x: 6.4, z: 9.6 },
+  piedra:     { nombre: 'Piedra grande', ico: '🪨', tipo: null, x: 9.8, z: 10.2 },
+  sombrilla:  { nombre: 'Sombrilla', ico: '⛱️', tipo: null, x: 14.6, z: 10 },
+};
+function modeloCosa(id) {
+  const g = new THREE.Group();
+  if (id === 'barriles') for (const dx of [-.3, .3]) g.add(malla(new THREE.CylinderGeometry(.28, .28, .7, 14), mat('#b5651d'), dx, .35, 0));
+  if (id === 'troncos') for (const dz of [-.25, 0, .25]) { const t = malla(new THREE.CylinderGeometry(.13, .13, 1.4, 10), mat('#8a5f35'), 0, .14 + (dz ? 0 : .2), dz); t.rotation.z = Math.PI / 2; g.add(t); }
+  if (id === 'tablas') for (let k = 0; k < 3; k++) g.add(caja(1.2, .06, .22, madera, 0, .04 + k * .07, (k - 1) * .05));
+  if (id === 'puerta') { const p = caja(.8, .08, 1.3, mat('#5f86a8'), 0, .05, 0); g.add(p, malla(new THREE.SphereGeometry(.05), mat('#ffc53d'), .3, .12, 0)); }
+  if (id === 'cuerda') { const t = malla(new THREE.TorusGeometry(.22, .06, 8, 18), mat('#d9b97a'), 0, .06, 0); t.rotation.x = Math.PI / 2; g.add(t); }
+  if (id === 'enredadera') for (let k = 0; k < 3; k++) { const t = malla(new THREE.TorusGeometry(.18 + k * .05, .04, 6, 14), mat('#3f9a3f'), 0, .05 + k * .03, 0); t.rotation.x = Math.PI / 2; g.add(t); }
+  if (id === 'remo') { const r = malla(new THREE.CylinderGeometry(.04, .04, 1.2, 8), madera, 0, .05, 0); r.rotation.z = Math.PI / 2; g.add(r, caja(.35, .05, .22, madera, .6, .05, 0)); }
+  if (id === 'palo') { const r = malla(new THREE.CylinderGeometry(.04, .05, 1.8, 8), mat('#7a5534'), 0, .05, 0); r.rotation.z = Math.PI / 2; g.add(r); }
+  if (id === 'piedra') { const p = malla(new THREE.DodecahedronGeometry(.4), mat('#8f949b'), 0, .3, 0); p.scale.y = .8; g.add(p); }
+  if (id === 'sombrilla') { g.add(malla(new THREE.CylinderGeometry(.03, .03, 1.4, 6), mat('#dddddd'), 0, .7, 0), malla(new THREE.ConeGeometry(.7, .3, 12), mat('#ff6b6b'), 0, 1.4, 0)); }
+  return g;
+}
+const mallasCosa = {};
+for (const id in COSAS) { const g = modeloCosa(id); g.position.set(COSAS[id].x, 0, COSAS[id].z); g.userData = { cosa: id }; escena.add(g); mallasCosa[id] = g; }
+
+// ---------- Bruno, el castor, y sus ramas ----------
+const CASTOR = new THREE.Vector3(-5, 0, RIO + 1.4);
+const castor = new THREE.Group();
+const marron = mat('#8b5a2b');
+const cuerpoC = malla(new THREE.CapsuleGeometry(.3, .35, 6, 14), marron, 0, .5, 0); cuerpoC.scale.set(1, 1, .9);
+const cabezaC = malla(new THREE.SphereGeometry(.25, 14, 12), marron, 0, 1.02, .08);
+const cola = caja(.4, .07, .6, mat('#4a3020'), 0, .12, -.45, .03); cola.rotation.x = -.3;
+castor.add(cuerpoC, cabezaC, cola,
+  malla(new THREE.SphereGeometry(.05), mat('#111111'), -.1, 1.1, .3), malla(new THREE.SphereGeometry(.05), mat('#111111'), .1, 1.1, .3),
+  caja(.12, .1, .03, mat('#fff6d8'), 0, .9, .32, .01), malla(new THREE.SphereGeometry(.06), mat('#3a2010'), 0, 1.0, .33),
+  malla(new THREE.SphereGeometry(.08), marron, -.2, 1.22, .02), malla(new THREE.SphereGeometry(.08), marron, .2, 1.22, .02));
+castor.position.copy(CASTOR); castor.rotation.y = Math.PI; castor.userData = { castor: true };
+escena.add(castor);
+// la casa (dique) de Bruno, rota
+const dique = new THREE.Group();
+for (let k = 0; k < 7; k++) { const r = malla(new THREE.CylinderGeometry(.06, .07, 1.2, 6), mat('#6b4a2a'), (k - 3) * .18, .25 + (k % 2) * .1, 0); r.rotation.z = Math.PI / 2 + (azarFijo() - .5) * .6; dique.add(r); }
+dique.position.set(-6.5, 0, RIO + .7); escena.add(dique);
+const RAMAS = [[-12, 9], [3, 12.5], [-1.5, 15]];
+const mallasRama = RAMAS.map(([x, z]) => {
+  const g = new THREE.Group();
+  const r = malla(new THREE.CylinderGeometry(.06, .09, 1.5, 7), mat('#6b4a2a'), 0, .1, 0); r.rotation.z = Math.PI / 2;
+  const h = malla(new THREE.SphereGeometry(.25, 8, 6), mat('#4f9d4f'), .65, .2, 0);
+  g.add(r, h); g.position.set(x, 0, z); g.visible = false; escena.add(g);
+  return g;
+});
+
+// ---------- Ari, aprendiz de exploración ----------
+const ari = new THREE.Group();
+const piel = mat('#e8b48a'), remera = mat('#2ec4a5'), short = mat('#3a4a6a');
+const cuerpoA = new THREE.Group();
+cuerpoA.add(malla(new THREE.CapsuleGeometry(.08, .32, 4, 10), short, -.1, .28, 0), malla(new THREE.CapsuleGeometry(.08, .32, 4, 10), short, .1, .28, 0));
+cuerpoA.add(malla(new THREE.CapsuleGeometry(.2, .32, 6, 14), remera, 0, .78, 0));
+cuerpoA.add(caja(.32, .38, .16, mat('#c9853a'), 0, .82, -.2, .05));
+cuerpoA.add(malla(new THREE.SphereGeometry(.21, 16, 14), piel, 0, 1.28, 0));
+cuerpoA.add(malla(new THREE.SphereGeometry(.035), mat('#222222'), -.07, 1.31, .19), malla(new THREE.SphereGeometry(.035), mat('#222222'), .07, 1.31, .19));
+cuerpoA.add(malla(new THREE.CylinderGeometry(.34, .34, .04, 18), mat('#d7b56d'), 0, 1.43, 0), malla(new THREE.CylinderGeometry(.18, .21, .18, 16), mat('#d7b56d'), 0, 1.53, 0));
+ari.add(cuerpoA);
+ari.add(malla(new THREE.CircleGeometry(.32, 18), mat('#000000', { transparent: true, opacity: .2 }), 0, .02, 0, false));
+ari.children[1].rotation.x = -Math.PI / 2;
+escena.add(ari);
+const INICIO = new THREE.Vector3(0, 0, 8);
+
+// ---------- la balsa (se arma con lo que se eligió) ----------
+const balsa = new THREE.Group(); balsa.visible = false; escena.add(balsa);
+function armarModeloBalsa(partes) {
+  balsa.clear();
+  const piezas = partes.map(id => { const g = modeloCosa(id); return g; });
+  piezas[0].position.set(0, -.15, 0); piezas[0].scale.set(1.4, 1, 1.4);
+  piezas[1].position.set(0, .2, 0); piezas[1].scale.set(1.5, 1, 1.5);
+  piezas[2].position.set(.5, .3, .4);
+  piezas[3].position.set(-.6, .35, -.3);
+  piezas.forEach(p => balsa.add(p));
+}
+
+function cartel(texto, color) {
+  const c = document.createElement('canvas'), g = c.getContext('2d');
+  g.font = '700 46px "Space Grotesk", system-ui, sans-serif';
+  const w = Math.ceil(g.measureText(texto).width + 50);
+  c.width = w; c.height = 76;
+  g.fillStyle = '#fff8e6'; g.beginPath(); g.roundRect(0, 0, w, 76, 20); g.fill();
+  g.strokeStyle = '#8a6a3a'; g.lineWidth = 5; g.beginPath(); g.roundRect(4, 4, w - 8, 68, 16); g.stroke();
+  g.font = '700 44px "Space Grotesk", system-ui, sans-serif';
+  g.fillStyle = color; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(texto, w / 2, 40);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const alto = .45, ancho = alto * w / 76;
+  return malla(new THREE.PlaneGeometry(ancho, alto), new THREE.MeshStandardMaterial({ map: t, roughness: .7 }), 0, 0, 0, false);
+}
+
+// ======================= moverse =======================
+const teclas = new Set();
+let destino = null;                       // a dónde camina Ari al tocar el piso
+let animando = null;                      // una animación que manda sobre el movimiento (saltos, balsa…)
+const VEL = 4.2;
+// por dónde se puede caminar: la isla, menos el río (salvo por el puente arreglado o el vado)
+function sePuede(x, z) {
+  if (x < -40 || x > 42 || z < -26 || z > 24) return false;
+  if (Math.abs(x - PRESA_X) < 1 && Math.abs(z) < RIO + .8) return false;
+  if (Math.abs(z) < RIO + .25) {
+    if (estado.puente && Math.abs(x) < 1.05) return true;
+    if (estado.vado && Math.abs(x - VADO_X) < .9) return true;
+    return false;
+  }
+  return true;
+}
+// sobre el río se camina por el puente (un poquito más alto) o por las piedras del vado (más abajo)
+function altura(x, z) {
+  if (Math.abs(z) >= RIO + .25) return 0;
+  if (estado.puente && Math.abs(x) < 1.05) return .1;
+  return -.62;
+}
+function mover(dt) {
+  if (animando || estado.enRoca || $('velo').hidden === false) return;
+  let dx = 0, dz = 0;
+  if (teclas.has('ArrowLeft') || teclas.has('a')) dx--;
+  if (teclas.has('ArrowRight') || teclas.has('d')) dx++;
+  if (teclas.has('ArrowUp') || teclas.has('w')) dz--;
+  if (teclas.has('ArrowDown') || teclas.has('s')) dz++;
+  if (dx || dz) destino = null;
+  else if (destino) {
+    const vx = destino.x - ari.position.x, vz = destino.z - ari.position.z, d = Math.hypot(vx, vz);
+    if (d < .12) destino = null; else { dx = vx / d; dz = vz / d; }
+  }
+  const largo = Math.hypot(dx, dz);
+  if (!largo) { caminar(false); return; }
+  dx /= largo; dz /= largo;
+  const nx = ari.position.x + dx * VEL * dt, nz = ari.position.z + dz * VEL * dt;
+  // si no puede pasar en diagonal, prueba deslizarse por un eje
+  if (sePuede(nx, nz)) ari.position.set(nx, 0, nz);
+  else if (sePuede(nx, ari.position.z)) ari.position.x = nx;
+  else if (sePuede(ari.position.x, nz)) ari.position.z = nz;
+  else { destino = null; if (Math.abs(ari.position.z) > RIO && Math.abs(nz) < RIO + .3) avisarRio(); }
+  ari.position.y = altura(ari.position.x, ari.position.z);
+  ari.rotation.y = Math.atan2(dx, dz);
+  caminar(true);
+}
+let paso = 0;
+function caminar(si) {
+  paso = si ? paso + .25 : 0;
+  cuerpoA.position.y = si ? Math.abs(Math.sin(paso)) * .07 : 0;
+  cuerpoA.rotation.z = si ? Math.sin(paso) * .05 : 0;
+}
+let ultimoAvisoRio = 0;
+function avisarRio() {
+  if (performance.now() - ultimoAvisoRio < 4000) return;
+  ultimoAvisoRio = performance.now();
+  aviso('El río está muy crecido para cruzar nadando. ¿Cómo más se podrá cruzar? 📓');
+}
+
+// ======================= lo que hay cerca =======================
+const cerca = (v, r) => Math.hypot(ari.position.x - v.x, ari.position.z - v.z) < r;
+let acciones = [];
+function revisarLugar() {
+  const p = ari.position;
+  // descubrir ideas para el cuaderno al acercarse a cada lugar
+  if (p.x > 4 && p.x < 17 && p.z > RIO && p.z < 11) descubrir('balsa', '💡 ¡Cuántas cosas en la orilla! ¿Se podrá armar una balsa?');
+  if (cerca(CASTOR, 3.2)) descubrir('castor', '💡 Ahí hay un castor. Los castores saben mucho de maderas…');
+  if (p.x < -13 && p.x > -24) descubrir('rocas', '💡 Río arriba hay piedras asomando del agua. ¿Se podrá cruzar saltando?');
+  if (p.x < -26) descubrir('presa', '💡 Una presa vieja con compuertas. ¿Y si bajo el agua del río?');
+  // juntar cosas de la orilla
+  for (const id in COSAS) {
+    const m = mallasCosa[id];
+    if (m.visible && cerca(m.position, .9)) {
+      m.visible = false; estado.mochila.push(id); pintarMochila();
+      bip(700, .08); aviso('Agarraste: ' + COSAS[id].ico + ' ' + COSAS[id].nombre);
+    }
+  }
+  // las ramas de Bruno
+  mallasRama.forEach(r => {
+    if (r.visible && cerca(r.position, 1)) {
+      r.visible = false; estado.ramas++; pintarMochila(); bip(760, .08);
+      aviso(estado.ramas < 3 ? '🌿 ¡Una rama de Bruno! Van ' + estado.ramas + ' de 3.' : '🌿 ¡Las 3 ramas! Llevaselas a Bruno.');
+    }
+  });
+  // las acciones posibles según dónde está
+  const a = [];
+  if (cerca(CASTOR, 2)) a.push(['🦫 Hablar con Bruno', hablarCastor]);
+  if (cerca(ASTILLERO, 2.4)) a.push(['🪵 Armar la balsa', abrirBalsa]);
+  if (cerca(tablero.position, 2.2)) a.push(['⚙️ Usar las compuertas', abrirPresa]);
+  if (estado.cruzando) a.push(['↺ Probar otra manera', reiniciar]);
+  if (p.x > -21.5 && p.x < -14.5 && p.z > RIO && p.z < RIO + 2.2) a.push(['🪨 Saltar a las piedras', () => aviso('Tocá una piedra de la primera fila para saltar. ¡Ojo con las que tienen musgo!')]);
+  ponerAcciones(a);
+  // ¿llegó a la otra orilla?
+  if (p.z < -RIO - .3 && !estado.cruzando) cruzo(estado.vado && Math.abs(p.x - VADO_X) < 3 ? 'presa' : 'castor');
+}
+function ponerAcciones(a) {
+  const clave = a.map(x => x[0]).join('|');
+  if (clave === acciones.map(x => x[0]).join('|')) return;
+  acciones = a;
+  $('accion').innerHTML = a.map((x, i) => '<button data-i="' + i + '">' + x[0] + (i === 0 ? '<kbd>E</kbd>' : '') + '</button>').join('');
+}
+$('accion').addEventListener('click', e => { const b = e.target.closest('button'); if (b) acciones[+b.dataset.i][1](); });
+
+function pintarMochila() {
+  $('mochila').innerHTML = estado.mochila.map(id => '<span title="' + COSAS[id].nombre + '">' + COSAS[id].ico + '</span>').join('') +
+    (estado.misionCastor && estado.ramas < 3 ? '<span>🌿 ' + estado.ramas + '/3</span>' : '');
+}
+let avisoT = 0;
+function aviso(t, ms = 3600) {
+  const a = $('aviso'); a.textContent = t; a.hidden = false;
+  a.style.animation = 'none'; void a.offsetWidth; a.style.animation = '';
+  clearTimeout(avisoT); avisoT = setTimeout(() => { a.hidden = true; }, ms);
+}
+function descubrir(id, texto) {
+  if (guardado.vistas[id]) return;
+  guardado.vistas[id] = true; guardar();
+  tono([660, 880]);
+  aviso(texto + ' (anotado en tu cuaderno)', 5000);
+  $('cuadernoBtn').animate([{ transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 500, iterations: 2 });
+}
+
+// ======================= ventanas =======================
+function ventana(html, alAbrir) {
+  $('ventana').innerHTML = html; $('velo').hidden = false;
+  teclas.clear(); destino = null; caminar(false);
+  if (alAbrir) alAbrir($('ventana'));
+  const b = $('ventana').querySelector('button'); if (b) b.focus({ preventScroll: true });
+}
+const cerrar = () => { $('velo').hidden = true; };
+
+// ---------- la historia ----------
+function intro() {
+  const n = Object.keys(guardado.hechas).length;
+  ventana('<span class="etiq">Capítulo 1 · El río</span><h2>El Faro Olvidado</h2>' +
+    '<p>En la isla Encrucijada las noches se volvieron oscuras: <b>el Gran Faro se apagó</b> y nadie sabe arreglarlo. ' +
+    'Ari, aprendiz de exploración, viene a encenderlo. Pero hay un problema: <b>la tormenta rompió el puente del río</b>.</p>' +
+    '<p>Para arreglar el faro hacen falta <b>4 engranajes</b>, y cada uno se gana cruzando el río <b>de una manera distinta</b>. ' +
+    'Explorá la orilla y mirá tu 📓 cuaderno: ahí se anotan las ideas.</p>' +
+    (n ? '<p class="nota">Ya cruzaste de ' + n + (n === 1 ? ' manera' : ' maneras') + '. ¡Buscá las que faltan!</p>' : '') +
+    '<div class="botones"><button class="boton" id="vamos">¡Vamos! →</button></div>',
+    v => v.querySelector('#vamos').addEventListener('click', cerrar));
+}
+
+// ---------- Bruno el castor (pedir ayuda) ----------
+function charla(quien, cara, texto, opciones, nota) {
+  ventana('<div class="charla"><div class="cara">' + cara + '</div><div class="dice"><b>' + quien + '</b>' + texto + '</div></div>' +
+    (nota ? '<p class="nota">' + nota + '</p>' : '') +
+    '<div class="opciones">' + opciones.map((o, i) => '<button data-i="' + i + '">' + o[0] + '</button>').join('') + '</div>',
+    v => v.querySelector('.opciones').addEventListener('click', e => { const b = e.target.closest('button'); if (b) opciones[+b.dataset.i][1](); }));
+}
+function hablarCastor() {
+  if (estado.puente) return charla('Bruno', '🦫', '¡El puente quedó como nuevo! Cruzá tranquilo, que lo hicimos con ramas de primera.', [['¡Gracias, Bruno! 👋', cerrar]]);
+  if (estado.misionCastor) {
+    if (estado.ramas < 3) return charla('Bruno', '🦫', '¿Encontraste mis ramas? Llevás ' + estado.ramas + ' de 3. Se volaron por toda la orilla, ¡fijate lejos del río!', [['Sigo buscando 🔍', cerrar]]);
+    return charla('Bruno', '🦫', '¡MIS RAMAS! ¡Gracias, gracias! Con esto arreglo mi casa… y con las que sobran, ¡te arreglo el puente! ¡Primos, a trabajar!', [['¡Genial! 🙌', () => { cerrar(); arreglarPuente(); }]]);
+  }
+  const inicio = () => charla('Bruno', '🦫', 'Grrr… ¿Quién anda ahí?', [
+    ['😤 ¡Correte! Necesito cruzar el río ya.', () => { estado.castorEnojado = true;
+      charla('Bruno', '🦫', '¡Qué modales! Así no le hablo a nadie. Hmpf.', [['Volver a empezar la charla', inicio]],
+        'Mmm… quizás esa no era la mejor manera de empezar.'); }],
+    ['🔨 ¿Me arreglás el puente?', () => charla('Bruno', '🦫', '¿Y por qué debería? Bastante tengo con lo mío…', [['Volver a empezar la charla', inicio]],
+        'Bruno parece preocupado. ¿Y si primero le preguntás qué le pasa?')],
+    ['🙂 Hola, ¿estás bien? Te veo preocupado.', () => charla('Bruno', '🦫',
+        'Snif… La tormenta se llevó las ramas de mi casa. Sin ellas, mi familia no tiene dónde dormir.', [
+        ['🌿 ¡Te ayudo a buscarlas!', () => {
+          estado.misionCastor = true; mallasRama.forEach(r => { r.visible = true; }); pintarMochila(); tono([520, 660, 780]);
+          charla('Bruno', '🦫', '¿De verdad? ¡Gracias! Se volaron 3 ramas grandes lejos del río. Si me las traés, con mis primos arreglamos el puente: ¡somos expertos en madera!',
+            [['¡Voy a buscarlas! 🔍', cerrar]], 'Preguntarle cómo estaba abrió la puerta. A veces, para que te ayuden, primero hay que escuchar.');
+        }],
+        ['Qué mala suerte. Bueno, chau.', () => charla('Bruno', '🦫', 'Chau…', [['Volver a empezar la charla', inicio]], 'Bruno necesita ayuda… ¿y si lo ayudás vos a él?')],
+      ])],
+  ]);
+  inicio();
+}
+function arreglarPuente() {
+  estado.puente = true; tono([523, 659, 784, 1046]);
+  // las tablas aparecen de a una, de una orilla a la otra
+  puenteRoto.visible = false; puenteNuevo.visible = true;
+  puenteNuevo.children.forEach((t, k) => { t.visible = false; setTimeout(() => { t.visible = true; bip(300 + k * 30, .05); }, 120 * k); });
+  castor.rotation.y = 0;
+  aviso('🌉 ¡Bruno y sus primos arreglaron el puente! Ahora sí: a cruzar.', 5000);
+}
+
+// ---------- la balsa (construir) ----------
+const HUECOS = [['flota', 'Para que flote'], ['piso', 'Para pararse arriba'], ['atar', 'Para atar todo'], ['remar', 'Para avanzar']];
+function abrirBalsa() {
+  if (!estado.mochila.length) {
+    return ventana('<span class="etiq">El astillero</span><h2>Para armar una balsa hacen falta cosas</h2>' +
+      '<p>Recorré la orilla y juntá lo que encuentres: caminando por encima de las cosas, Ari las agarra.</p>' +
+      '<div class="botones"><button class="boton" id="ok">Voy a buscar</button></div>', v => v.querySelector('#ok').addEventListener('click', cerrar));
+  }
+  const puesto = {};
+  let elegido = 'flota';
+  const pintar = v => {
+    v.querySelector('.huecos').innerHTML = HUECOS.map(([k, t]) =>
+      '<button class="hueco' + (puesto[k] ? ' lleno' : '') + (elegido === k ? ' elegido' : '') + '" data-k="' + k + '"><small>' + t + '</small>' +
+      '<b>' + (puesto[k] ? COSAS[puesto[k]].ico + ' ' + COSAS[puesto[k]].nombre : '—') + '</b></button>').join('');
+    v.querySelector('.cosas').innerHTML = estado.mochila.map(id =>
+      '<button class="cosa' + (Object.values(puesto).includes(id) ? ' usada' : '') + '" data-id="' + id + '">' + COSAS[id].ico + ' ' + COSAS[id].nombre + '</button>').join('');
+    v.querySelector('#botar').disabled = HUECOS.some(([k]) => !puesto[k]);
+  };
+  ventana('<span class="etiq">El astillero · Construir</span><h2>Armá tu balsa</h2>' +
+    '<p>Elegí un lugar de la balsa y después qué cosa poner. Pensá bien: <b>¿eso flota? ¿aguanta? ¿sirve para atar?</b></p>' +
+    '<div class="huecos"></div><div class="cosas"></div>' +
+    '<p class="nota">¿Te faltan cosas? Hay más por la orilla.</p>' +
+    '<div class="botones"><button class="boton" id="botar" disabled>🛶 ¡Al agua!</button><button class="boton gris" id="salir">Seguir buscando</button></div>', v => {
+    pintar(v);
+    v.querySelector('.huecos').addEventListener('click', e => { const b = e.target.closest('.hueco'); if (b) { elegido = b.dataset.k; pintar(v); } });
+    v.querySelector('.cosas').addEventListener('click', e => {
+      const b = e.target.closest('.cosa'); if (!b) return;
+      const id = b.dataset.id;
+      for (const k in puesto) if (puesto[k] === id) delete puesto[k];
+      puesto[elegido] = id;
+      const sig = HUECOS.find(([k]) => !puesto[k]); if (sig) elegido = sig[0];
+      bip(600, .05); pintar(v);
+    });
+    v.querySelector('#salir').addEventListener('click', cerrar);
+    v.querySelector('#botar').addEventListener('click', () => { cerrar(); botarBalsa(HUECOS.map(([k]) => puesto[k])); });
+  });
+}
+// por qué falla una balsa (o null si está bien armada). Falla siempre por lo mismo: nunca por mala suerte.
+function fallaBalsa(partes) {
+  const [flota, piso, atar, remar] = partes.map(id => COSAS[id]);
+  const mal = (c, k) => c.tipo !== k;
+  if (mal(flota, 'flota')) return flota.tipo === null && flota.nombre === 'Piedra grande'
+    ? '¡La piedra no flota! La balsa se hundió en el medio del río.'
+    : (flota.nombre + ' no alcanza para que flote todo: la balsa se hundió en el medio del río.');
+  if (mal(atar, 'atar')) return 'Con ' + atar.nombre.toLowerCase() + ' no se puede atar nada: en el medio del río, las piezas se separaron.';
+  if (mal(piso, 'piso')) return 'Sobre ' + piso.nombre.toLowerCase() + ' no se puede estar parado: Ari perdió el equilibrio y ¡splash!';
+  if (mal(remar, 'remar')) return 'Con ' + remar.nombre.toLowerCase() + ' no se puede remar: la corriente se llevó la balsa río abajo.';
+  return null;
+}
+function botarBalsa(partes) {
+  const falla = fallaBalsa(partes);
+  armarModeloBalsa(partes);
+  balsa.visible = true; balsa.position.set(ASTILLERO.x, NIVEL_ALTO + .05, RIO - .6); balsa.rotation.set(0, 0, 0);
+  partes.forEach(id => { estado.mochila.splice(estado.mochila.indexOf(id), 1); });
+  pintarMochila();
+  ari.position.set(ASTILLERO.x, .35, RIO - .6); ari.rotation.y = Math.PI;
+  const desde = RIO - .6, hasta = falla ? 0 : -RIO + .3, dur = falla ? 2200 : 3800;
+  animando = { t0: performance.now(), dur, cada: (f, t) => {
+    const z = desde + (hasta - desde) * f;
+    balsa.position.z = z; balsa.position.y = nivelAgua + .05 + Math.sin(t / 250) * .04;
+    balsa.position.x = ASTILLERO.x + (falla ? f * 1.5 : 0);
+    balsa.rotation.z = Math.sin(t / 400) * .05;
+    ari.position.set(balsa.position.x, balsa.position.y + .3, z);
+  }, fin: () => {
+    if (!falla) {
+      balsa.position.z = -RIO + .3;
+      ari.position.set(ASTILLERO.x, 0, -RIO - .8); balsa.visible = true;
+      guardado.balsa = partes; return cruzo('balsa');
+    }
+    // se desarma: las piezas se separan y se hunden, y Ari vuelve nadando
+    bip(160, .4, 'square', .05);
+    const piezas = [...balsa.children];
+    animando = { t0: performance.now(), dur: 1800, cada: f => {
+      piezas.forEach((p, i) => { p.position.x += (i % 2 ? .02 : -.02); p.position.z += (i < 2 ? .015 : -.015); p.position.y -= .01; p.rotation.z += .02; });
+      ari.position.set(ASTILLERO.x + 1.5, nivelAgua - .3 + Math.sin(f * 20) * .05, 0 + f * (RIO + .6));
+    }, fin: () => {
+      balsa.visible = false;
+      partes.forEach(id => estado.mochila.push(id)); pintarMochila();
+      ari.position.set(ASTILLERO.x + 1.5, 0, RIO + 1);
+      ventana('<span class="etiq">¡Splash!</span><h2>Esta idea no funcionó como esperaba…</h2>' +
+        '<p><b>' + falla + '</b></p><p>Ari volvió nadando a la orilla: con la ropa empapada, pero bien. Las cosas quedaron en la mochila.</p>' +
+        '<p class="nota">No pasa nada: ahora sabés algo nuevo. ¿Cambiamos una pieza o probamos otro enfoque?</p>' +
+        '<div class="botones"><button class="boton" id="otra">🔧 Cambiar piezas</button><button class="boton gris" id="cerrar">Probar otro enfoque</button></div>', v => {
+        v.querySelector('#otra').addEventListener('click', () => { cerrar(); abrirBalsa(); });
+        v.querySelector('#cerrar').addEventListener('click', cerrar);
+      });
+    } };
+  } };
+}
+
+// ---------- las piedras (explorar) ----------
+function saltarA(destinoPiedra) {
+  const desde = ari.position.clone();
+  const hacia = destinoPiedra ? destinoPiedra.position.clone().setY(.08) : new THREE.Vector3(ari.position.x, 0, -RIO - .9);
+  ari.rotation.y = Math.atan2(hacia.x - desde.x, hacia.z - desde.z);
+  bip(520, .07);
+  animando = { t0: performance.now(), dur: 420, cada: f => {
+    ari.position.lerpVectors(desde, hacia, f); ari.position.y += Math.sin(f * Math.PI) * .7;
+  }, fin: () => {
+    if (!destinoPiedra) { estado.enRoca = null; return cruzo('rocas'); }
+    const u = destinoPiedra.userData;
+    if (u.musgo) {
+      // resbala: se cae al agua y vuelve a la orilla
+      bip(170, .35, 'square', .05);
+      animando = { t0: performance.now(), dur: 900, cada: f => { ari.position.y = .08 - f * .9; ari.rotation.z = f * 1.2; }, fin: () => {
+        ari.rotation.z = 0; estado.enRoca = null; ari.position.set(-18, 0, RIO + 1.2);
+        aviso('¡Uy! Esa piedra tenía musgo y resbalaba. Ari volvió a la orilla: mirá bien las piedras antes de saltar.', 5000);
+      } };
+      return;
+    }
+    estado.enRoca = { r: u.r, c: u.c };
+    aviso(u.r === PIEDRAS.length - 1 ? '¡Ya casi! Tocá la orilla de enfrente para saltar.' : 'Bien. ¿A qué piedra seguís? Solo se puede saltar a una pegada (adelante, atrás o a los costados).');
+  } };
+}
+function tocarPiedra(p) {
+  if (animando) return;
+  const u = p.userData, e = estado.enRoca;
+  if (!e) {
+    if (u.r !== 0) return aviso('Primero saltá a una piedra de la fila de tu orilla.');
+    if (!(ari.position.x > -21.5 && ari.position.x < -14.5 && ari.position.z > RIO && ari.position.z < RIO + 3)) return aviso('Acercate a la orilla, frente a las piedras.');
+    return saltarA(p);
+  }
+  if (Math.abs(u.r - e.r) + Math.abs(u.c - e.c) !== 1) return aviso('Esa está muy lejos: solo podés saltar a una piedra pegada.');
+  saltarA(p);
+}
+
+// ---------- la presa (razonar) ----------
+// El río está en el nivel 12. Para cruzar a pie tiene que quedar entre 2 y 4: con menos, los peces se quedan sin agua.
+const BASE = 12, COMPUERTAS = [2, 3, 5, 6], MIN = 2, MAX = 4;
+function abrirPresa() {
+  const abiertas = new Set();
+  const nivelCon = s => BASE - [...s].reduce((a, k) => a + COMPUERTAS[k], 0);
+  let nivelVisto = estado.presaCombo ? nivelCon(new Set(estado.presaCombo)) : BASE;
+  const pintar = v => {
+    v.querySelector('.compuertas').innerHTML = COMPUERTAS.map((n, k) =>
+      '<button class="compuerta' + (abiertas.has(k) ? ' abierta' : '') + '" data-k="' + k + '"><b>−' + n + '</b><small>' + (abiertas.has(k) ? 'abierta' : 'cerrada') + '</small></button>').join('');
+    v.querySelector('.agua').style.height = Math.max(0, nivelVisto) / BASE * 100 + '%';
+    v.querySelector('.num').textContent = nivelVisto;
+    v.querySelector('.combos').textContent = guardado.combos.length ? 'Combinaciones que funcionaron: ' + guardado.combos.join(' · ') : '';
+  };
+  ventana('<span class="etiq">La presa vieja · Razonar</span><h2>Bajá el río justo lo necesario</h2>' +
+    '<p>El río está en el nivel <b>' + BASE + '</b>. Cada compuerta abierta lo baja un poco. Para cruzar a pie tiene que quedar <b>entre ' + MIN + ' y ' + MAX + '</b>: ' +
+    'si baja de más, los peces se quedan sin agua. <b>Pensá la cuenta antes de abrir.</b></p>' +
+    '<div class="presa"><div class="nivel"><div class="franja" style="bottom:' + (MIN / BASE * 100) + '%; height:' + ((MAX - MIN) / BASE * 100) + '%"></div>' +
+    '<div class="agua"></div><div class="num"></div></div>' +
+    '<div><div class="compuertas"></div><p class="combos"></p><p id="resPresa" style="margin:8px 0 0"></p></div></div>' +
+    '<div class="botones"><button class="boton" id="abrir">Abrir las compuertas elegidas</button><button class="boton gris" id="salir">Salir</button></div>', v => {
+    pintar(v);
+    v.querySelector('.compuertas').addEventListener('click', e => {
+      const b = e.target.closest('.compuerta'); if (!b) return;
+      const k = +b.dataset.k; abiertas.has(k) ? abiertas.delete(k) : abiertas.add(k); bip(400 + k * 80, .05); pintar(v);
+    });
+    v.querySelector('#salir').addEventListener('click', cerrar);
+    v.querySelector('#abrir').addEventListener('click', () => {
+      if (!abiertas.size) { v.querySelector('#resPresa').textContent = 'Elegí al menos una compuerta.'; return; }
+      nivelVisto = nivelCon(abiertas); pintar(v);
+      const cuenta = BASE + ' − ' + [...abiertas].sort().map(k => COMPUERTAS[k]).join(' − ') + ' = ' + nivelVisto;
+      const res = v.querySelector('#resPresa');
+      if (nivelVisto > MAX) { res.innerHTML = '🌊 <b>' + cuenta + '</b>. El río sigue muy alto para cruzar. ¿Qué otra compuerta abrirías?'; bip(200, .2, 'square', .03); return; }
+      if (nivelVisto < MIN) { res.innerHTML = '🐟 <b>' + cuenta + '</b>. ¡Bajó de más! Los peces se quedan sin agua. Cerrá alguna.'; bip(200, .2, 'square', .03); return; }
+      const combo = [...abiertas].sort().map(k => COMPUERTAS[k]).join('+');
+      const nueva = !guardado.combos.includes(combo);
+      if (nueva) { guardado.combos.push(combo); guardar(); }
+      estado.presaCombo = [...abiertas];
+      bajarRio(abiertas);
+      tono([523, 659, 784]);
+      res.innerHTML = '✅ <b>' + cuenta + '</b>. ¡Justo! El río bajó y apareció un vado de piedras cerca del puente.' +
+        (guardado.combos.length < 4 ? '<br><span style="color:var(--lima)">Desafío extra: hay ' + 4 + ' combinaciones que funcionan. Llevás ' + guardado.combos.length + '. ¿Encontrás otra?</span>' : '<br><span style="color:var(--lima)">¡Encontraste las 4 combinaciones! 🧠</span>');
+      v.querySelector('#salir').textContent = 'Ir a cruzar →';
+      abiertas.clear(); pintar(v);
+    });
+  });
+}
+function bajarRio(abiertas) {
+  estado.vado = true; nivelMeta = NIVEL_BAJO;
+  compuertasMalla.forEach((cp, k) => { cp.position.y = abiertas.has(k) ? .9 : .2; });
+  aviso('🌊 El río bajó: apareció un vado de piedras cerca del puente.', 5000);
+}
+
+// ======================= cruzar =======================
+function cruzo(manera) {
+  if (estado.cruzando) return;
+  estado.cruzando = true;
+  const nueva = !guardado.hechas[manera];
+  guardado.hechas[manera] = true;
+  if (!guardado.primera) guardado.primera = manera;
+  guardado.vistas[manera] = true;
+  guardar(); pintarEngranajes();
+  tono([523, 659, 784, 1046, 1318], .16);
+  if (nueva) enviarPuntos(150);
+  const m = MANERAS[manera], n = Object.keys(guardado.hechas).length;
+  const faltan = ORDEN.filter(k => !guardado.hechas[k]);
+  setTimeout(() => ventana('<span class="etiq">' + m.ico + ' ' + m.estilo + '</span><h2>¡Cruzaste el río!</h2>' +
+    '<p>Esta vez, Ari <b>' + m.diario + '</b></p>' +
+    (nueva ? '<p class="nota">⚙ ¡Ganaste un engranaje para el faro! Llevás <b>' + n + ' de 4</b>.</p>' : '<p class="nota">Esta manera ya la conocías. ¡Probá una distinta para ganar otro engranaje!</p>') +
+    (faltan.length ? '<p>Todas las maneras cruzan el río, ninguna está mal. ¿Cómo más se podría haber cruzado? Mirá tu cuaderno: te ' + (faltan.length === 1 ? 'falta 1 idea' : 'faltan ' + faltan.length + ' ideas') + '.</p>'
+                   : '<p><b>¡Cruzaste de las 4 maneras!</b> Construiste, pediste ayuda, exploraste y razonaste. El faro ya tiene todos sus engranajes…</p>') +
+    '<div class="botones">' + (faltan.length ? '<button class="boton" id="otra">↺ Probar otra manera</button>' : '<button class="boton" id="faroBtn">🗼 Prender el faro</button>') +
+    '<button class="boton gris" id="diario">📰 Ver el diario</button></div>', v => {
+    const b = v.querySelector('#otra') || v.querySelector('#faroBtn');
+    b.addEventListener('click', () => { cerrar(); if (faltan.length) reiniciar(); else prenderFaro(); });
+    v.querySelector('#diario').addEventListener('click', verDiario);
+  }), 500);
+}
+function prenderFaro() {
+  guardado.faro = true; guardar();
+  lampara.material = mat('#fff4b0', { emissive: '#ffd85a', emissiveIntensity: 2.5, roughness: .2 });
+  if (!faro.userData.luz) { const l = new THREE.PointLight('#ffd85a', 30, 30, 1.6); l.position.set(0, 6.6, 0); faro.add(l); faro.userData.luz = l; }
+  tono([392, 523, 659, 784, 1046, 1318], .25);
+  camaraMira = faro.position; setTimeout(() => { camaraMira = null; }, 4000);
+  aviso('🗼 ¡El Gran Faro volvió a brillar! La isla Encrucijada tiene luz otra vez.', 7000);
+  setTimeout(() => ventana('<span class="etiq">Fin del capítulo 1</span><h2>¡La isla tiene luz!</h2>' +
+    '<p>Ari cruzó el río de 4 maneras distintas y el faro volvió a brillar. Pero desde arriba de la colina se ve algo raro en el bosque del norte…</p>' +
+    '<p class="nota">Capítulo 2: próximamente. Mientras tanto, compará tu diario con el de un compañero: ¿cruzaron igual?</p>' +
+    '<div class="botones"><button class="boton" id="d">📰 Ver el diario</button><button class="boton gris" id="c">Seguir paseando</button></div>', v => {
+    v.querySelector('#d').addEventListener('click', verDiario);
+    v.querySelector('#c').addEventListener('click', cerrar);
+  }), 4500);
+}
+function reiniciar() {
+  estado = estadoInicial();
+  ari.position.copy(INICIO); ari.rotation.set(0, Math.PI, 0); destino = null;
+  puenteRoto.visible = true; puenteNuevo.visible = false; castor.rotation.y = Math.PI;
+  nivelMeta = NIVEL_ALTO; compuertasMalla.forEach(cp => { cp.position.y = .2; });
+  balsa.visible = false;
+  for (const id in mallasCosa) mallasCosa[id].visible = true;
+  mallasRama.forEach(r => { r.visible = false; });
+  pintarMochila(); ponerAcciones([]);
+}
+function pintarEngranajes() {
+  const n = Object.keys(guardado.hechas).length;
+  $('engranajes').textContent = '⚙ ' + n + '/4';
+}
+function prenderFaroQuieto() {
+  if (faro.userData.luz) return;
+  lampara.material = mat('#fff4b0', { emissive: '#ffd85a', emissiveIntensity: 2.5, roughness: .2 });
+  const l = new THREE.PointLight('#ffd85a', 30, 30, 1.6); l.position.set(0, 6.6, 0); faro.add(l); faro.userData.luz = l;
+}
+
+// los puntos suman al ranking general, como los otros juegos de Plan B
+function enviarPuntos(p) {
+  if (!sesion || !sesion.token) return;
+  fetch(API + '/resultado', { method: 'POST', headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ token: sesion.token, r: { app: 'planb', m: 'p', p, ms: Math.min(3600000, Math.round(performance.now())), lg: 'es' } }) }).catch(() => {});
+}
+
+// ======================= el cuaderno de ideas =======================
+// Un mapa mental: en el centro el problema; alrededor, las ideas (con "?" hasta que se descubren).
+function verCuaderno() {
+  const pos = [[120, 70], [480, 70], [120, 290], [480, 290]];
+  const nodos = ORDEN.map((k, i) => {
+    const m = MANERAS[k], [x, y] = pos[i], visto = guardado.vistas[k], hecho = guardado.hechas[k];
+    const color = hecho ? '#2f9e6a' : visto ? '#c9862a' : '#9a8f7a';
+    const partir = (t, n) => { const w = t.split(' '), l = ['']; w.forEach(p => { if ((l[l.length - 1] + ' ' + p).length > n) l.push(p); else l[l.length - 1] = (l[l.length - 1] + ' ' + p).trim(); }); return l; };
+    const lineas = visto ? partir(m.titulo, 22) : partir(m.pista, 24);
+    return '<line x1="300" y1="180" x2="' + x + '" y2="' + y + '" stroke="' + color + '" stroke-width="3" stroke-dasharray="' + (visto ? '0' : '6 6') + '"/>' +
+      '<g transform="translate(' + x + ' ' + y + ')">' +
+      '<rect x="-108" y="-46" width="216" height="92" rx="16" fill="#fffdf6" stroke="' + color + '" stroke-width="3"/>' +
+      '<text x="-92" y="-18" font-size="22">' + (visto ? m.ico : '❓') + '</text>' +
+      '<text x="-60" y="-19" font-size="12" font-weight="700" fill="' + color + '" letter-spacing="1">' + (visto ? m.estilo.toUpperCase() : 'IDEA ESCONDIDA') + '</text>' +
+      (hecho ? '<text x="78" y="-16" font-size="20">⚙</text>' : '') +
+      lineas.map((l, j) => '<text x="-92" y="' + (8 + j * 17) + '" font-size="' + (visto ? 15 : 13.5) + '" font-weight="' + (visto ? 600 : 500) + '" fill="#3a3022"' + (visto ? '' : ' font-style="italic"') + '>' + esc(l) + '</text>').join('') +
+      '</g>';
+  }).join('');
+  const n = Object.keys(guardado.hechas).length;
+  ventana('<span class="etiq">📓 Cuaderno de ideas</span><h2>¿Cómo cruzo el río?</h2>' +
+    '<div class="cuaderno"><svg viewBox="0 0 600 360" role="img" aria-label="Mapa de ideas para cruzar el río">' + nodos +
+    '<g transform="translate(300 180)"><ellipse rx="92" ry="40" fill="#ffd56a" stroke="#c9862a" stroke-width="3"/>' +
+    '<text text-anchor="middle" y="-4" font-size="16" font-weight="700" fill="#3a3022">¿Cómo cruzo</text><text text-anchor="middle" y="16" font-size="16" font-weight="700" fill="#3a3022">el río?</text></g>' +
+    '</svg></div>' +
+    '<p style="margin-top:12px">' + (n === 4 ? '¡Probaste las 4 ideas! Construir, pedir ayuda, explorar y razonar: todas sirven.' :
+      'Explorá la isla para descubrir ideas. Cada idea que probás te da un ⚙ engranaje. Llevás <b>' + n + ' de 4</b>.') + '</p>' +
+    '<div class="botones"><button class="boton" id="ok">Cerrar</button></div>', v => v.querySelector('#ok').addEventListener('click', cerrar));
+}
+
+// ======================= el diario del pueblo =======================
+function verDiario() {
+  const hechas = ORDEN.filter(k => guardado.hechas[k]);
+  const nombre = sesion && sesion.apodo ? sesion.apodo : 'Ari';
+  const titulares = {
+    balsa: '¡Cruzó el río en una balsa hecha a mano!', castor: 'Una charla con un castor salvó el puente',
+    rocas: 'Aventura río arriba: ¡cruzó saltando piedras!', presa: 'Misterio resuelto: alguien hizo andar la vieja presa',
+  };
+  const titular = hechas.length === 4 ? '¡Cuatro maneras de cruzar un río: el faro vuelve a brillar!' : guardado.primera ? titulares[guardado.primera] : 'El puente del río sigue roto';
+  const piezas = guardado.balsa ? ' (' + guardado.balsa.map(id => COSAS[id].nombre.toLowerCase()).join(', ') + ')' : '';
+  ventana('<div class="diario"><div class="cabecera"><small>Isla Encrucijada · Edición ' + (hechas.length === 4 ? 'especial' : 'del día') + '</small><b>El Eco del Faro</b></div>' +
+    '<h3>' + esc(titular) + '</h3>' +
+    (hechas.length ? '<p>Según pudo saber este diario, ' + esc(nombre) + ', aprendiz de exploración, cruzó el río roto así:</p><ul>' +
+      hechas.map(k => '<li>' + MANERAS[k].ico + ' <b>' + MANERAS[k].estilo + ':</b> ' + MANERAS[k].diario + (k === 'balsa' ? piezas : '') + '</li>').join('') + '</ul>' +
+      (hechas.length < 4 ? '<p class="vacia">Los vecinos se preguntan: ¿habrá otras maneras de cruzar?</p>' : '<p>Los vecinos dicen que nunca vieron a alguien resolver un problema de tantas formas distintas.</p>')
+      : '<p class="vacia">Todavía nadie cruzó el río. Este diario espera noticias…</p>') +
+    '</div><div class="botones"><button class="boton" id="ok">Cerrar</button></div>', v => v.querySelector('#ok').addEventListener('click', cerrar));
+}
+$('cuadernoBtn').addEventListener('click', verCuaderno);
+$('diarioBtn').addEventListener('click', verDiario);
+
+// ======================= tocar y teclado =======================
+const rayo = new THREE.Raycaster(), puntero = new THREE.Vector2(), pisoPlano = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+renderer.domElement.addEventListener('pointerdown', e => {
+  if (animando) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  puntero.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  rayo.setFromCamera(puntero, camara);
+  const hit = rayo.intersectObjects([...piedras, castor, tablero], true)[0];
+  if (hit) {
+    let o = hit.object; while (o.parent && !o.userData.roca && !o.userData.castor && o !== tablero) o = o.parent;
+    if (o.userData.roca) return tocarPiedra(o);
+    if (o.userData.castor) { if (cerca(CASTOR, 2.2)) return hablarCastor(); destino = new THREE.Vector3(CASTOR.x, 0, CASTOR.z + 1.2); return; }
+    if (o === tablero) { if (cerca(tablero.position, 2.4)) return abrirPresa(); destino = tablero.position.clone().add(new THREE.Vector3(0, 0, 1)); return; }
+  }
+  const p = new THREE.Vector3();
+  if (!rayo.ray.intersectPlane(pisoPlano, p)) return;
+  // en las piedras: tocar la orilla de enfrente salta a ella (desde la última fila)
+  if (estado.enRoca) {
+    if (p.z < -RIO && estado.enRoca.r === PIEDRAS.length - 1) return saltarA(null);
+    return aviso('Tocá una piedra pegada para seguir saltando.');
+  }
+  destino = p;
+});
+const MAPA_TECLAS = { ArrowUp: 1, ArrowDown: 1, ArrowLeft: 1, ArrowRight: 1, w: 1, a: 1, s: 1, d: 1 };
+window.addEventListener('keydown', e => {
+  if (!$('velo').hidden) { if (e.key === 'Escape' && !$('ventana').querySelector('.opciones')) cerrar(); return; }
+  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+  if (k === 'e' || k === 'Enter') { if (acciones[0]) { e.preventDefault(); acciones[0][1](); } return; }
+  if (k === 'c') return verCuaderno();
+  if (!MAPA_TECLAS[k]) return;
+  e.preventDefault();
+  // en las piedras, las flechas saltan a la piedra de al lado
+  if (estado.enRoca) {
+    if (animando) return;
+    const { r, c } = estado.enRoca;
+    const [nr, nc] = { ArrowUp: [r + 1, c], w: [r + 1, c], ArrowDown: [r - 1, c], s: [r - 1, c], ArrowLeft: [r, c - 1], a: [r, c - 1], ArrowRight: [r, c + 1], d: [r, c + 1] }[k];
+    if (nr === PIEDRAS.length) return saltarA(null);
+    const p = piedraEn(nr, nc);
+    if (p) saltarA(p); else aviso(nr < 0 ? 'Para volver, tocá la piedra de atrás.' : 'Ahí no hay piedra: es agua.');
+    return;
+  }
+  teclas.add(k);
+});
+window.addEventListener('keyup', e => teclas.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key));
+window.addEventListener('blur', () => teclas.clear());
+
+// ======================= el bucle =======================
+let camaraMira = null;
+const camPos = new THREE.Vector3(), camObj = new THREE.Vector3();
+function ajustar() {
+  const w = isla.clientWidth, h = isla.clientHeight;
+  renderer.setSize(w, h, false); camara.aspect = w / h;
+  camara.fov = w < 600 ? 55 : 42;
+  camara.updateProjectionMatrix();
+}
+new ResizeObserver(ajustar).observe(isla);
+let antes = performance.now();
+function cuadro(t) {
+  avanzarJuego(t);
+  requestAnimationFrame(cuadro);
+}
+function avanzarJuego(t) {
+  const dt = Math.max(0, Math.min(.05, (t - antes) / 1000)); antes = Math.max(antes, t);
+  if (animando) {
+    const f = Math.min(1, (t - animando.t0) / animando.dur);
+    const a = animando; a.cada(f, t);
+    if (f >= 1 && animando === a) { animando = null; a.fin(); }
+  }
+  mover(dt);
+  if (!animando && !estado.enRoca && $('velo').hidden) revisarLugar();
+  // el agua corre y sube o baja despacio
+  TX_AGUA.offset.x -= dt * .12;
+  nivelAgua += (nivelMeta - nivelAgua) * Math.min(1, dt * 1.5);
+  agua.position.y = nivelAgua;
+  vado.visible = nivelAgua < -.55;
+  // Bruno se mueve un poquito; el castor mira a Ari si está cerca
+  castor.position.y = Math.abs(Math.sin(t / 500)) * .03;
+  // la cámara sigue a Ari desde arriba y atrás
+  const objetivo = camaraMira || ari.position;
+  const lejos = isla.clientWidth < 600 ? 1.25 : 1;
+  camObj.lerp(new THREE.Vector3(objetivo.x, objetivo === ari.position ? .8 : 4, objetivo.z - (objetivo === ari.position ? 1.5 : 0)), Math.min(1, dt * 4));
+  camPos.lerp(new THREE.Vector3(objetivo.x, (objetivo === ari.position ? 9.5 : 14) * lejos, objetivo.z + (objetivo === ari.position ? 10.5 : 18) * lejos), Math.min(1, dt * 3));
+  camara.position.copy(camPos); camara.lookAt(camObj);
+  sol.position.set(ari.position.x - 10, 22, ari.position.z + 8); sol.target.position.copy(ari.position);
+  renderer.render(escena, camara);
+}
+
+// ======================= arrancar =======================
+estado = estadoInicial();
+reiniciar();
+if (guardado.faro) prenderFaroQuieto();
+pintarEngranajes();
+camPos.set(INICIO.x, 9.5, INICIO.z + 10.5); camObj.set(INICIO.x, .8, INICIO.z - 1.5);
+ajustar();
+requestAnimationFrame(cuadro);
+intro();
+// para probar desde la consola
+// avanzar(ms) corre el juego a mano, aunque la pestaña esté en segundo plano
+window.faro = { estado: () => estado, guardado: () => guardado, ari, piedras, cruzo, reiniciar, tocarPiedra,
+  avanzar(ms = 1000) { let t = Math.max(antes, performance.now()); for (let k = 0; k < ms; k += 33) avanzarJuego(t += 33); } };
+</script>
+</body>
+</html>
