@@ -423,6 +423,17 @@
           <span class="boton verde chico">Investigar <span class="flecha">▶</span></span>
         </div>
       </a>
+      <a class="juego" href="plan-b.html" id="linkPlanB" style="--c:radial-gradient(circle at 40% 15%, #0f3d3a, #12151d 70%); --a:#2ee6c5">
+        <div class="portada" aria-hidden="true">
+          <span class="tema">Muchas maneras</span>
+          <div class="teclas"><span style="--k:#2ee6c5">+</span><span style="--k:#b8ff3c">8</span><span style="--k:#ffc53d">×</span></div>
+        </div>
+        <div class="cuerpo">
+          <h3>Plan B</h3>
+          <p>Siempre hay otra manera: encontrá varias formas distintas de formar cada número.</p>
+          <span class="boton verde chico">Jugar <span class="flecha">▶</span></span>
+        </div>
+      </a>
       <div class="juego pronto">
         <div class="portada" aria-hidden="true">// PRÓXIMAMENTE</div>
         <div class="cuerpo">
@@ -580,7 +591,7 @@ async function mostrarJuegos(invitado) {
 }
 
 // ---------- ranking general ----------
-const JUEGOS = { tecla: 'Tecla a Tecla', tablas: 'Factor X', misterios: 'Desapariciones Misteriosas' };
+const JUEGOS = { tecla: 'Tecla a Tecla', tablas: 'Factor X', misterios: 'Desapariciones Misteriosas', planb: 'Plan B' };
 let periodo = 'semana';
 async function rankingGeneral(p) {
   const r = await (await fetch(API + '/general?p=' + p)).json();
@@ -631,7 +642,7 @@ document.querySelectorAll('.periodo button').forEach(b => b.addEventListener('cl
   mostrarRanking();
 }));
 
-if (location.search) ['linkTecla', 'linkTablas', 'linkMisterios'].forEach(id => { $(id).href += location.search; });   // mantiene ?api= al ir al juego
+if (location.search) ['linkTecla', 'linkTablas', 'linkMisterios', 'linkPlanB'].forEach(id => { $(id).href += location.search; });   // mantiene ?api= al ir al juego
 const sesion = leer();
 if (sesion && sesion.token) {
   mostrarJuegos();

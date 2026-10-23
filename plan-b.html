@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan B</title>
+<meta name="description" content="Siempre hay otra manera: encontrá varias formas distintas de resolver cada desafío.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='14' y='14' width='72' height='72' rx='16' fill='%230a0c11' stroke='%232ee6c5' stroke-width='6'/><text x='50' y='67' text-anchor='middle' font-family='monospace' font-weight='700' font-size='46' fill='%232ee6c5'>B</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="motor.css?v=2">
+<style>
+  /* misma estética que el resto del sitio: oscuro, grilla sutil, acentos neón */
+  :root{
+    --bg:#0a0c11; --surface:#12151d; --surface-2:#0e1118; --line:#232a37;
+    --ink:#eef1f7; --muted:#98a2b6; --faint:#5f6a80;
+    --lima:#b8ff3c; --violeta:#8b5cff; --rosa:#ff4d8d; --cian:#2ee6c5; --rojo:#ff4d6d; --oro:#ffc53d;
+    --shadow-card:0 0 0 1px rgba(255,255,255,.02), 0 18px 50px rgba(0,0,0,.5);
+    --display:'Space Grotesk', system-ui, sans-serif;
+    --body:'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0; min-height:100%}
+  body{
+    font-family:var(--body); font-size:16px; line-height:1.5; color:var(--ink);
+    background:var(--bg); min-height:100vh; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit; color:inherit; cursor:pointer}
+  :focus-visible{outline:2px solid var(--lima); outline-offset:3px}
+
+  .fondo{position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden}
+  .fondo .grilla{position:absolute; inset:0;
+    background:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px) 0 0/44px 44px,
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px) 0 0/44px 44px;
+    -webkit-mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%);
+            mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 80%)}
+  .fondo .luz{position:absolute; border-radius:50%; filter:blur(90px)}
+  .fondo .l1{width:520px; height:520px; top:-220px; left:-120px; background:var(--cian); opacity:.2}
+  .fondo .l2{width:420px; height:420px; bottom:-220px; right:-140px; background:var(--lima); opacity:.08}
+
+  .wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:22px 16px 48px}
+
+  /* ---------- cabecera ---------- */
+  header{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .volver{display:grid; place-items:center; width:36px; height:36px; border-radius:10px; flex:none;
+    border:1px solid var(--line); background:var(--surface); color:var(--muted); text-decoration:none; font-weight:600}
+  .volver:hover{color:var(--ink); border-color:var(--faint)}
+  .marca{display:flex; align-items:baseline; gap:10px; margin-right:auto; min-width:0}
+  .marca h1{font-family:var(--display); font-weight:700; font-size:26px; letter-spacing:-.04em; margin:0; line-height:1}
+  .marca h1 em{font-style:normal; color:var(--cian)}
+  .marca small{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+  .chip{display:inline-flex; align-items:center; gap:8px; height:36px; padding:0 12px; border-radius:10px;
+    border:1px solid var(--line); background:var(--surface); font-size:14px; font-weight:600; max-width:200px}
+  .chip .cara{width:22px; height:22px; border-radius:50%; background:var(--cian); color:#0a0c11; display:grid; place-items:center;
+    font-size:11px; font-weight:700; flex:none}
+  .chip .nom{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .chip.invitado{color:var(--faint); font-weight:500}
+  .chip.invitado .cara{background:var(--line); color:var(--muted)}
+
+  /* ---------- resumen ---------- */
+  .intro{display:flex; align-items:flex-end; gap:24px; flex-wrap:wrap; margin:34px 0 26px}
+  .intro .txt{flex:1 1 360px}
+  .etiqueta{display:inline-flex; align-items:center; gap:8px; font-family:var(--mono); font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--cian); border:1px solid color-mix(in srgb, var(--cian) 35%, transparent);
+    background:color-mix(in srgb, var(--cian) 8%, transparent); border-radius:999px; padding:5px 12px; margin-bottom:16px}
+  .intro h2{font-family:var(--display); font-weight:700; font-size:clamp(34px,5.6vw,56px); line-height:1; letter-spacing:-.045em; margin:0 0 12px}
+  .intro h2 .brillo{background:linear-gradient(90deg, var(--cian), var(--lima) 55%, var(--oro));
+    -webkit-background-clip:text; background-clip:text; color:transparent}
+  .intro p{margin:0; color:var(--muted); max-width:48ch}
+  .resumen{display:flex; gap:10px; flex-wrap:wrap}
+  .dato{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 16px; min-width:120px}
+  .dato b{display:block; font-family:var(--mono); font-size:24px; line-height:1.1; font-variant-numeric:tabular-nums}
+  .dato b small{font-size:14px; color:var(--faint); font-weight:500}
+  .dato span{font-family:var(--mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+  .dato.oro b{color:var(--oro)}
+
+  /* ---------- mundos y niveles ---------- */
+  .mundo-cab{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:30px 0 14px}
+  .mundo-cab h3{font-family:var(--display); font-weight:700; font-size:22px; letter-spacing:-.03em; margin:0}
+  .mundo-cab span{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+  .niveles{display:grid; gap:14px; grid-template-columns:repeat(3, 1fr)}
+  .nivel{
+    --c:var(--cian);
+    position:relative; text-align:left; border:1px solid var(--line); border-radius:18px; overflow:hidden;
+    background:linear-gradient(160deg, color-mix(in srgb, var(--c) 13%, var(--surface)) 0%, var(--surface) 55%);
+    padding:18px 18px 16px; display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto 1fr auto; column-gap:14px; row-gap:10px;
+    transition:transform .18s, border-color .18s, box-shadow .18s; min-height:170px;
+  }
+  .nivel:hover{transform:translateY(-3px); border-color:color-mix(in srgb, var(--c) 60%, var(--line));
+    box-shadow:var(--shadow-card), 0 0 36px color-mix(in srgb, var(--c) 16%, transparent)}
+  .nivel .num{
+    grid-row:1 / 3; width:64px; height:64px; border-radius:15px; display:grid; place-items:center;
+    font-family:var(--mono); font-weight:700; font-size:22px; color:var(--c);
+    background:#0d1016; border:1px solid color-mix(in srgb, var(--c) 50%, transparent);
+    box-shadow:0 5px 0 #05060a, 0 0 22px color-mix(in srgb, var(--c) 28%, transparent);
+  }
+  .nivel .cab{min-width:0}
+  .nivel .tipo{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--c)}
+  .nivel h3{font-family:var(--display); font-weight:700; font-size:21px; letter-spacing:-.03em; margin:2px 0 0; line-height:1.1}
+  .nivel p{grid-column:2; margin:0; color:var(--muted); font-size:13.5px; line-height:1.4}
+  .nivel .pie{grid-column:1 / 3; display:flex; align-items:center; gap:10px; padding-top:10px; border-top:1px solid var(--line)}
+  .estrellas{font-size:15px; letter-spacing:2px; color:var(--line); line-height:1}
+  .estrellas b{color:var(--oro); font-weight:400; text-shadow:0 0 10px color-mix(in srgb, var(--oro) 50%, transparent)}
+  .nivel .mejor{margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--faint)}
+  .nivel .mejor b{color:var(--ink); font-weight:700}
+  .nivel.bloqueada{cursor:not-allowed; background:var(--surface-2); border-style:dashed}
+  .nivel.bloqueada:hover{transform:none; box-shadow:none; border-color:var(--line)}
+  .nivel.bloqueada .num{color:var(--faint); border-color:var(--line); box-shadow:0 5px 0 #05060a}
+  .nivel.bloqueada .tipo, .nivel.bloqueada h3{color:var(--faint)}
+  .nivel.pronto{cursor:default; background:var(--surface-2); border-style:dashed}
+  .nivel.pronto:hover{transform:none; box-shadow:none; border-color:var(--line)}
+  .nivel.pronto .num{font-size:28px}
+
+  /* ---------- detalle de un nivel ---------- */
+  .detalle{margin-top:26px}
+  .det-cab{display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:22px}
+  .det-cab .num{
+    width:76px; height:76px; border-radius:18px; display:grid; place-items:center; flex:none;
+    font-family:var(--mono); font-weight:700; font-size:26px; color:var(--c); background:#0d1016;
+    border:1px solid color-mix(in srgb, var(--c) 50%, transparent);
+    box-shadow:0 6px 0 #05060a, 0 0 30px color-mix(in srgb, var(--c) 30%, transparent);
+  }
+  .det-cab .tipo{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--c)}
+  .det-cab h2{font-family:var(--display); font-weight:700; font-size:clamp(28px,4.6vw,42px); letter-spacing:-.04em; margin:2px 0 0; line-height:1.05}
+  .det-cab .ghost{margin-left:auto}
+  .det{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:16px; align-items:start}
+  .panel{background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:18px; box-shadow:var(--shadow-card)}
+  .panel h3{font-family:var(--display); font-weight:700; font-size:18px; letter-spacing:-.02em; margin:0 0 14px}
+  .ejemplo{display:flex; flex-direction:column; align-items:center; gap:14px; padding:6px 0 4px}
+  .ejemplo .meta-num{font-family:var(--mono); font-weight:700; font-size:56px; line-height:1; color:var(--c);
+    text-shadow:0 0 26px color-mix(in srgb, var(--c) 45%, transparent)}
+  .truco{margin:14px 0 0; padding:12px 14px; border-radius:12px; font-size:14px; color:var(--muted);
+    background:color-mix(in srgb, var(--c) 8%, transparent); border:1px solid color-mix(in srgb, var(--c) 25%, transparent)}
+  .truco b{color:var(--ink); font-weight:600}
+
+  .juego-desc{margin:0 0 16px; color:var(--muted)}
+  .pasos{list-style:none; margin:0 0 18px; padding:0; display:flex; flex-direction:column; gap:8px}
+  .pasos li{display:flex; gap:12px; align-items:flex-start; font-size:14.5px}
+  .pasos li span{flex:none; width:24px; height:24px; border-radius:7px; display:grid; place-items:center;
+    font-family:var(--mono); font-size:12px; font-weight:700; color:var(--c);
+    background:color-mix(in srgb, var(--c) 12%, transparent); border:1px solid color-mix(in srgb, var(--c) 35%, transparent)}
+  .metas{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:18px}
+  .meta{background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:10px 12px}
+  .meta .estrellas{font-size:13px; display:block; margin-bottom:4px}
+  .meta span{font-size:12.5px; color:var(--muted); line-height:1.35; display:block}
+  .meta.ok{border-color:color-mix(in srgb, var(--oro) 45%, var(--line))}
+  .jugar-fila{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .jugar-fila .mejor{font-family:var(--mono); font-size:13px; color:var(--faint)}
+  .jugar-fila .mejor b{color:var(--ink)}
+
+  .boton{
+    border:1px solid transparent; border-radius:12px; padding:12px 22px; font-family:var(--display); font-weight:700; font-size:17px;
+    background:var(--c, var(--lima)); color:#0a0c11; line-height:1.1;
+    box-shadow:0 0 24px color-mix(in srgb, var(--c, var(--lima)) 30%, transparent); transition:transform .12s, box-shadow .12s;
+  }
+  .boton:hover{transform:translateY(-1px); box-shadow:0 0 32px color-mix(in srgb, var(--c, var(--lima)) 45%, transparent)}
+  .boton:disabled{opacity:.45; cursor:default; transform:none; box-shadow:none}
+  .ghost{border:1px solid var(--line); background:var(--surface-2); border-radius:9px; padding:7px 13px;
+    font-size:13px; font-weight:500; color:var(--muted)}
+  .ghost:hover{color:var(--ink); border-color:var(--faint)}
+
+  /* ---------- la partida: formá el número ---------- */
+  .escenario.forma{gap:16px; justify-content:flex-start}
+  .objetivo{display:flex; flex-direction:column; align-items:center; gap:2px}
+  .objetivo .meta-num{font-family:var(--mono); font-weight:700; font-size:clamp(64px,13vw,104px); line-height:1; color:var(--c);
+    text-shadow:0 0 36px color-mix(in srgb, var(--c) 45%, transparent)}
+  .objetivo .meta-num.nuevo{animation:aparece .5s}
+  /* la colección: las maneras encontradas, con lugares vacíos para las que faltan */
+  .coleccion{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:640px}
+  .manera{font-family:var(--mono); font-weight:700; font-size:clamp(15px,3.4vw,19px); padding:7px 13px; border-radius:11px;
+    background:color-mix(in srgb, var(--c) 12%, var(--surface-2)); border:1px solid color-mix(in srgb, var(--c) 55%, var(--line));
+    color:var(--ink); white-space:nowrap}
+  .manera.nueva{animation:entra .45s}
+  @keyframes entra{from{transform:scale(1.5); box-shadow:0 0 30px var(--c)}}
+  .manera.extra{border-color:color-mix(in srgb, var(--oro) 55%, var(--line)); background:color-mix(in srgb, var(--oro) 10%, var(--surface-2))}
+  .manera.vacia{background:transparent; border-style:dashed; border-color:var(--line); color:var(--faint); min-width:86px; text-align:center}
+  .manera.repetida{animation:sacude .35s; border-color:var(--oro)}
+  /* la cuenta que se está armando */
+  .armado{min-width:min(340px,100%); min-height:64px; border-radius:16px; border:1px solid var(--line); background:var(--surface-2);
+    display:flex; align-items:center; justify-content:center; gap:.3em; padding:6px 18px;
+    font-family:var(--mono); font-weight:700; font-size:clamp(28px,6vw,38px); font-variant-numeric:tabular-nums;
+    box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 25%, transparent)}
+  .armado .op{color:var(--c)}
+  .armado .igual{color:var(--faint)} .armado .igual b{color:var(--c)}
+  .armado .cursor{color:var(--faint); animation:parpadeo 1s steps(2) infinite}
+  .armado.ok{animation:visorOk .4s} .armado.mal{animation:visorMal .4s}
+  .mensaje{min-height:1.5em; margin:0; text-align:center; font-size:15px; font-weight:600; color:var(--muted); max-width:46ch}
+  .mensaje.bien{color:var(--lima)} .mensaje.mal{color:#ffb08a} .mensaje.ojo{color:var(--oro)}
+  .teclado-cuenta{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; width:min(460px,100%)}
+  .teclado-cuenta button{border:1px solid var(--line); background:var(--surface-2); border-radius:10px; padding:10px 0;
+    font-family:var(--mono); font-weight:700; font-size:20px; box-shadow:0 3px 0 #05060a}
+  .teclado-cuenta button:active{transform:translateY(2px); box-shadow:0 1px 0 #05060a; border-color:var(--c)}
+  .teclado-cuenta .op{color:var(--c); border-color:color-mix(in srgb, var(--c) 40%, var(--line))}
+  .teclado-cuenta .borrar{color:var(--muted)}
+  .teclado-cuenta .probar{grid-column:span 2; font-family:var(--display); font-size:17px; background:var(--c); color:#0a0c11; border-color:transparent}
+  .acciones{display:flex; gap:8px; flex-wrap:wrap; justify-content:center}
+  .acciones .boton{font-size:15px; padding:9px 18px}
+  .acciones kbd{font-family:var(--mono); font-size:11px; color:inherit; opacity:.6; border:1px solid currentColor; border-radius:5px; padding:0 5px; margin-left:6px}
+
+  /* pantalla final: la colección completa */
+  .r-extra .grupo{display:flex; flex-direction:column; align-items:center; gap:6px; width:100%}
+  .r-extra .grupo h4{margin:6px 0 0; font-family:var(--mono); font-size:12px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
+  .r-extra .grupo h4 b{color:var(--c); font-size:15px}
+
+  footer{margin-top:48px; text-align:center; color:var(--faint); font-family:var(--mono); font-size:11.5px; letter-spacing:.04em}
+
+  @media (max-width:860px){
+    .niveles{grid-template-columns:repeat(2, 1fr)}
+    .det{grid-template-columns:1fr}
+  }
+  @media (max-width:560px){
+    .niveles{grid-template-columns:1fr}
+    .nivel{min-height:0}
+    .marca small{display:none}
+    .metas{grid-template-columns:1fr}
+    .det-cab .ghost{margin-left:0}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .nivel:hover, .boton:hover{transform:none}
+    .manera.nueva, .manera.repetida, .objetivo .meta-num.nuevo{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="fondo" aria-hidden="true"><div class="grilla"></div><div class="luz l1"></div><div class="luz l2"></div></div>
+
+<div class="wrap">
+  <header>
+    <a class="volver" id="volverInicio" href="index.html" title="Todos los juegos">←</a>
+    <div class="marca"><h1>Plan <em>B</em></h1><small>Siempre hay otra manera</small></div>
+    <span class="chip invitado" id="chip"><span class="cara" id="chipCara">·</span><span class="nom" id="chipNom">Invitado</span></span>
+  </header>
+
+  <!-- ===== elegir nivel ===== -->
+  <section id="inicio">
+    <div class="intro">
+      <div class="txt">
+        <span class="etiqueta">Pensar de muchas maneras</span>
+        <h2>Una respuesta está bien.<br><span class="brillo">Tres, mucho mejor.</span></h2>
+        <p>Casi todo se puede resolver de más de una manera. Acá no alcanza con encontrar una: ganás cuando encontrás varias distintas. Cada estrella abre el nivel siguiente.</p>
+      </div>
+      <div class="resumen">
+        <div class="dato oro"><b id="totEstrellas">0<small>/18</small></b><span>Estrellas</span></div>
+        <div class="dato"><b id="totManeras">0</b><span>Maneras</span></div>
+        <div class="dato"><b id="totPuntos">0</b><span>Puntos</span></div>
+      </div>
+    </div>
+
+    <div class="mundo-cab"><h3>🔢 Formá el número</h3><span>Mundo 1</span></div>
+    <div class="niveles" id="niveles"></div>
+
+    <div class="mundo-cab"><h3>🗺️ Caminos por el barrio</h3><span>Mundo 2 · Próximamente</span></div>
+    <div class="niveles">
+      <div class="nivel pronto" style="--c:var(--faint)">
+        <span class="num">🚧</span>
+        <div class="cab"><div class="tipo">Próximamente</div><h3>Muchos caminos</h3></div>
+        <p>Llevá al personaje de un lugar a otro por tres caminos distintos: el más corto, el que esquiva al perro, el que pasa por la plaza…</p>
+      </div>
+    </div>
+
+    <div class="mundo-cab"><h3>🎒 Situaciones de todos los días</h3><span>Mundo 3 · Próximamente</span></div>
+    <div class="niveles">
+      <div class="nivel pronto" style="--c:var(--faint)">
+        <span class="num">🚧</span>
+        <div class="cab"><div class="tipo">Próximamente</div><h3>¿Y ahora qué hago?</h3></div>
+        <p>“Me olvidé la cartuchera”, “no me alcanza la plata”… Elegí tres ideas que sí sirvan para resolverlo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== un nivel ===== -->
+  <section class="detalle" id="detalle" hidden>
+    <div class="det-cab">
+      <div class="num" id="dNum"></div>
+      <div><div class="tipo" id="dTipo"></div><h2 id="dTitulo"></h2></div>
+      <button class="ghost" id="dVolver">← Todos los niveles</button>
+    </div>
+    <div class="det">
+      <div class="panel">
+        <h3>Por ejemplo</h3>
+        <div class="ejemplo" id="dEjemplo"></div>
+        <p class="truco" id="dTruco"></p>
+      </div>
+      <div class="panel">
+        <h3>Cómo se juega</h3>
+        <p class="juego-desc" id="dDesc"></p>
+        <ol class="pasos" id="dPasos"></ol>
+        <div class="metas" id="dMetas"></div>
+        <div class="jugar-fila">
+          <button class="boton" id="jugarBtn">Jugar ▶</button>
+          <span class="mejor" id="dMejor"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== partida (la arma motor.js) ===== -->
+  <section class="juego" id="juego" hidden></section>
+
+  <footer>PLAN B · LOS PUNTOS SUMAN AL RANKING GENERAL</footer>
+</div>
+
+<script src="motor.js?v=2"></script>
+<script>
+
+// ---------- los niveles del mundo 1: Formá el número ----------
+// ops: las operaciones que se pueden usar · nums: cuántos números puede tener la cuenta como máximo
+// objetivos(): los números a formar en la partida · por: cuántas maneras hacen falta para cada uno
+const PASOS = ['Aparece un número. Armá una cuenta que dé ese número y tocá “Probar” (o Enter).',
+  'Cada manera distinta se guarda en tu colección. Con 3, pasás al número siguiente.',
+  '¿Se te ocurren más? ¡Seguí! Las maneras de más valen estrellas. Si te trabás, pedí una pista.'];
+const NIVELES = {
+  1: { nombre: 'Sumas', tipo: 'Dos números · +', color: '#b8ff3c', ops: '+', nums: 2, por: 3,
+       objetivos: () => mezclar([8, 9, 10, 11, 12]).slice(0, 3),
+       corto: 'Formá cada número sumando dos números. ¡Hay varias sumas que dan lo mismo!',
+       ejemplo: [8, ['5 + 3', '6 + 2', '4 + 4']],
+       truco: '<b>5 + 3 y 3 + 5 son la misma manera, dada vuelta.</b> Buscá sumas con números distintos.' },
+  2: { nombre: 'Sumas y restas', tipo: 'Dos números · + −', color: '#2ee6c5', ops: '+-', nums: 2, por: 3,
+       objetivos: () => mezclar([7, 9, 10, 12, 13, 15]).slice(0, 3),
+       corto: 'Ahora también vale restar: ¡un número grande menos otro puede dar lo que buscás!',
+       ejemplo: [10, ['6 + 4', '12 − 2', '15 − 5']],
+       truco: '<b>Con la resta hay infinitas maneras.</b> Si 12 − 2 da 10, ¿cuánto dará 13 − 3?' },
+  3: { nombre: 'Tres números', tipo: 'Hasta tres números · + −', color: '#3db8ff', ops: '+-', nums: 3, por: 3,
+       objetivos: () => mezclar([11, 14, 15, 16, 18, 20]).slice(0, 3),
+       corto: 'Podés usar hasta tres números en la misma cuenta. Más números, más ideas.',
+       ejemplo: [15, ['10 + 5', '5 + 5 + 5', '20 − 10 + 5']],
+       truco: '<b>Partí el número en pedacitos.</b> 15 es 10 + 5, pero también 5 + 5 + 5.' },
+  4: { nombre: 'Multiplicar', tipo: 'Dos números · + − ×', color: '#8b5cff', ops: '+-*', nums: 2, por: 3,
+       objetivos: () => mezclar([12, 16, 18, 20, 24]).slice(0, 3),
+       corto: 'Llega la multiplicación: algunos números se pueden armar con grupos iguales.',
+       ejemplo: [12, ['3 × 4', '2 × 6', '20 − 8']],
+       truco: '<b>Probá con las tablas.</b> ¿En qué tablas aparece el 12? En la del 2, la del 3, la del 4 y la del 6.' },
+  5: { nombre: 'Mezclá todo', tipo: 'Hasta tres números · + − ×', color: '#ff4d8d', ops: '+-*', nums: 3, por: 3,
+       objetivos: () => mezclar([20, 24, 25, 30, 32, 36, 40]).slice(0, 3),
+       corto: 'Sumas, restas y multiplicaciones juntas. ¿Cuál es tu manera más rara?',
+       ejemplo: [30, ['5 × 6', '3 × 10', '2 × 10 + 10']],
+       truco: '<b>Primero se multiplica, después se suma o se resta.</b> 2 × 10 + 10 es 20 + 10 = 30.' },
+};
+const FINAL = 6;
+NIVELES[FINAL] = { nombre: 'Maratón de maneras', tipo: 'Desafío final · 2 minutos', color: '#ffc53d', ops: '+-*', nums: 3,
+  segundos: 120, objetivos: () => [mezclar([18, 20, 24, 30, 36])[0]],
+  corto: 'Un solo número y dos minutos: ¿cuántas maneras distintas podés encontrar?',
+  ejemplo: [24, ['4 × 6', '3 × 8', '12 + 12', '30 − 6', '2 × 10 + 4']],
+  truco: '<b>Cuando una idea funciona, cambiala un poquito.</b> Si 30 − 6 da 24, ¿y 40 − …?',
+  metas: ['Encontrá 6 maneras', 'Encontrá 10 maneras', 'Encontrá 15 maneras'],
+  estrellas: p => p.aciertos >= 15 ? 3 : p.aciertos >= 10 ? 2 : p.aciertos >= 6 ? 1 : 0 };
+for (let n = 1; n < FINAL; n++) Object.assign(NIVELES[n], {
+  marcador: ['1/3', 'Número'],
+  metas: ['Encontrá 3 maneras de cada número', 'Encontrá 2 maneras de más', 'Encontrá 5 maneras de más'],
+  // sobra: las maneras de más (las que pasan de 3 por número)
+  estrellas: p => p.sobra >= 5 ? 3 : p.sobra >= 2 ? 2 : p.terminado ? 1 : 0,
+  pasos: PASOS,
+  desc: 'En cada partida hay 3 números para formar. No hay una sola respuesta correcta: hay muchas, y tenés que encontrar por lo menos 3 de cada uno.',
+});
+Object.assign(NIVELES[FINAL], {
+  pasos: ['Aparece un número. Armá cuentas que den ese número.', 'Cada manera distinta suma puntos. Las repetidas o dadas vuelta no cuentan.', 'Tenés 2 minutos: ¡encontrá todas las que puedas!'],
+  desc: 'Usá todo lo que aprendiste: sumas, restas, multiplicaciones y hasta tres números. El reloj corre, pero un error no te saca nada: probá otra idea.',
+});
+
+// ---------- sesión y progreso ----------
+const CLAVE = 'planb.' + (sesion && sesion.apodo ? sesion.apodo.toLowerCase() : 'invitado');
+// progreso = { 1: { estrellas: 0-3, mejor: puntos, maneras: las más que encontró en una partida }, ... }
+let progreso = {};
+try { progreso = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch (e) {}
+const prog = n => progreso[n] || { estrellas: 0, mejor: 0, maneras: 0 };
+const guardarProgreso = () => { try { localStorage.setItem(CLAVE, JSON.stringify(progreso)); } catch (e) {} };
+function unirProgreso(a, b) {
+  const r = {};
+  for (let n = 1; n <= FINAL; n++) {
+    if (!a[n] && !b[n]) continue;
+    const x = a[n] || {}, y = b[n] || {};
+    r[n] = { estrellas: Math.max(x.estrellas || 0, y.estrellas || 0), mejor: Math.max(x.mejor || 0, y.mejor || 0),
+             maneras: Math.max(x.maneras || 0, y.maneras || 0) };
+  }
+  return r;
+}
+
+// se desbloquean de a uno: el nivel n se abre con al menos 1 estrella en el n-1
+const abierto = n => n === 1 || esAdmin || prog(n - 1).estrellas > 0;
+const estrellas = n => '<span class="estrellas" aria-label="' + n + ' de 3 estrellas">' +
+  '<b>★</b>'.repeat(n) + '★'.repeat(3 - n) + '</span>';
+
+if (sesion && sesion.apodo) {
+  $('chip').classList.remove('invitado');
+  $('chipCara').textContent = sesion.apodo[0].toUpperCase();
+  $('chipNom').textContent = sesion.apodo + (esAdmin ? ' · admin' : '');
+}
+if (location.search) $('volverInicio').href += location.search;   // mantiene ?api=
+
+// ---------- las cuentas ----------
+// una cuenta es una lista: [número, op, número, op, número], con op en '+', '-', '*'
+const VER_OP = { '+': '+', '-': '−', '*': '×' };
+const ver = c => c.map(t => typeof t === 'number' ? t : VER_OP[t]).join(' ');
+// primero se multiplica, después se suma y se resta (de izquierda a derecha)
+function partes(c) {
+  const terminos = [];                       // [{ signo: 1 | -1, factores: [..] }]
+  let t = { signo: 1, factores: [c[0]] };
+  for (let i = 1; i < c.length; i += 2) {
+    if (c[i] === '*') t.factores.push(c[i + 1]);
+    else { terminos.push(t); t = { signo: c[i] === '-' ? -1 : 1, factores: [c[i + 1]] }; }
+  }
+  terminos.push(t);
+  return terminos;
+}
+const valor = c => partes(c).reduce((s, t) => s + t.signo * t.factores.reduce((p, f) => p * f, 1), 0);
+// la "forma" de una cuenta, para saber si dos son la misma dada vuelta: 3 + 5 = 5 + 3, 2 × 4 = 4 × 2
+function forma(c) {
+  const ts = partes(c).map(t => ({ s: t.signo, k: t.factores.slice().sort((a, b) => a - b).join('×') }));
+  const orden = s => ts.filter(t => t.s === s).map(t => t.k).sort();
+  return orden(1).join('+') + (orden(-1).length ? '-' + orden(-1).join('-') : '');
+}
+// qué operaciones usa: para premiar las ideas nuevas
+const tipos = c => new Set(c.filter(t => typeof t === 'string'));
+
+// por qué no vale una cuenta (o null si vale)
+function trampa(c, objetivo) {
+  const nums = c.filter(t => typeof t === 'number');
+  if (nums.length < 2) return 'Armá una cuenta con por lo menos dos números.';
+  if (nums.includes(0)) return 'El 0 no vale en este juego: probá con otros números.';
+  if (nums.includes(objetivo)) return '¡Eso ya es el ' + objetivo + '! Armalo con otros números.';
+  for (let i = 1; i < c.length; i += 2)
+    if (c[i] === '*' && (c[i - 1] === 1 || c[i + 1] === 1)) return 'Multiplicar por 1 no cambia nada: buscá otra idea.';
+  return null;
+}
+
+// todas las maneras "lindas" de formar un número (números chicos), para dar pistas
+function soluciones(objetivo, nivel) {
+  const ops = [...nivel.ops], tope = Math.max(20, objetivo + 10), r = new Map();
+  const probar = c => { if (valor(c) === objetivo && !trampa(c, objetivo)) { const f = forma(c); if (!r.has(f)) r.set(f, c); } };
+  for (let a = 1; a <= tope; a++) for (let b = 1; b <= tope; b++) for (const o of ops) probar([a, o, b]);
+  if (nivel.nums >= 3 && r.size < 12)
+    for (let a = 1; a <= 12; a++) for (let b = 1; b <= 12; b++) for (let d = 1; d <= 12; d++)
+      for (const o of ops) for (const p of ops) probar([a, o, b, p, d]);
+  return [...r.values()];
+}
+
+// ---------- pantalla de inicio ----------
+function pintarInicio() {
+  let tot = 0, man = 0, pts = 0, html = '';
+  for (let n = 1; n <= FINAL; n++) {
+    const j = NIVELES[n], p = prog(n);
+    tot += p.estrellas; man += p.maneras || 0; pts += p.mejor;
+    const icono = n === FINAL ? '∞' : '#' + n;
+    if (!abierto(n)) {
+      html += '<button class="nivel bloqueada" aria-disabled="true" style="--c:' + j.color + '">' +
+        '<span class="num">🔒</span>' +
+        '<div class="cab"><div class="tipo">' + (n === FINAL ? 'Desafío final' : 'Nivel ' + n) + '</div><h3>' + esc(j.nombre) + '</h3></div>' +
+        '<p>Conseguí al menos 1 estrella en el nivel ' + (n - 1) + ' para desbloquearlo.</p>' +
+        '<div class="pie">' + estrellas(0) + '<span class="mejor">Bloqueado</span></div></button>';
+      continue;
+    }
+    html += '<button class="nivel" data-n="' + n + '" style="--c:' + j.color + '">' +
+      '<span class="num">' + icono + '</span>' +
+      '<div class="cab"><div class="tipo">' + esc(j.tipo) + '</div><h3>' + esc(j.nombre) + '</h3></div>' +
+      '<p>' + esc(j.corto) + '</p>' +
+      '<div class="pie">' + estrellas(p.estrellas) +
+      '<span class="mejor">' + (p.mejor ? 'Mejor <b>' + p.mejor + '</b>' : 'Sin jugar') + '</span></div>' +
+      '</button>';
+  }
+  $('niveles').innerHTML = html;
+  $('totEstrellas').innerHTML = tot + '<small>/18</small>';
+  $('totManeras').textContent = man;
+  $('totPuntos').textContent = pts;
+}
+$('niveles').addEventListener('click', e => {
+  const b = e.target.closest('.nivel[data-n]');
+  if (b) location.hash = 'nivel-' + b.dataset.n;
+});
+
+// ---------- detalle de un nivel ----------
+let nivelActual = 1;
+function pintarDetalle(n) {
+  nivelActual = n;
+  const j = NIVELES[n], p = prog(n);
+  $('detalle').style.setProperty('--c', j.color);
+  $('dNum').textContent = n === FINAL ? '∞' : '#' + n;
+  $('dTipo').textContent = n === FINAL ? j.tipo : 'Nivel ' + n + ' · ' + j.tipo;
+  $('dTitulo').textContent = j.nombre;
+  const [obj, maneras] = j.ejemplo;
+  $('dEjemplo').innerHTML = '<span class="meta-num">' + obj + '</span>' +
+    '<div class="coleccion">' + maneras.map(t => '<span class="manera">' + t + '</span>').join('') + '</div>';
+  $('dTruco').innerHTML = j.truco;
+  $('dDesc').textContent = j.desc;
+  $('dPasos').innerHTML = j.pasos.map((t, i) => '<li><span>' + (i + 1) + '</span>' + esc(t) + '</li>').join('');
+  $('dMetas').innerHTML = j.metas.map((t, i) =>
+    '<div class="meta' + (p.estrellas > i ? ' ok' : '') + '">' + estrellas(i + 1) + '<span>' + t + '</span></div>').join('');
+  $('dMejor').innerHTML = p.mejor ? 'Tu mejor: <b>' + p.mejor + '</b> pts' + (p.maneras ? ' · <b>' + p.maneras + '</b> maneras' : '') : '';
+}
+$('dVolver').addEventListener('click', () => { location.hash = ''; });
+$('jugarBtn').addEventListener('click', () => { location.hash = 'jugar-' + nivelActual; });
+
+// pantalla final: todas las maneras que encontró, número por número
+function pantallaFinal(p) {
+  if (!p.coleccion || !p.coleccion.length) return '';
+  return '<p>Tu colección de maneras:</p>' + p.coleccion.map(g =>
+    '<div class="grupo"><h4>El <b>' + g.objetivo + '</b> · ' + g.maneras.length + ' manera' + (g.maneras.length === 1 ? '' : 's') + '</h4>' +
+    '<div class="cuentas">' + g.maneras.map(c => '<span class="bien">' + ver(c) + '</span>').join('') + '</div></div>').join('');
+}
+
+// ---------- motor común (motor.js) ----------
+Motor.iniciar({
+  app: 'planb', clave: 'planb', niveles: NIVELES, ultimo: FINAL,
+  etiquetas: { aciertos: 'Maneras' },
+  extra: pantallaFinal,
+  sync: {
+    datos: () => progreso,
+    cargar: d => { progreso = d; guardarProgreso(); },
+    unir: unirProgreso,
+    alCambiar: () => { if (!$('inicio').hidden) pintarInicio(); else if (!$('detalle').hidden) pintarDetalle(nivelActual); },
+  },
+  prog: n => ({ premio: prog(n).estrellas, mejor: prog(n).mejor }),
+  guardar: (n, premio, mejor) => {
+    progreso[n] = { estrellas: premio, mejor, maneras: Math.max(prog(n).maneras || 0, partida.aciertos) };
+    guardarProgreso();
+  },
+  abierto,
+  nombre: n => n === FINAL ? 'Desafío final' : 'Nivel ' + n,
+  rutaNivel: n => 'nivel-' + n,
+  premio: { icono: '★', uno: 'estrella', varios: 'estrellas', nuevo: '⭐ Nueva estrella' },
+  titulos: ['Seguí probando', '¡Bien pensado!', '¡Muchas ideas!', '¡Sos un genio del Plan B!'],
+  textos: {
+    dominado: n => n === FINAL ? '¡Maratón superada!' : '¡Encontraste un montón de maneras!',
+    desbloqueado: n => n === FINAL ? 'Desafío final desbloqueado' : 'Nivel ' + n + ' desbloqueado',
+  },
+});
+
+// ---------- el juego: formá el número ----------
+function formaElNumero(n) {
+  return m => {
+    const nivel = NIVELES[n], final = n === FINAL;
+    const objetivos = nivel.objetivos();
+    const ops = [...nivel.ops];
+    let k = -1, objetivo, encontradas, usadas, pistas, sols;
+    let cuenta = [];                  // lo que está escribiendo: números y operaciones
+    let numero = '';                  // el número que está escribiendo ahora
+    partida.coleccion = []; partida.terminado = false;
+    m.escenario.classList.add('forma');
+    m.escenario.innerHTML =
+      '<div class="objetivo"><p class="consigna" id="consigna"></p><span class="meta-num" id="metaNum"></span></div>' +
+      '<div class="coleccion" id="coleccion" aria-live="polite"></div>' +
+      '<div class="armado" id="armado" aria-live="polite"></div>' +
+      '<p class="mensaje" id="mensaje" aria-live="polite"></p>' +
+      '<div class="teclado-cuenta" id="tecladoCuenta">' +
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map(d => '<button data-t="' + d + '">' + d + '</button>').join('') +
+        ops.map(o => '<button class="op" data-t="' + o + '" aria-label="' + { '+': 'más', '-': 'menos', '*': 'por' }[o] + '">' + VER_OP[o] + '</button>').join('') +
+        '<button class="borrar" data-t="⌫" aria-label="Borrar">⌫</button>' +
+        '<button class="probar" data-t="=">Probar ✓</button>' +
+      '</div>' +
+      '<div class="acciones">' +
+        '<button class="ghost" id="pistaBtn">💡 Pista</button>' +
+        '<button class="boton" id="siguienteBtn" hidden></button>' +
+      '</div>';
+
+    const msj = (t, clase = '') => { $('mensaje').textContent = t; $('mensaje').className = 'mensaje ' + clase; };
+    const completa = () => numero !== '';
+    const pintarArmado = () => {
+      const partes = cuenta.map(t => typeof t === 'number' ? '<span>' + t + '</span>' : '<span class="op">' + VER_OP[t] + '</span>');
+      if (numero) partes.push('<span>' + numero + '</span>');
+      else partes.push('<span class="cursor">_</span>');
+      $('armado').innerHTML = partes.join('') + '<span class="igual">= <b>' + objetivo + '</b></span>';
+    };
+    const pintarColeccion = nueva => {
+      const huecos = final ? 0 : Math.max(0, nivel.por - encontradas.length);
+      $('coleccion').innerHTML = encontradas.map((c, i) =>
+        '<span class="manera' + (!final && i >= nivel.por ? ' extra' : '') + (i === nueva ? ' nueva' : '') + '" data-f="' + forma(c) + '">' + ver(c) + '</span>').join('') +
+        '<span class="manera vacia">?</span>'.repeat(huecos);
+    };
+    const vaciar = () => { cuenta = []; numero = ''; pintarArmado(); };
+    const destello = clase => { const a = $('armado'); a.classList.remove('ok', 'mal'); void a.offsetWidth; a.classList.add(clase); };
+
+    function siguienteNumero() {
+      k++;
+      objetivo = objetivos[k]; encontradas = []; usadas = new Set(); pistas = 0; sols = null;
+      if (!final) m.marcador((k + 1) + '/' + objetivos.length, 'Número');
+      $('consigna').textContent = final ? '¿De cuántas maneras podés formar el…?' : 'Encontrá 3 maneras de formar el';
+      const meta = $('metaNum');
+      meta.textContent = objetivo; meta.classList.remove('nuevo'); void meta.offsetWidth; meta.classList.add('nuevo');
+      partida.coleccion.push({ objetivo, maneras: encontradas });
+      $('siguienteBtn').hidden = true;
+      msj(final ? '¡Rápido, que corre el reloj!' : '');
+      pintarColeccion(); vaciar();
+    }
+
+    function probar() {
+      if (!partida.activa) return;
+      if (!completa()) { msj(cuenta.length ? 'Te falta un número al final.' : 'Escribí una cuenta primero.', 'ojo'); return; }
+      const c = [...cuenta, +numero];
+      const t = trampa(c, objetivo);
+      if (t) { msj(t, 'ojo'); destello('mal'); vaciar(); return; }
+      const v = valor(c);
+      if (v !== objetivo) {
+        m.error(true);
+        msj(ver(c) + ' da ' + v + ', no ' + objetivo + '. ' + (v > objetivo ? 'Te pasaste' : 'Te faltó') + ' un poco… ¿qué cambiarías?', 'mal');
+        destello('mal'); vaciar(); return;
+      }
+      const f = forma(c), i = encontradas.findIndex(x => forma(x) === f);
+      if (i >= 0) {
+        const igual = ver(encontradas[i]) === ver(c);
+        msj(igual ? '¡Esa ya la encontraste! Buscá otra diferente.'
+                  : '¡Es la misma, dada vuelta! ' + ver(c) + ' y ' + ver(encontradas[i]) + ' dan igual. Buscá una diferente.', 'ojo');
+        const chip = $('coleccion').querySelector('[data-f="' + f + '"]');
+        if (chip) { chip.classList.remove('repetida'); void chip.offsetWidth; chip.classList.add('repetida'); }
+        destello('mal'); vaciar(); return;
+      }
+      // ¡una manera nueva!
+      encontradas.push(c);
+      const extra = !final && encontradas.length > nivel.por;
+      if (extra) partida.sobra++;
+      destello('ok');
+      pintarColeccion(encontradas.length - 1);
+      m.flota('+' + m.acierto(extra ? 15 : 10), $('coleccion').querySelectorAll('.manera:not(.vacia)')[encontradas.length - 1]);
+      // premio a las ideas distintas: usar una operación que todavía no había usado para este número
+      const nuevas = [...tipos(c)].filter(o => !usadas.has(o));
+      nuevas.forEach(o => usadas.add(o));
+      const idea = encontradas.length > 1 && nuevas.length;
+      if (idea) { m.bono(10); m.espera(() => m.flota('¡Idea nueva! +10', $('metaNum')), 250); }
+      const bien = ['¡Bien!', '¡Muy bien!', '¡Otra manera!', '¡Genial!', '¡Eso!'][Math.floor(Math.random() * 5)];
+      if (final) msj(bien + (idea ? ' ¡Y con una idea nueva!' : ' ¿Y otra?'), 'bien');
+      else if (encontradas.length < nivel.por) msj(bien + ' Te ' + (nivel.por - encontradas.length === 1 ? 'falta 1' : 'faltan ' + (nivel.por - encontradas.length)) + '.', 'bien');
+      else {
+        const ultimo = k === objetivos.length - 1;
+        msj(encontradas.length === nivel.por ? '¡Encontraste 3 maneras! ¿Se te ocurre otra más? Cada una de más vale una estrella.'
+                                             : '¡' + encontradas.length + ' maneras del ' + objetivo + '! ¿Hay más?', 'bien');
+        $('siguienteBtn').hidden = false;
+        $('siguienteBtn').innerHTML = (ultimo ? 'Terminar ✓' : 'Siguiente número →') + '<kbd>Enter</kbd>';
+      }
+      vaciar();
+    }
+
+    function terminarNumero() {
+      if (encontradas.length < nivel.por) return;
+      if (k < objetivos.length - 1) return siguienteNumero();
+      partida.terminado = true;
+      const total = partida.aciertos;
+      partida.mensaje = 'Encontraste ' + total + ' maneras distintas' + (partida.sobra ? ', ' + partida.sobra + ' de más.' : '.');
+      m.fin();
+    }
+
+    // la pista no da la respuesta: da el principio de una manera que todavía no encontró
+    function pista() {
+      if (!partida.activa) return;
+      sols = sols || mezclar(soluciones(objetivo, nivel));
+      const ya = new Set(encontradas.map(forma));
+      // primero las que usan una operación que todavía no usó, así la pista también enseña a pensar distinto
+      const libres = sols.filter(c => !ya.has(forma(c)));
+      const distinta = libres.find(c => [...tipos(c)].some(o => !usadas.has(o)));
+      const c = distinta || libres[0];
+      if (!c) { msj('¡Ya encontraste un montón! Probá con números más grandes.', 'ojo'); return; }
+      pistas++;
+      const nombre = { '+': 'una suma', '-': 'una resta', '*': 'una multiplicación' }[c[1]];
+      if (pistas % 2 === 1 && distinta && encontradas.length) msj('💡 ¿Y si probás con ' + nombre + '?', 'ojo');
+      else msj('💡 Probá así: ' + c[0] + ' ' + VER_OP[c[1]] + ' ? ' + (c.length > 3 ? '…' : '') + '= ' + objetivo, 'ojo');
+    }
+
+    function tecla(t) {
+      if (!partida.activa) return;
+      if (t === '=') return probar();
+      if (t === '⌫') {
+        if (numero) numero = numero.slice(0, -1);
+        else if (cuenta.length) { cuenta.pop(); numero = String(cuenta.pop()); }
+      } else if (ops.includes(t)) {
+        if (!completa()) { if (cuenta.length) cuenta[cuenta.length - 1] = t; }   // cambia la operación
+        else if (cuenta.length / 2 + 1 >= nivel.nums) { msj('En este nivel, como mucho ' + nivel.nums + ' números por cuenta.', 'ojo'); return; }
+        else { cuenta.push(+numero, t); numero = ''; }
+      } else if (numero.length < 2) {
+        numero = numero === '0' ? t : numero + t;
+      }
+      pintarArmado();
+    }
+
+    $('tecladoCuenta').addEventListener('click', e => { const b = e.target.closest('button'); if (b) tecla(b.dataset.t); });
+    $('pistaBtn').addEventListener('click', pista);
+    $('siguienteBtn').addEventListener('click', terminarNumero);
+    partida.onTecla = e => {
+      if (/^[0-9]$/.test(e.key)) tecla(e.key);
+      else if (e.key === '+' && ops.includes('+')) tecla('+');
+      else if (e.key === '-' && ops.includes('-')) tecla('-');
+      else if ((e.key === '*' || e.key === 'x' || e.key === 'X') && ops.includes('*')) tecla('*');
+      else if (e.key === 'Backspace') tecla('⌫');
+      else if (e.key === 'Enter' || e.key === '=') {
+        // con la cuenta vacía, Enter pasa al número siguiente
+        if (!completa() && !cuenta.length && !$('siguienteBtn').hidden) terminarNumero();
+        else tecla('=');
+      } else return;
+      e.preventDefault();
+    };
+
+    siguienteNumero();
+    if (final) {
+      m.temporizador(nivel.segundos * 1000, { alAcabar: () => {
+        partida.mensaje = 'En 2 minutos encontraste ' + partida.aciertos + ' maneras de formar el ' + objetivo + '.';
+        m.fin();
+      } });
+    }
+  };
+}
+for (let n = 1; n <= FINAL; n++) MINIJUEGOS[n] = formaElNumero(n);
+
+// ---------- navegación: #nivel-N (detalle) y #jugar-N (partida) ----------
+function ruta() {
+  let m = location.hash.match(/^#(nivel|jugar)-([1-6])$/);
+  if (m && !abierto(+m[2])) { history.replaceState(null, '', location.pathname + location.search); m = null; }
+  Motor.limpiar();
+  const vista = m ? (m[1] === 'jugar' ? 'juego' : 'detalle') : 'inicio';
+  ['inicio', 'detalle', 'juego'].forEach(id => { $(id).hidden = id !== vista; });
+  if (vista === 'juego') Motor.jugar(+m[2]);
+  else if (vista === 'detalle') pintarDetalle(+m[2]);
+  else pintarInicio();
+  window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', ruta);
+ruta();
+</script>
+</body>
+</html>
