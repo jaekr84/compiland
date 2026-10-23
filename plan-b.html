@@ -207,6 +207,64 @@
   .r-extra .grupo h4{margin:6px 0 0; font-family:var(--mono); font-size:12px; letter-spacing:.07em; text-transform:uppercase; color:var(--faint)}
   .r-extra .grupo h4 b{color:var(--c); font-size:15px}
 
+  /* ---------- la partida: caminos por el barrio ---------- */
+  .escenario.caminos{gap:12px; justify-content:flex-start}
+  .mapa-caja{width:min(620px,100%)}
+  .ejemplo .mapa-caja{width:100%}
+  .mapa{position:relative; display:grid; grid-template-columns:repeat(var(--cols),1fr); aspect-ratio:var(--cols) / var(--filas);
+    border-radius:14px; overflow:hidden; border:1px solid var(--line); background:#141822;
+    touch-action:none; user-select:none; -webkit-user-select:none}
+  .cel{display:grid; place-items:center; font-size:clamp(12px,3.4vw,24px); line-height:1}
+  .cel.calle{background:#2a3142; box-shadow:inset 0 0 0 .5px rgba(255,255,255,.05); cursor:pointer}
+  .cel.casa{background:#161b26; box-shadow:inset 0 0 0 1px #0d1016}
+  .cel.plaza{background:#22553a; box-shadow:inset 0 0 0 .5px rgba(255,255,255,.06); cursor:pointer}
+  .cel.agua{background:linear-gradient(160deg, #1d4f80, #143a60)}
+  .cel.puente{background:repeating-linear-gradient(90deg, #7a5532 0 5px, #5e4026 5px 7px); cursor:pointer}
+  .cel.obra{background:repeating-linear-gradient(45deg, var(--oro) 0 5px, #1a1d26 5px 10px); box-shadow:inset 0 0 0 2px var(--oro)}
+  .cel.obra.nueva{animation:aparece .5s}
+  /* la meta queda arriba de los caminos, para que siempre se vea */
+  .cel.meta{position:relative; z-index:1; background:color-mix(in srgb, var(--c) 32%, #2a3142); box-shadow:inset 0 0 0 2px var(--c)}
+  .cel.inicio{background:color-mix(in srgb, var(--lima) 16%, #2a3142)}
+  .cel.punta{box-shadow:inset 0 0 0 2px var(--ink)}
+  .trazos{position:absolute; inset:0; z-index:0; width:100%; height:100%; pointer-events:none}
+  .trazos polyline{fill:none; stroke-linecap:round; stroke-linejoin:round; opacity:.9}
+  .trazos .actual{opacity:.85}
+  .trazos .cortado{stroke-dasharray:.25 .2; opacity:.6}
+  .trazos .pista{stroke-dasharray:.02 .3; opacity:1}
+  .nene{position:absolute; display:grid; place-items:center; font-size:clamp(14px,3.8vw,28px); line-height:1; pointer-events:none; z-index:2;
+    transition:left .075s linear, top .075s linear; filter:drop-shadow(0 2px 4px rgba(0,0,0,.7))}
+  .manera.camino{display:inline-flex; align-items:center; gap:7px; font-size:14px; cursor:default;
+    border-color:color-mix(in srgb, var(--pc) 60%, var(--line)); background:color-mix(in srgb, var(--pc) 10%, var(--surface-2))}
+  .manera.camino i{width:11px; height:11px; border-radius:50%; flex:none; background:var(--pc); box-shadow:0 0 8px var(--pc)}
+  .manera.camino.cortado{text-decoration:line-through; opacity:.5}
+  .manera.camino.era{outline:2px solid var(--lima); outline-offset:2px}
+  .coleccion.elegir .manera.camino:not(.cortado){cursor:pointer; animation:latido 1.2s infinite}
+  .coleccion.elegir .manera.camino:not(.cortado):hover{background:color-mix(in srgb, var(--pc) 25%, var(--surface-2))}
+  @keyframes latido{50%{box-shadow:0 0 18px color-mix(in srgb, var(--pc) 55%, transparent)}}
+  .mensaje.pregunta{color:var(--ink); font-family:var(--display); font-size:18px}
+  /* las misiones del mapa */
+  .misiones{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; width:min(620px,100%)}
+  .mision{display:flex; align-items:center; gap:10px; text-align:left; padding:9px 12px; border-radius:12px;
+    border:1px solid var(--line); background:var(--surface-2); transition:border-color .12s, background .12s}
+  .mision:hover{border-color:var(--faint)}
+  .mision .m-ico{flex:none; width:30px; height:30px; border-radius:9px; display:grid; place-items:center; font-size:17px;
+    background:#0d1016; border:1px solid var(--line)}
+  .mision .m-txt{flex:1; min-width:0; display:flex; flex-direction:column; line-height:1.25}
+  .mision b{font-size:14px; font-weight:600}
+  .mision small{font-size:11.5px; color:var(--faint)}
+  .mision .m-estado{flex:none; font-family:var(--mono); font-weight:700; color:var(--oro)}
+  .mision.activa{border-color:var(--c); background:color-mix(in srgb, var(--c) 12%, var(--surface-2));
+    box-shadow:0 0 18px color-mix(in srgb, var(--c) 22%, transparent)}
+  .mision.activa .m-ico{border-color:var(--c)}
+  .mision.dificil:not(.hecha){border-style:dashed; border-color:color-mix(in srgb, var(--oro) 45%, var(--line))}
+  .mision.dificil.activa{border-style:solid; border-color:var(--oro); background:color-mix(in srgb, var(--oro) 10%, var(--surface-2))}
+  .mision.hecha{border-color:color-mix(in srgb, var(--pc) 60%, var(--line)); background:color-mix(in srgb, var(--pc) 10%, var(--surface-2))}
+  .mision.hecha b{color:var(--muted)}
+  .mision.hecha .m-estado{color:var(--pc); font-size:18px}
+  .mision.repetida{animation:sacude .35s}
+  .contador{margin:-4px 0 0; font-family:var(--mono); font-size:13px; color:var(--muted)}
+  .contador .d{color:var(--lima); font-weight:700} .contador .i{color:var(--rosa); font-weight:700}
+
   footer{margin-top:48px; text-align:center; color:var(--faint); font-family:var(--mono); font-size:11.5px; letter-spacing:.04em}
 
   @media (max-width:860px){
@@ -218,11 +276,16 @@
     .nivel{min-height:0}
     .marca small{display:none}
     .metas{grid-template-columns:1fr}
+    .misiones{grid-template-columns:1fr; gap:6px}
+    .mision{padding:6px 10px}
+    .mision .m-ico{width:26px; height:26px; font-size:15px}
+    .mision:not(.activa) small{display:none}
     .det-cab .ghost{margin-left:0}
   }
   @media (prefers-reduced-motion: reduce){
     .nivel:hover, .boton:hover{transform:none}
-    .manera.nueva, .manera.repetida, .objetivo .meta-num.nuevo{animation:none}
+    .manera.nueva, .manera.repetida, .objetivo .meta-num.nuevo, .cel.obra.nueva, .coleccion.elegir .manera.camino{animation:none}
+    .nene{transition:none}
   }
 </style>
 </head>
@@ -245,7 +308,7 @@
         <p>Casi todo se puede resolver de más de una manera. Acá no alcanza con encontrar una: ganás cuando encontrás varias distintas. Cada estrella abre el nivel siguiente.</p>
       </div>
       <div class="resumen">
-        <div class="dato oro"><b id="totEstrellas">0<small>/18</small></b><span>Estrellas</span></div>
+        <div class="dato oro"><b id="totEstrellas">0<small>/30</small></b><span>Estrellas</span></div>
         <div class="dato"><b id="totManeras">0</b><span>Maneras</span></div>
         <div class="dato"><b id="totPuntos">0</b><span>Puntos</span></div>
       </div>
@@ -254,14 +317,8 @@
     <div class="mundo-cab"><h3>🔢 Formá el número</h3><span>Mundo 1</span></div>
     <div class="niveles" id="niveles"></div>
 
-    <div class="mundo-cab"><h3>🗺️ Caminos por el barrio</h3><span>Mundo 2 · Próximamente</span></div>
-    <div class="niveles">
-      <div class="nivel pronto" style="--c:var(--faint)">
-        <span class="num">🚧</span>
-        <div class="cab"><div class="tipo">Próximamente</div><h3>Muchos caminos</h3></div>
-        <p>Llevá al personaje de un lugar a otro por tres caminos distintos: el más corto, el que esquiva al perro, el que pasa por la plaza…</p>
-      </div>
-    </div>
+    <div class="mundo-cab"><h3>🗺️ Caminos por el barrio</h3><span>Mundo 2</span></div>
+    <div class="niveles" id="niveles2"></div>
 
     <div class="mundo-cab"><h3>🎒 Situaciones de todos los días</h3><span>Mundo 3 · Próximamente</span></div>
     <div class="niveles">
@@ -342,7 +399,7 @@ const NIVELES = {
        truco: '<b>Primero se multiplica, después se suma o se resta.</b> 2 × 10 + 10 es 20 + 10 = 30.' },
 };
 const FINAL = 6;
-NIVELES[FINAL] = { nombre: 'Maratón de maneras', tipo: 'Desafío final · 2 minutos', color: '#ffc53d', ops: '+-*', nums: 3,
+NIVELES[FINAL] = { nombre: 'Maratón de maneras', tipo: 'Maratón · 2 minutos', color: '#ffc53d', ops: '+-*', nums: 3,
   segundos: 120, objetivos: () => [mezclar([18, 20, 24, 30, 36])[0]],
   corto: 'Un solo número y dos minutos: ¿cuántas maneras distintas podés encontrar?',
   ejemplo: [24, ['4 × 6', '3 × 8', '12 + 12', '30 − 6', '2 × 10 + 4']],
@@ -362,6 +419,278 @@ Object.assign(NIVELES[FINAL], {
   desc: 'Usá todo lo que aprendiste: sumas, restas, multiplicaciones y hasta tres números. El reloj corre, pero un error no te saca nada: probá otra idea.',
 });
 
+// ---------- los niveles del mundo 2: Caminos por el barrio ----------
+// Los mapas: A = donde sale 🧒, B = la meta, . = calle, # = casa, P = plaza, D = el perro (se puede pasar, pero ladra),
+// W = agua, H = puente, X = obra (no se puede pasar). En cada partida se dan vuelta al azar, así no son siempre iguales.
+const MAPAS = {
+  heladeria: { lugar: 'la heladería', meta: '🍦', filas: [
+    'A........',
+    '.##.####.',
+    '.##.####.',
+    '.........',
+    '.####.##.',
+    '.####.##.',
+    '........B'] },
+  escuela: { lugar: 'la escuela', meta: '🏫', filas: [
+    'A...#....',
+    '.##.#.##.',
+    '.##...##.',
+    '.........',
+    '.#.##.##.',
+    '.#....##.',
+    '.#.##...B'] },
+  cancha: { lugar: 'la cancha', meta: '⚽', filas: [
+    'A.....##..',
+    '.##.#.##..',
+    '.##.#.....',
+    '....D.###.',
+    '.##.#.###.',
+    '.##.......',
+    '....##.#.B'] },
+  abuela: { lugar: 'la casa de la abuela', meta: '👵', filas: [
+    'A..##.....',
+    '.#.##.###.',
+    '.#....###.',
+    '.###D.....',
+    '.###.####.',
+    '.....####.',
+    '.###.....B'] },
+  biblioteca: { lugar: 'la biblioteca', meta: '📚', filas: [
+    'A....#....',
+    '.##..#.##.',
+    '.##PPP.##.',
+    '....PPP...',
+    '.##.PPP##.',
+    '.##D...##.',
+    '.........B'] },
+  kiosco: { lugar: 'el kiosco', meta: '🍭', filas: [
+    'A...##....',
+    '.##.##.##.',
+    '.##....##.',
+    '...PPPP...',
+    '.#.PPPP.#.',
+    '.#..D...#.',
+    '.#.###...B'] },
+  cine: { lugar: 'el cine', meta: '🎬', filas: [
+    'A.........',
+    '.##.##.##.',
+    '..........',
+    'WHWWWHWWHW',
+    '..........',
+    '.##.##.##.',
+    '.........B'] },
+  museo: { lugar: 'el museo', meta: '🦖', filas: [
+    'A....#....',
+    '.###.#.##.',
+    '.....#.##.',
+    '.##.......',
+    '.##.#.###.',
+    '....#.....',
+    '.##...##.B'] },
+};
+const MUNDO2 = 7, ULTIMO = 10;
+Object.assign(NIVELES, {
+  7: { nombre: 'Derecha e izquierda', tipo: 'Misiones de giros', color: '#2ee6c5', icono: '↱', mapas: ['heladeria', 'escuela'],
+       // cada lista es un lugar de misión: se elige una de esas que se pueda cumplir en el mapa
+       misiones: [['giros1', 'giros2'], ['der1', 'izq1', 'corto'], ['soloDer', 'soloIzq']], dificiles: ['u', 'zigzag'],
+       corto: 'Cada camino es una misión: doblá una sola vez, doblá solo a la derecha…',
+       truco: '<b>La derecha y la izquierda son las de 🧒, no las tuyas.</b> Si 🧒 camina para abajo, su derecha queda a tu izquierda. Mirá los puntitos: verde es derecha, rosa es izquierda.' },
+  8: { nombre: 'El perro del barrio', tipo: 'Misiones con perro', color: '#ffc53d', icono: '🐕', mapas: ['cancha', 'abuela'],
+       misiones: [['perroNo', 'perroSi'], ['giros2', 'der1', 'izq1', 'corto'], ['u', 'soloDer', 'soloIzq']], dificiles: ['perroDer', 'manzana'],
+       corto: 'Esquivá al perro, pasá a saludarlo, hacé una U… ¿Podés con todas?',
+       truco: '<b>Una U son dos giros seguidos para el mismo lado.</b> Derecha y derecha, o izquierda e izquierda: terminás yendo para el otro lado.' },
+  9: { nombre: 'Pasando por la plaza', tipo: 'Misiones en la plaza', color: '#b8ff3c', icono: '🌳', mapas: ['biblioteca', 'kiosco'],
+       misiones: [['plaza'], ['perroNo', 'perroSi', 'u'], ['pasos', 'soloDer', 'soloIzq']], dificiles: ['plazaU', 'manzana', 'zigzag'],
+       corto: 'Pasá por la plaza, llegá en justo tantos pasos, dá la vuelta manzana…',
+       truco: '<b>Para llegar en justo tantos pasos, mirá el contador.</b> Si te sobran pasos, buscá una vuelta más corta; si te faltan, dá un rodeo.' },
+  10: { nombre: '¡Calle cortada!', tipo: 'Misiones · Plan B', color: '#ff4d6d', icono: '🚧', mapas: ['cine', 'museo'], corte: true,
+       misiones: [['corto', 'giros2', 'der1'], ['u', 'pasos', 'puentes3'], ['manzana', 'zigzag', 'soloIzq', 'soloDer']], dificiles: ['manzanaDer', 'largo'],
+       corto: 'Cuando cumplís la primera misión, ¡cortan una calle! Tenés que volver a hacerla por otro lado.',
+       truco: '<b>Cuando algo no sale, no es el fin: es el momento del Plan B.</b> Siempre hay otra calle.' },
+});
+for (let n = MUNDO2; n <= ULTIMO; n++) Object.assign(NIVELES[n], {
+  marcador: ['1/2', 'Mapa'],
+  metas: ['Cumplí las 3 misiones de cada mapa', 'Elegí bien en las preguntas o cumplí las 2 misiones ⭐', 'Elegí bien y cumplí las 2 misiones ⭐'],
+  // sobra: las misiones ⭐ (difíciles) que cumplió
+  estrellas: p => {
+    if (!p.terminado) return 0;
+    const bien = p.preguntasBien === p.preguntas, mas = p.sobra >= 2;
+    return bien && mas ? 3 : bien || mas ? 2 : 1;
+  },
+  pasos: ['Elegí una misión y dibujá el camino arrastrando el dedo desde 🧒 (o tocando las casillas, o con las flechas).',
+    'Cada giro se marca con un puntito: verde si 🧒 dobla a su derecha, rosa si dobla a su izquierda.',
+    'Cumplí las 3 misiones (y la ⭐ si te animás). Después compará tus caminos: ¿cuál conviene en cada situación?'],
+  desc: 'Cada mapa trae misiones: no alcanza con llegar, hay que llegar como pide la misión. Pensá el camino antes de dibujarlo.' +
+    (NIVELES[n].corte ? ' Ojo: apenas cumplas la primera, van a cortar una calle.' : ''),
+});
+
+// ---------- los mapas: leer, recorrer y comparar caminos ----------
+// Un camino es la lista de casillas (índices) desde A hasta B, sin pasar dos veces por la misma.
+const COLORES = ['#2ee6c5', '#ff4d8d', '#ffc53d', '#8b5cff', '#3db8ff', '#b8ff3c', '#ff8a3d', '#eef1f7'];
+const pisable = ch => !'#WX'.includes(ch);
+function leerMapa(clave, darVueltaH, darVueltaV) {
+  const m = MAPAS[clave];
+  let filas = m.filas.map(f => [...f]);
+  if (darVueltaV) filas.reverse();
+  if (darVueltaH) filas = filas.map(f => f.reverse());
+  const celdas = filas.flat();
+  return { lugar: m.lugar, meta: m.meta, R: filas.length, C: filas[0].length, celdas,
+           A: celdas.indexOf('A'), B: celdas.indexOf('B'), semilla: clave.length };
+}
+function vecinos(g, i) {
+  const r = Math.floor(i / g.C), c = i % g.C, v = [];
+  if (r > 0) v.push(i - g.C);
+  if (r < g.R - 1) v.push(i + g.C);
+  if (c > 0) v.push(i - 1);
+  if (c < g.C - 1) v.push(i + 1);
+  return v.filter(j => pisable(g.celdas[j]));
+}
+const pegadas = (g, i, j) => Math.abs(Math.floor(i / g.C) - Math.floor(j / g.C)) + Math.abs(i % g.C - j % g.C) === 1;
+const pasos = p => p.length - 1;
+const pasaPor = (g, p, ch) => p.some(i => g.celdas[i] === ch);
+// el camino más barato de `desde` a `hasta`; costo(i) da cuánto cuesta pisar la casilla i (Infinity = no se puede)
+function rutaEntre(g, desde, hasta, costo) {
+  const n = g.celdas.length, dist = Array(n).fill(Infinity), prev = Array(n).fill(-1), hecho = Array(n).fill(false);
+  dist[desde] = 0;
+  for (;;) {
+    let u = -1;
+    for (let i = 0; i < n; i++) if (!hecho[i] && dist[i] < Infinity && (u < 0 || dist[i] < dist[u])) u = i;
+    if (u < 0) return null;
+    if (u === hasta) break;
+    hecho[u] = true;
+    for (const w of vecinos(g, u)) { const d = dist[u] + costo(w); if (d < dist[w]) { dist[w] = d; prev[w] = u; } }
+  }
+  const p = [];
+  for (let i = hasta; i >= 0; i = prev[i]) p.unshift(i);
+  return p;
+}
+const rutaBarata = (g, costo) => rutaEntre(g, g.A, g.B, costo);
+
+// el dibujo del mapa: casillas + una capa SVG para los caminos + el personaje
+const CLASE_CELDA = { '#': 'casa', W: 'agua', X: 'obra', P: 'plaza', H: 'puente', A: 'calle inicio', B: 'calle meta', D: 'calle' };
+function emojiCelda(g, i) {
+  const ch = g.celdas[i];
+  if (ch === '#') return (i * 7 + g.semilla) % 4 ? '' : ['🏠', '🏡', '🏢', '🏪'][(i + g.semilla) % 4];
+  return { P: i % 3 ? '' : '🌳', D: '🐕', B: g.meta, X: '🚧' }[ch] || '';
+}
+function htmlMapa(g) {
+  let h = '';
+  g.celdas.forEach((ch, i) => { h += '<div class="cel ' + (CLASE_CELDA[ch] || 'calle') + '" data-i="' + i + '">' + emojiCelda(g, i) + '</div>'; });
+  return '<div class="mapa" style="--cols:' + g.C + '; --filas:' + g.R + '">' + h +
+    '<svg class="trazos" viewBox="0 0 ' + g.C + ' ' + g.R + '" aria-hidden="true"></svg><div class="nene">🧒</div></div>';
+}
+// lista: [{ p, color, ancho, off, clase, puntos: [{ i, color }] }]
+function trazar(svg, g, lista) {
+  const x = i => i % g.C + .5, y = i => Math.floor(i / g.C) + .5;
+  svg.innerHTML = lista.filter(t => t.p.length > 1).map(t =>
+    '<polyline class="' + (t.clase || '') + '" stroke="' + t.color + '" stroke-width="' + t.ancho + '" points="' +
+    t.p.map(i => (x(i) + (t.off || 0)) + ',' + (y(i) + (t.off || 0))).join(' ') + '"/>' +
+    (t.puntos || []).map(q => '<circle cx="' + x(q.i) + '" cy="' + y(q.i) + '" r=".2" fill="' + q.color + '" stroke="#0a0c11" stroke-width=".05"/>').join('')).join('');
+}
+function ponerNene(caja, g, i) {
+  const n = caja.querySelector('.nene');
+  n.style.left = (i % g.C) * 100 / g.C + '%'; n.style.top = Math.floor(i / g.C) * 100 / g.R + '%';
+  n.style.width = 100 / g.C + '%'; n.style.height = 100 / g.R + '%';
+}
+const describir = (g, h) => (h.mision ? h.mision.ico + ' ' : '') + h.nombre + ' · ' + pasos(h.p) + ' pasos' + (pasaPor(g, h.p, 'D') ? ' 🐕' : '') + (pasaPor(g, h.p, 'P') ? ' 🌳' : '');
+
+// ---------- misiones: cómo tiene que ser cada camino ----------
+// Los giros se cuentan desde donde mira 🧒: si va para abajo y dobla hacia la izquierda de la pantalla, es su derecha.
+const rumbo = (a, b) => b - a === 1 ? 1 : a - b === 1 ? 3 : b > a ? 2 : 0;   // 0 arriba, 1 derecha, 2 abajo, 3 izquierda
+function giros(p) {
+  const t = [];
+  for (let k = 2; k < p.length; k++) {
+    const d1 = rumbo(p[k - 2], p[k - 1]), d2 = rumbo(p[k - 1], p[k]);
+    if (d1 !== d2) t.push({ lado: (d2 - d1 + 4) % 4 === 1 ? 'D' : 'I', en: p[k - 1] });
+  }
+  return t;
+}
+// todo lo que una misión puede pedir de un camino
+function rasgos(g, p) {
+  const t = giros(p);
+  let seg = t.length ? 1 : 0, r = 1, zig = 1, zigzag = false, manzanaDer = false;
+  for (let k = 1; k < t.length; k++) {
+    r = t[k].lado === t[k - 1].lado ? r + 1 : 1;
+    zig = t[k].lado !== t[k - 1].lado ? zig + 1 : 1;
+    seg = Math.max(seg, r);
+    if (zig >= 4) zigzag = true;
+    // la vuelta manzana (3 giros seguidos para el mismo lado) y, más adelante, un giro a la derecha
+    if (r >= 3 && t.slice(k + 1).some(x => x.lado === 'D')) manzanaDer = true;
+  }
+  return { t, der: t.filter(x => x.lado === 'D').length, izq: t.filter(x => x.lado === 'I').length, total: t.length,
+           seg, zigzag, manzanaDer, pasos: pasos(p), perro: pasaPor(g, p, 'D'), plaza: pasaPor(g, p, 'P'),
+           puentes: p.filter(i => g.celdas[i] === 'H').length };
+}
+// c: datos del mapa (min: los pasos del camino más corto; n: unos pasos justos que se pueden hacer)
+const MISIONES = {
+  giros1: () => ({ ico: '↪', texto: 'Llegá doblando una sola vez', ok: r => r.total === 1 }),
+  giros2: () => ({ ico: '↪', texto: 'Llegá doblando exactamente 2 veces', ok: r => r.total === 2 }),
+  der1: () => ({ ico: '↱', texto: 'Doblá a la derecha una sola vez', sub: 'A la izquierda, todas las que quieras', ok: r => r.der === 1 }),
+  izq1: () => ({ ico: '↰', texto: 'Doblá a la izquierda una sola vez', sub: 'A la derecha, todas las que quieras', ok: r => r.izq === 1 }),
+  soloDer: () => ({ ico: '↱', texto: 'Llegá doblando solo a la derecha', sub: 'Nunca a la izquierda', ok: r => r.der > 0 && !r.izq }),
+  soloIzq: () => ({ ico: '↰', texto: 'Llegá doblando solo a la izquierda', sub: 'Nunca a la derecha', ok: r => r.izq > 0 && !r.der }),
+  corto: c => ({ ico: '⚡', texto: 'Por el camino más corto', sub: c.min + ' pasos', ok: r => r.pasos === c.min }),
+  pasos: c => ({ ico: '👣', texto: 'Llegá en exactamente ' + c.n + ' pasos', sub: 'Ni uno más, ni uno menos', ok: r => r.pasos === c.n }),
+  largo: c => ({ ico: '🐢', texto: 'Hacé un paseo de ' + (c.min + 8) + ' pasos o más', ok: r => r.pasos >= c.min + 8 }),
+  u: () => ({ ico: '⤴', texto: 'Hacé una U', sub: 'Dos giros seguidos para el mismo lado', ok: r => r.seg >= 2 }),
+  manzana: () => ({ ico: '🔄', texto: 'Dá la vuelta manzana', sub: 'Tres giros seguidos para el mismo lado', ok: r => r.seg >= 3 }),
+  manzanaDer: () => ({ ico: '🔄', texto: 'Dá la vuelta manzana y después doblá a la derecha', sub: 'Tres giros seguidos para el mismo lado, y más adelante uno a la derecha', ok: r => r.manzanaDer }),
+  zigzag: () => ({ ico: '〰', texto: 'Hacé zigzag', sub: 'Derecha, izquierda, derecha, izquierda (o al revés), seguidos', ok: r => r.zigzag }),
+  perroNo: () => ({ ico: '🐕', texto: 'Esquivá al perro', sub: 'Que tu camino no pase por donde está', ok: r => !r.perro }),
+  perroSi: () => ({ ico: '🐕', texto: 'Pasá a saludar al perro', ok: r => r.perro }),
+  perroDer: () => ({ ico: '🐕', texto: 'Esquivá al perro doblando solo a la derecha', ok: r => !r.perro && r.der > 0 && !r.izq }),
+  plaza: () => ({ ico: '🌳', texto: 'Pasá por la plaza', ok: r => r.plaza }),
+  plazaU: () => ({ ico: '🌳', texto: 'Pasá por la plaza y hacé una U', ok: r => r.plaza && r.seg >= 2 }),
+  puentes3: () => ({ ico: '🌉', texto: 'Cruzá el río 3 veces', sub: 'Pasá por 3 puentes', ok: r => r.puentes >= 3 }),
+};
+const DE_RESERVA = ['giros2', 'der1', 'izq1', 'corto', 'u', 'largo'];
+
+// muchos caminos posibles del mapa, para saber qué misiones se pueden cumplir (y para dar pistas).
+// Son rutas al azar, algunas pasando por una o dos casillas cualquiera: así salen rodeos, U y vueltas manzana.
+function muestras(g, cuantas = 450) {
+  const corto = rutaBarata(g, () => 1);
+  const r = [corto], vistos = new Set([corto.join()]), libres = [];
+  g.celdas.forEach((ch, i) => { if (pisable(ch) && i !== g.A && i !== g.B) libres.push(i); });
+  for (let s = 0; s < cuantas; s++) {
+    const paradas = mezclar(libres.slice()).slice(0, s % 3);
+    let p = [g.A];
+    for (const w of [...paradas, g.B]) {
+      const usadas = new Set(p);
+      const tramo = rutaEntre(g, p[p.length - 1], w, i => usadas.has(i) || (i === g.B && w !== g.B) ? Infinity : 1 + Math.random() * 3);
+      if (!tramo) { p = null; break; }
+      p = p.concat(tramo.slice(1));
+    }
+    if (p && !vistos.has(p.join())) { vistos.add(p.join()); r.push(p); }
+  }
+  return r;
+}
+// arma las misiones de un mapa: una por cada lugar del nivel + una ⭐ difícil, todas posibles en este mapa
+function armarMisiones(g, nivel, caminos, antes = []) {
+  const R = caminos.map(p => ({ p, r: rasgos(g, p) }));
+  const min = pasos(rutaBarata(g, () => 1));
+  const justos = [...new Set(R.map(x => x.r.pasos))].filter(n => n >= min + 2 && n <= min + 6);
+  const c = { min, n: justos.length ? justos[Math.floor(Math.random() * justos.length)] : min };
+  const elegidas = antes.slice();
+  const tomar = (ids, dificil) => {
+    for (const id of [...mezclar(ids.slice()), ...mezclar(DE_RESERVA.slice())]) {
+      if (elegidas.some(m => m && m.id === id)) continue;
+      const m = { id, dificil, ...MISIONES[id](c) };
+      m.ejemplos = R.filter(x => m.ok(x.r)).map(x => x.p);
+      if (m.ejemplos.length) return m;
+    }
+    return null;
+  };
+  nivel.misiones.forEach((ids, k) => { if (!elegidas[k]) elegidas[k] = tomar(ids, false); });
+  if (!elegidas[nivel.misiones.length]) elegidas[nivel.misiones.length] = tomar(nivel.dificiles, true);
+  return elegidas.filter(Boolean);
+}
+// "doblaste 2 veces a la derecha y 1 a la izquierda": para explicar por qué un camino no cumple la misión
+function contarGiros(r) {
+  const v = n => n === 1 ? '1 vez' : n + ' veces';
+  if (!r.total) return 'no doblaste nunca';
+  return 'doblaste ' + [r.der ? v(r.der) + ' a la derecha' : '', r.izq ? v(r.izq) + ' a la izquierda' : ''].filter(Boolean).join(' y ');
+}
+
 // ---------- sesión y progreso ----------
 const CLAVE = 'planb.' + (sesion && sesion.apodo ? sesion.apodo.toLowerCase() : 'invitado');
 // progreso = { 1: { estrellas: 0-3, mejor: puntos, maneras: las más que encontró en una partida }, ... }
@@ -371,7 +700,7 @@ const prog = n => progreso[n] || { estrellas: 0, mejor: 0, maneras: 0 };
 const guardarProgreso = () => { try { localStorage.setItem(CLAVE, JSON.stringify(progreso)); } catch (e) {} };
 function unirProgreso(a, b) {
   const r = {};
-  for (let n = 1; n <= FINAL; n++) {
+  for (let n = 1; n <= ULTIMO; n++) {
     if (!a[n] && !b[n]) continue;
     const x = a[n] || {}, y = b[n] || {};
     r[n] = { estrellas: Math.max(x.estrellas || 0, y.estrellas || 0), mejor: Math.max(x.mejor || 0, y.mejor || 0),
@@ -380,8 +709,11 @@ function unirProgreso(a, b) {
   return r;
 }
 
-// se desbloquean de a uno: el nivel n se abre con al menos 1 estrella en el n-1
-const abierto = n => n === 1 || esAdmin || prog(n - 1).estrellas > 0;
+// se desbloquean de a uno: el nivel n se abre con al menos 1 estrella en el n-1.
+// Cada mundo arranca abierto: se puede ir directo a los caminos sin terminar los números.
+const abierto = n => n === 1 || n === MUNDO2 || esAdmin || prog(n - 1).estrellas > 0;
+const nombreNivel = n => n === FINAL ? 'Desafío final' : n >= MUNDO2 ? 'Caminos ' + (n - MUNDO2 + 1) : 'Nivel ' + n;
+const iconoNivel = n => n === FINAL ? '∞' : NIVELES[n].icono || '#' + n;
 const estrellas = n => '<span class="estrellas" aria-label="' + n + ' de 3 estrellas">' +
   '<b>★</b>'.repeat(n) + '★'.repeat(3 - n) + '</span>';
 
@@ -441,36 +773,37 @@ function soluciones(objetivo, nivel) {
 
 // ---------- pantalla de inicio ----------
 function pintarInicio() {
-  let tot = 0, man = 0, pts = 0, html = '';
-  for (let n = 1; n <= FINAL; n++) {
+  let tot = 0, man = 0, pts = 0;
+  const tarjeta = n => {
     const j = NIVELES[n], p = prog(n);
     tot += p.estrellas; man += p.maneras || 0; pts += p.mejor;
-    const icono = n === FINAL ? '∞' : '#' + n;
-    if (!abierto(n)) {
-      html += '<button class="nivel bloqueada" aria-disabled="true" style="--c:' + j.color + '">' +
-        '<span class="num">🔒</span>' +
-        '<div class="cab"><div class="tipo">' + (n === FINAL ? 'Desafío final' : 'Nivel ' + n) + '</div><h3>' + esc(j.nombre) + '</h3></div>' +
-        '<p>Conseguí al menos 1 estrella en el nivel ' + (n - 1) + ' para desbloquearlo.</p>' +
-        '<div class="pie">' + estrellas(0) + '<span class="mejor">Bloqueado</span></div></button>';
-      continue;
-    }
-    html += '<button class="nivel" data-n="' + n + '" style="--c:' + j.color + '">' +
-      '<span class="num">' + icono + '</span>' +
+    if (!abierto(n)) return '<button class="nivel bloqueada" aria-disabled="true" style="--c:' + j.color + '">' +
+      '<span class="num">🔒</span>' +
+      '<div class="cab"><div class="tipo">' + nombreNivel(n) + '</div><h3>' + esc(j.nombre) + '</h3></div>' +
+      '<p>Conseguí al menos 1 estrella en ' + (n - 1 === FINAL ? 'el desafío final' : nombreNivel(n - 1).toLowerCase()) + ' para desbloquearlo.</p>' +
+      '<div class="pie">' + estrellas(0) + '<span class="mejor">Bloqueado</span></div></button>';
+    return '<button class="nivel" data-n="' + n + '" style="--c:' + j.color + '">' +
+      '<span class="num">' + iconoNivel(n) + '</span>' +
       '<div class="cab"><div class="tipo">' + esc(j.tipo) + '</div><h3>' + esc(j.nombre) + '</h3></div>' +
       '<p>' + esc(j.corto) + '</p>' +
       '<div class="pie">' + estrellas(p.estrellas) +
       '<span class="mejor">' + (p.mejor ? 'Mejor <b>' + p.mejor + '</b>' : 'Sin jugar') + '</span></div>' +
       '</button>';
-  }
+  };
+  let html = '';
+  for (let n = 1; n <= FINAL; n++) html += tarjeta(n);
   $('niveles').innerHTML = html;
-  $('totEstrellas').innerHTML = tot + '<small>/18</small>';
+  html = '';
+  for (let n = MUNDO2; n <= ULTIMO; n++) html += tarjeta(n);
+  $('niveles2').innerHTML = html;
+  $('totEstrellas').innerHTML = tot + '<small>/' + ULTIMO * 3 + '</small>';
   $('totManeras').textContent = man;
   $('totPuntos').textContent = pts;
 }
-$('niveles').addEventListener('click', e => {
+['niveles', 'niveles2'].forEach(id => $(id).addEventListener('click', e => {
   const b = e.target.closest('.nivel[data-n]');
   if (b) location.hash = 'nivel-' + b.dataset.n;
-});
+}));
 
 // ---------- detalle de un nivel ----------
 let nivelActual = 1;
@@ -478,12 +811,26 @@ function pintarDetalle(n) {
   nivelActual = n;
   const j = NIVELES[n], p = prog(n);
   $('detalle').style.setProperty('--c', j.color);
-  $('dNum').textContent = n === FINAL ? '∞' : '#' + n;
-  $('dTipo').textContent = n === FINAL ? j.tipo : 'Nivel ' + n + ' · ' + j.tipo;
+  $('dNum').textContent = iconoNivel(n);
+  $('dTipo').textContent = n === FINAL ? j.tipo : nombreNivel(n) + ' · ' + j.tipo;
   $('dTitulo').textContent = j.nombre;
-  const [obj, maneras] = j.ejemplo;
-  $('dEjemplo').innerHTML = '<span class="meta-num">' + obj + '</span>' +
-    '<div class="coleccion">' + maneras.map(t => '<span class="manera">' + t + '</span>').join('') + '</div>';
+  if (j.mapas) {
+    // un mapa con 3 caminos de muestra (salen distintos cada vez)
+    // un mapa con un camino de muestra para cada misión (salen distintos cada vez)
+    const g = leerMapa(j.mapas[0]), hs = [];
+    armarMisiones(g, j, muestras(g, 250)).filter(x => !x.dificil).forEach((x, k) => {
+      const p = x.ejemplos.find(p => !hs.some(h => h.p.join() === p.join()));
+      if (p) hs.push({ p, color: COLORES[k], nombre: x.texto, mision: x });
+    });
+    $('dEjemplo').innerHTML = '<div class="mapa-caja">' + htmlMapa(g) + '</div>' +
+      '<div class="coleccion">' + hs.map(h => '<span class="manera camino" style="--pc:' + h.color + '"><i></i>' + h.mision.ico + ' ' + esc(h.nombre) + '</span>').join('') + '</div>';
+    trazar($('dEjemplo').querySelector('svg'), g, hs.map((h, k) => ({ p: h.p, color: h.color, ancho: .16, off: (k - 1) * .1 })));
+    ponerNene($('dEjemplo'), g, g.A);
+  } else {
+    const [obj, maneras] = j.ejemplo;
+    $('dEjemplo').innerHTML = '<span class="meta-num">' + obj + '</span>' +
+      '<div class="coleccion">' + maneras.map(t => '<span class="manera">' + t + '</span>').join('') + '</div>';
+  }
   $('dTruco').innerHTML = j.truco;
   $('dDesc').textContent = j.desc;
   $('dPasos').innerHTML = j.pasos.map((t, i) => '<li><span>' + (i + 1) + '</span>' + esc(t) + '</li>').join('');
@@ -497,6 +844,12 @@ $('jugarBtn').addEventListener('click', () => { location.hash = 'jugar-' + nivel
 // pantalla final: todas las maneras que encontró, número por número
 function pantallaFinal(p) {
   if (!p.coleccion || !p.coleccion.length) return '';
+  if (p.coleccion[0].mapa) return '<p>Tus misiones cumplidas:</p>' + p.coleccion.map(c => {
+    const vale = c.hechos.filter(h => !h.cortado);
+    return '<div class="grupo"><h4>' + c.mapa.meta + ' Hasta ' + esc(c.mapa.lugar) + ' · <b>' + vale.length + '</b> misi' + (vale.length === 1 ? 'ón' : 'ones') + '</h4>' +
+      '<div class="cuentas">' + vale.map(h => '<span class="bien" style="color:' + h.color + '">' +
+        (h.mision ? h.mision.ico + ' ' + esc(h.mision.texto) : h.nombre) + '<small>' + pasos(h.p) + ' pasos</small></span>').join('') + '</div></div>';
+  }).join('');
   return '<p>Tu colección de maneras:</p>' + p.coleccion.map(g =>
     '<div class="grupo"><h4>El <b>' + g.objetivo + '</b> · ' + g.maneras.length + ' manera' + (g.maneras.length === 1 ? '' : 's') + '</h4>' +
     '<div class="cuentas">' + g.maneras.map(c => '<span class="bien">' + ver(c) + '</span>').join('') + '</div></div>').join('');
@@ -504,7 +857,7 @@ function pantallaFinal(p) {
 
 // ---------- motor común (motor.js) ----------
 Motor.iniciar({
-  app: 'planb', clave: 'planb', niveles: NIVELES, ultimo: FINAL,
+  app: 'planb', clave: 'planb', niveles: NIVELES, ultimo: ULTIMO,
   etiquetas: { aciertos: 'Maneras' },
   extra: pantallaFinal,
   sync: {
@@ -519,13 +872,13 @@ Motor.iniciar({
     guardarProgreso();
   },
   abierto,
-  nombre: n => n === FINAL ? 'Desafío final' : 'Nivel ' + n,
+  nombre: nombreNivel,
   rutaNivel: n => 'nivel-' + n,
   premio: { icono: '★', uno: 'estrella', varios: 'estrellas', nuevo: '⭐ Nueva estrella' },
   titulos: ['Seguí probando', '¡Bien pensado!', '¡Muchas ideas!', '¡Sos un genio del Plan B!'],
   textos: {
-    dominado: n => n === FINAL ? '¡Maratón superada!' : '¡Encontraste un montón de maneras!',
-    desbloqueado: n => n === FINAL ? 'Desafío final desbloqueado' : 'Nivel ' + n + ' desbloqueado',
+    dominado: n => n === FINAL ? '¡Maratón superada!' : n >= MUNDO2 ? '¡Encontraste un montón de caminos!' : '¡Encontraste un montón de maneras!',
+    desbloqueado: n => nombreNivel(n) + ' desbloqueado',
   },
 });
 
@@ -699,11 +1052,354 @@ function formaElNumero(n) {
     }
   };
 }
+// ---------- el juego: caminos por el barrio ----------
+// Cada mapa trae 3 misiones (y una ⭐ difícil): hay que llegar a la meta como pide cada una.
+// Con las 3 cumplidas se comparan los caminos: una pregunta ("estás apurado", "te da miedo el perro"…)
+// y hay que tocar el camino que conviene.
+function preguntasDe(g, caminos) {
+  const L = caminos.map(h => pasos(h.p)), min = Math.min(...L), max = Math.max(...L), qs = [];
+  const perro = h => pasaPor(g, h.p, 'D'), plaza = h => pasaPor(g, h.p, 'P');
+  if (caminos.some(perro) && !caminos.every(perro)) qs.push({ lugar: true,
+    t: '🐕 Te dan un poco de miedo los perros. ¿Qué camino elegís?', ok: h => !perro(h),
+    si: () => 'no pasa por el perro', no: () => 'pasa justo al lado del perro 🐕' });
+  if (caminos.some(plaza) && !caminos.every(plaza)) qs.push({ lugar: true,
+    t: '🌳 Querés pasar por la plaza a jugar un rato. ¿Qué camino elegís?', ok: plaza,
+    si: () => 'pasa por la plaza', no: () => 'no pasa por la plaza' });
+  if (min < max) {
+    qs.push({ t: '⏰ Estás apurado: ¡llegás tarde! ¿Qué camino elegís?', ok: h => pasos(h.p) === min,
+      si: () => 'es el más corto: ' + min + ' pasos', no: h => 'tiene ' + pasos(h.p) + ' pasos, y hay uno de ' + min });
+    qs.push({ t: '🚶 Tenés tiempo y querés pasear un montón. ¿Qué camino elegís?', ok: h => pasos(h.p) === max,
+      si: () => 'es el más largo: ' + max + ' pasos', no: h => 'tiene ' + pasos(h.p) + ' pasos, y hay uno de ' + max });
+  }
+  return qs;
+}
+
+function caminos(n) {
+  return m => {
+    const nivel = NIVELES[n];
+    const mapas = nivel.mapas.map(k => leerMapa(k, Math.random() < .5, Math.random() < .5));
+    let k = -1, g, hechos, misiones, activa, actual, fase, cortada, pistaP, pregunta, caminando = false, arrastrando = false;
+    Object.assign(partida, { coleccion: [], terminado: false, preguntas: 0, preguntasBien: 0 });
+    m.escenario.classList.add('caminos');
+    m.escenario.innerHTML =
+      '<p class="consigna" id="consigna"></p>' +
+      '<div class="misiones" id="misiones"></div>' +
+      '<div class="mapa-caja" id="mapaCaja"></div>' +
+      '<p class="contador" id="contador" aria-live="polite"></p>' +
+      '<p class="mensaje" id="mensaje" aria-live="polite"></p>' +
+      '<div class="coleccion" id="coleccion"></div>' +
+      '<div class="acciones">' +
+        '<button class="ghost" id="atrasBtn">↩ Atrás</button>' +
+        '<button class="ghost" id="borrarBtn">✕ Empezar de nuevo</button>' +
+        '<button class="ghost" id="pistaBtn">💡 Pista</button>' +
+        '<button class="boton" id="siguienteBtn" hidden></button>' +
+      '</div>';
+    const msj = (t, clase = '') => { $('mensaje').textContent = t; $('mensaje').className = 'mensaje ' + clase; };
+    const validos = () => hechos.filter(h => !h.cortado);
+    const pendientes = () => misiones.filter(x => !x.hecha);
+    const comunesListas = () => misiones.every(x => x.dificil || x.hecha);
+    const botonSiguiente = texto => {
+      $('siguienteBtn').hidden = !texto;
+      if (texto) $('siguienteBtn').innerHTML = texto + '<kbd>Enter</kbd>';
+    };
+
+    function pintar() {
+      const lista = hechos.map((h, i) => ({ p: h.p, color: h.cortado ? '#5f6a80' : h.color, ancho: h.marca === 'era' ? .3 : .16,
+        off: ((i % 5) - 2) * .08, clase: h.cortado ? 'cortado' : '' }));
+      if (pistaP) lista.push({ p: pistaP, color: '#ffc53d', ancho: .14, clase: 'pista' });
+      // el camino que se está dibujando, con un puntito en cada giro: verde a la derecha, rosa a la izquierda
+      const t = giros(actual);
+      lista.push({ p: actual, color: '#eef1f7', ancho: .3, clase: 'actual',
+        puntos: t.map(x => ({ i: x.en, color: x.lado === 'D' ? '#b8ff3c' : '#ff4d8d' })) });
+      trazar($('mapaCaja').querySelector('svg'), g, lista);
+      const fin = actual[actual.length - 1];
+      $('mapaCaja').querySelectorAll('.cel.punta').forEach(c => c.classList.remove('punta'));
+      if (fase === 'dibujar' && !caminando) $('mapaCaja').querySelector('[data-i="' + fin + '"]').classList.add('punta');
+      const r = rasgos(g, actual);
+      $('contador').innerHTML = '<span class="d">↱ ' + r.der + '</span> a la derecha · <span class="i">↰ ' + r.izq + '</span> a la izquierda · 👣 ' + r.pasos + ' pasos';
+    }
+    function pintarMisiones() {
+      $('misiones').innerHTML = misiones.map((x, i) =>
+        '<button class="mision' + (x === activa && fase === 'dibujar' ? ' activa' : '') + (x.hecha ? ' hecha' : '') + (x.dificil ? ' dificil' : '') +
+        '" data-m="' + i + '"' + (x.hecha ? ' style="--pc:' + x.hecha.color + '"' : '') + '>' +
+        '<span class="m-ico">' + x.ico + '</span>' +
+        '<span class="m-txt"><b>' + esc(x.texto) + '</b>' + (x.sub ? '<small>' + esc(x.sub) + '</small>' : '') + '</span>' +
+        '<span class="m-estado">' + (x.hecha ? '✓' : x.dificil ? '⭐' : '') + '</span></button>').join('');
+    }
+    function pintarColeccion(nuevo) {
+      $('coleccion').innerHTML = hechos.map((h, i) =>
+        '<button class="manera camino' + (h.cortado ? ' cortado' : '') + (h.marca ? ' ' + h.marca : '') + (i === nuevo ? ' nueva' : '') +
+        '" data-k="' + i + '" style="--pc:' + h.color + '"><i></i>' + describir(g, h) + '</button>').join('');
+    }
+    function elegirActiva() {
+      if (!activa || activa.hecha) activa = pendientes().find(x => !x.dificil) || pendientes()[0] || null;
+      pintarMisiones();
+    }
+
+    function siguienteMapa() {
+      k++;
+      g = mapas[k]; hechos = []; actual = [g.A]; fase = 'dibujar'; cortada = false; pistaP = null; activa = null;
+      g.muestras = muestras(g);
+      misiones = armarMisiones(g, nivel, g.muestras);
+      m.marcador((k + 1) + '/' + mapas.length, 'Mapa');
+      $('consigna').textContent = 'Misiones para llegar a ' + g.lugar + ' ' + g.meta;
+      $('mapaCaja').innerHTML = htmlMapa(g);
+      $('coleccion').classList.remove('elegir');
+      partida.coleccion.push({ mapa: g, hechos });
+      const mapa = $('mapaCaja').querySelector('.mapa');
+      const celdaEn = (x, y) => {
+        const c = document.elementFromPoint(x, y);
+        const cel = c && c.closest('.cel');
+        return cel && mapa.contains(cel) ? +cel.dataset.i : -1;
+      };
+      let px = 0, py = 0;
+      mapa.addEventListener('pointerdown', e => {
+        const i = celdaEn(e.clientX, e.clientY);
+        if (i < 0) return;
+        e.preventDefault();
+        arrastrando = true; px = e.clientX; py = e.clientY;
+        pisar(i, true);
+      });
+      // si el dedo va rápido salta casillas: se recorre el tramo de a pedacitos para no perder ninguna
+      mapa.addEventListener('pointermove', e => {
+        if (!arrastrando) return;
+        const lado = mapa.getBoundingClientRect().width / g.C;
+        const n = Math.max(1, Math.ceil(Math.hypot(e.clientX - px, e.clientY - py) / (lado / 4)));
+        for (let s = 1; s <= n; s++) {
+          const i = celdaEn(px + (e.clientX - px) * s / n, py + (e.clientY - py) * s / n);
+          if (i >= 0) pisar(i, false);
+        }
+        px = e.clientX; py = e.clientY;
+      });
+      ponerNene($('mapaCaja'), g, g.A);
+      botonSiguiente('');
+      elegirActiva();
+      msj('Elegí una misión (o empezá por la marcada) y dibujá el camino desde 🧒 hasta ' + g.meta + '.');
+      pintar(); pintarColeccion();
+    }
+
+    // tocar (o pasar arrastrando por) la casilla i
+    function pisar(i, toque) {
+      if (fase !== 'dibujar' || caminando || !partida.activa) return;
+      const j = actual.indexOf(i);
+      if (j >= 0) {                     // volver a una casilla del camino: se borra lo que venía después
+        if (j < actual.length - 1) { actual.length = j + 1; pintar(); }
+        return;
+      }
+      const fin = actual[actual.length - 1], ch = g.celdas[i];
+      if (!pegadas(g, fin, i)) {
+        // un toque en línea recta por la calle avanza hasta ahí de una vez
+        const tramo = toque ? enLinea(fin, i) : null;
+        if (tramo) tramo.forEach(t => pisar(t, false));
+        else if (toque) msj('Avanzá por la calle: tocá una casilla pegada a la punta del camino.', 'ojo');
+        return;
+      }
+      if (!pisable(ch)) {
+        if (toque) msj({ '#': 'Por adentro de las casas no se puede pasar.', W: 'Por el agua no: buscá un puente.', X: 'Ahí hay una obra 🚧: buscá otra calle.' }[ch], 'ojo');
+        return;
+      }
+      actual.push(i); pistaP = null;
+      bip(320 + Math.min(actual.length, 30) * 14, .04, 'sine', .03);
+      pintar();
+      if (i === g.B) llegar();
+    }
+    // las casillas de fin a i si están en la misma fila o columna, todas por la calle y sin pisar el camino
+    function enLinea(fin, i) {
+      const fr = Math.floor(fin / g.C), fc = fin % g.C, r = Math.floor(i / g.C), c = i % g.C;
+      if (fr !== r && fc !== c) return null;
+      const paso = fr === r ? Math.sign(c - fc) : Math.sign(r - fr) * g.C, tramo = [];
+      for (let t = fin + paso; ; t += paso) {
+        if (!pisable(g.celdas[t]) || actual.includes(t)) return null;
+        tramo.push(t);
+        if (t === i) return tramo;
+      }
+    }
+    function atras() {
+      if (fase !== 'dibujar' || caminando || actual.length < 2) return;
+      actual.pop(); pintar();
+    }
+    function empezarDeNuevo() {
+      if (fase !== 'dibujar' || caminando) return;
+      actual = [g.A]; pintar();
+    }
+    function sacudir(el) { if (el) { el.classList.remove('repetida'); void el.offsetWidth; el.classList.add('repetida'); } }
+
+    function llegar() {
+      arrastrando = false;
+      const p = actual.slice(), r = rasgos(g, p);
+      const igual = validos().find(h => h.p.length === p.length && h.p.every((x, i) => x === p[i]));
+      if (igual) {
+        msj('¡Ese camino ya lo usaste para otra misión! Dibujá uno distinto.', 'ojo');
+        sacudir($('coleccion').querySelector('[data-k="' + hechos.indexOf(igual) + '"]'));
+        actual = [g.A]; pintar();
+        return;
+      }
+      // cumple la misión elegida; si no, alguna otra que falte
+      const cumple = activa && !activa.hecha && activa.ok(r) ? activa : pendientes().find(x => x.ok(r));
+      if (!cumple) {
+        m.error(true);
+        msj('Llegaste, pero ' + contarGiros(r) + ' en ' + r.pasos + ' pasos: no cumple ' + (activa ? 'la misión “' + activa.texto + '”' : 'ninguna misión') + '. ¡Probá otra vez!', 'mal');
+        sacudir($('misiones').querySelector('.activa'));
+        actual = [g.A]; pintar();
+        return;
+      }
+      // ¡misión cumplida!
+      const h = { p, color: COLORES[hechos.length % COLORES.length], nombre: 'Camino ' + (hechos.length + 1), mision: cumple };
+      hechos.push(h); cumple.hecha = h;
+      if (cumple.dificil) partida.sobra++;
+      const otra = cumple !== activa && activa;
+      pintarColeccion(hechos.length - 1); pintarMisiones();
+      m.flota('+' + m.acierto(cumple.dificil ? 25 : 10), $('misiones').querySelector('[data-m="' + misiones.indexOf(cumple) + '"]'));
+      // el personaje recorre el camino
+      caminando = true; pintar();
+      p.forEach((i, s) => m.espera(() => ponerNene($('mapaCaja'), g, i), s * 75));
+      m.espera(() => {
+        caminando = false; actual = [g.A];
+        ponerNene($('mapaCaja'), g, g.A);
+        if (nivel.corte && !cortada) return cortarCalle(h);
+        elegirActiva();
+        const faltan = misiones.filter(x => !x.dificil && !x.hecha).length;
+        const dijo = '¡Misión cumplida! ' + cumple.ico + ' ' + cumple.texto + (otra ? ' (no era la que elegiste, ¡pero vale!)' : '') + '.';
+        if (faltan) msj(dijo + ' Te ' + (faltan === 1 ? 'falta 1' : 'faltan ' + faltan) + '.', 'bien');
+        else {
+          const dificil = pendientes().find(x => x.dificil);
+          msj(dijo + (dificil ? ' ¿Te animás a la misión ⭐? Vale una estrella. Si no, compará tus caminos.' : ' ¡Cumpliste todas! Ahora compará tus caminos.'), 'bien');
+          botonSiguiente('Comparar caminos →');
+        }
+        pintar();
+      }, p.length * 75 + 250);
+    }
+
+    // nivel "¡Calle cortada!": después de la primera misión, una obra corta una calle de ese camino
+    // y hay que volver a cumplirla por otro lado. Las misiones que ya no se puedan hacer se cambian por otras.
+    function cortarCalle(h) {
+      cortada = true;
+      const medio = h.p.length / 2;
+      const opciones = h.p.slice(1, -1).filter(i => g.celdas[i] === '.')
+        .sort((a, b) => Math.abs(h.p.indexOf(a) - medio) - Math.abs(h.p.indexOf(b) - medio));
+      const c = opciones.find(i => { g.celdas[i] = 'X'; const ok = rutaBarata(g, () => 1); g.celdas[i] = '.'; return ok; });
+      if (c === undefined) { elegirActiva(); msj('¡Misión cumplida! Seguí con la próxima.', 'bien'); return pintar(); }
+      g.celdas[c] = 'X';
+      const cel = $('mapaCaja').querySelector('[data-i="' + c + '"]');
+      cel.className = 'cel obra nueva'; cel.textContent = '🚧';
+      h.cortado = true; h.mision.hecha = null;
+      if (h.mision.dificil) partida.sobra--;
+      g.muestras = muestras(g);
+      misiones = armarMisiones(g, nivel, g.muestras, misiones.map(x => x.hecha || x.ok && g.muestras.some(p => x.ok(rasgos(g, p))) ? x : null));
+      activa = h.mision.ok && misiones.includes(h.mision) ? h.mision : null;
+      elegirActiva();
+      bip(180, .3, 'square', .04);
+      msj('🚧 ¡Uy! Cortaron una calle por una obra y ese camino ya no sirve. ¡Hora del Plan B! Volvé a cumplir la misión por otro lado.', 'ojo');
+      pintarColeccion(); pintar();
+    }
+
+    function comparar() {
+      if (!comunesListas()) return;
+      const qs = preguntasDe(g, validos());
+      actual = [g.A]; pistaP = null;
+      if (!qs.length) {
+        fase = 'fin'; pintar(); pintarMisiones();
+        msj('¡Tus caminos tienen todos los mismos pasos! Cualquiera sirve igual.', 'bien');
+        return listoMapa();
+      }
+      // primero las de los lugares del mapa (el perro, la plaza); si no hay, cualquiera
+      const lugares = qs.filter(q => q.lugar);
+      pregunta = lugares.length ? lugares[Math.floor(Math.random() * lugares.length)] : qs[Math.floor(Math.random() * qs.length)];
+      fase = 'pregunta';
+      botonSiguiente('');
+      $('coleccion').classList.add('elegir');
+      msj(pregunta.t + ' Tocá el camino.', 'pregunta');
+      pintar(); pintarMisiones();
+    }
+    function responder(h) {
+      if (fase !== 'pregunta' || h.cortado) return;
+      fase = 'fin';
+      partida.preguntas++;
+      const bien = pregunta.ok(h);
+      validos().forEach(x => { x.marca = pregunta.ok(x) ? 'era' : ''; });
+      $('coleccion').classList.remove('elegir');
+      if (bien) {
+        partida.preguntasBien++; m.bono(20); bip(880, .18, 'triangle', .06);
+        msj('¡Bien elegido! El ' + h.nombre.toLowerCase() + ' ' + pregunta.si(h) + '. ¿Viste? El mejor camino depende de lo que necesitás.', 'bien');
+      } else {
+        m.error(true);
+        msj('Mmm… el ' + h.nombre.toLowerCase() + ' ' + pregunta.no(h) + '. Te convenía ' + (validos().filter(pregunta.ok).length > 1 ? 'uno de los que quedaron marcados' : 'el que quedó marcado') + '. El mejor camino depende de lo que necesitás.', 'mal');
+      }
+      pintarColeccion(); pintar();
+      if (bien) m.flota('+20', $('coleccion').querySelector('[data-k="' + hechos.indexOf(h) + '"]'));
+      listoMapa();
+    }
+    function listoMapa() {
+      botonSiguiente(k === mapas.length - 1 ? 'Terminar ✓' : 'Siguiente mapa →');
+    }
+    function siguiente() {
+      if ($('siguienteBtn').hidden || caminando) return;
+      if (fase === 'dibujar') return comparar();
+      if (fase !== 'fin') return;
+      if (k < mapas.length - 1) return siguienteMapa();
+      partida.terminado = true;
+      const total = partida.coleccion.reduce((s, c) => s + c.hechos.filter(h => !h.cortado).length, 0);
+      partida.mensaje = 'Cumpliste ' + total + ' misiones' + (partida.sobra ? ', ' + partida.sobra + ' de ellas ⭐.' : '.');
+      m.fin();
+    }
+
+    // la pista: una huella amarilla con el principio de un camino que cumple la misión elegida
+    function pista() {
+      if (fase !== 'dibujar' || caminando || !activa) return;
+      const usados = new Set(validos().map(h => h.p.join()));
+      const opciones = activa.ejemplos.filter(p => !usados.has(p.join()) && !p.some(i => !pisable(g.celdas[i])));
+      if (!opciones.length) { msj('Esta misión es difícil… ¡probá con otra y volvé después!', 'ojo'); return; }
+      const p = opciones[Math.floor(Math.random() * opciones.length)];
+      pistaP = p.slice(0, Math.max(3, Math.ceil(p.length * .6)));
+      actual = [g.A];
+      msj('💡 Seguí la huella amarilla y después pensá cómo terminar la misión.', 'ojo');
+      pintar();
+    }
+
+    $('atrasBtn').addEventListener('click', atras);
+    $('borrarBtn').addEventListener('click', empezarDeNuevo);
+    $('pistaBtn').addEventListener('click', pista);
+    $('siguienteBtn').addEventListener('click', siguiente);
+    $('misiones').addEventListener('click', e => {
+      const b = e.target.closest('.mision');
+      if (!b || fase !== 'dibujar') return;
+      const x = misiones[+b.dataset.m];
+      if (x.hecha) { msj('Esa misión ya la cumpliste ✓. Elegí otra.', 'ojo'); return; }
+      activa = x; pistaP = null; pintarMisiones(); pintar();
+      msj('Misión elegida: ' + x.ico + ' ' + x.texto + '.', '');
+    });
+    $('coleccion').addEventListener('click', e => {
+      const b = e.target.closest('.camino');
+      if (b) responder(hechos[+b.dataset.k]);
+    });
+    const soltar = () => { arrastrando = false; };
+    window.addEventListener('pointerup', soltar);
+    window.addEventListener('pointercancel', soltar);
+    const DIR = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] };
+    partida.onTecla = e => {
+      if (DIR[e.key]) {
+        const fin = actual[actual.length - 1], [dr, dc] = DIR[e.key];
+        const r = Math.floor(fin / g.C) + dr, c = fin % g.C + dc;
+        if (r >= 0 && r < g.R && c >= 0 && c < g.C) {
+          const i = r * g.C + c;
+          if (i === actual[actual.length - 2]) atras(); else pisar(i, true);
+        }
+      } else if (e.key === 'Backspace') atras();
+      else if (e.key === 'Enter') siguiente();
+      else return;
+      e.preventDefault();
+    };
+
+    siguienteMapa();
+  };
+}
+
 for (let n = 1; n <= FINAL; n++) MINIJUEGOS[n] = formaElNumero(n);
+for (let n = MUNDO2; n <= ULTIMO; n++) MINIJUEGOS[n] = caminos(n);
 
 // ---------- navegación: #nivel-N (detalle) y #jugar-N (partida) ----------
 function ruta() {
-  let m = location.hash.match(/^#(nivel|jugar)-([1-6])$/);
+  let m = location.hash.match(/^#(nivel|jugar)-([1-9]|10)$/);
   if (m && !abierto(+m[2])) { history.replaceState(null, '', location.pathname + location.search); m = null; }
   Motor.limpiar();
   const vista = m ? (m[1] === 'jugar' ? 'juego' : 'detalle') : 'inicio';
