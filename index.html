@@ -434,6 +434,28 @@
           <span class="boton verde chico">Jugar <span class="flecha">▶</span></span>
         </div>
       </a>
+      <a class="juego" href="plan-b.html#nivel-7" id="linkCaminos" style="--c:radial-gradient(circle at 60% 15%, #123a52, #12151d 70%); --a:#3db8ff">
+        <div class="portada" aria-hidden="true">
+          <span class="tema">Plan B · Mundo 2</span>
+          <div class="teclas"><span style="--k:#b8ff3c">↱</span><span style="--k:#3db8ff">🧒</span><span style="--k:#ff4d8d">↰</span></div>
+        </div>
+        <div class="cuerpo">
+          <h3>Caminos por el barrio</h3>
+          <p>Cumplí misiones para llegar: doblá solo a la derecha, hacé una U, dá la vuelta manzana…</p>
+          <span class="boton verde chico">Jugar <span class="flecha">▶</span></span>
+        </div>
+      </a>
+      <a class="juego" href="faro.html" id="linkFaro" style="--c:radial-gradient(circle at 50% 10%, #4a3a12, #12151d 70%); --a:#ffc53d">
+        <div class="portada" aria-hidden="true">
+          <span class="tema">Plan B · Aventura 3D</span>
+          <div class="teclas"><span style="--k:#ffc53d">🗼</span><span style="--k:#2ee6c5">🦫</span><span style="--k:#3db8ff">🌊</span></div>
+        </div>
+        <div class="cuerpo">
+          <h3>El Faro Olvidado</h3>
+          <p>El puente de la isla se rompió. Cruzá el río de 4 maneras distintas para volver a encender el faro.</p>
+          <span class="boton verde chico">Explorar <span class="flecha">▶</span></span>
+        </div>
+      </a>
       <div class="juego pronto">
         <div class="portada" aria-hidden="true">// PRÓXIMAMENTE</div>
         <div class="cuerpo">
@@ -642,7 +664,11 @@ document.querySelectorAll('.periodo button').forEach(b => b.addEventListener('cl
   mostrarRanking();
 }));
 
-if (location.search) ['linkTecla', 'linkTablas', 'linkMisterios', 'linkPlanB'].forEach(id => { $(id).href += location.search; });   // mantiene ?api= al ir al juego
+// mantiene ?api= al ir al juego (antes del #, si el enlace lleva a una pantalla del juego)
+if (location.search) ['linkTecla', 'linkTablas', 'linkMisterios', 'linkPlanB', 'linkCaminos', 'linkFaro'].forEach(id => {
+  const h = $(id).getAttribute('href');
+  $(id).href = h.includes('#') ? h.replace('#', location.search + '#') : h + location.search;
+});
 const sesion = leer();
 if (sesion && sesion.token) {
   mostrarJuegos();
